@@ -17,34 +17,50 @@
                 <ToolBar.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                         <GradientStop Color="White" Offset="0"/>
-                        <GradientStop Color="Green" Offset="1"/>
+                        <GradientStop Color="Green" Offset="0.5"/>
+                        <GradientStop Color="White" Offset="1"/>
                     </LinearGradientBrush>
                 </ToolBar.Background>
-                <Button>
+                <Button Tag="PAGE_HOME" Margin="5" Click="Button_PageExchange">
                     <Image Source="../MyImage/imgHome.png"></Image>
                 </Button>
-                <Button>
+                <Button Tag="PAGE_CONNECT" Margin="5" Click="Button_PageExchange">
                     <Image Source="../MyImage/imgConnect.png"></Image>
                 </Button>
-                <Button>
+                <Button Tag="PAGE_CONTROL" Margin="5" Click="Button_PageExchange">
                     <Image Source="../MyImage/imgControl.png"></Image>
                 </Button>
-                <Button>
+                <Button Tag="PAGE_UPDATE" Margin="5" Click="Button_PageExchange">
                     <Image Source="../MyImage/imgUpdate.png"></Image>
                 </Button>
-                <Button>
+                <Button Tag="PAGE_WATCH" Margin="5" Click="Button_PageExchange">
                     <Image Source="../MyImage/imgWatch.png"></Image>
                 </Button>
-                <Button>
+                <Button Tag="PAGE_CALIBRATION" Margin="5" Click="Button_PageExchange">
                     <Image Source="../MyImage/imgCalibration.png"></Image>
                 </Button>
-                <Button>
+                <Button Tag="PAGE_SETUP" Margin="5" Click="Button_PageExchange">
                     <Image Source="../MyImage/imgSetup.png"></Image>
-                </Button>                
-                <CheckBox>
+                </Button>
+                <CheckBox Tag="PAGE_LOGGING" Margin="5" x:Name="chkLogShow">
                     <Image Source="../MyImage/imgLog.png"></Image>
                 </CheckBox>
             </ToolBar>
         </DockPanel>
+        <Grid Grid.Row="1" x:Name="gridBottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="5*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Frame Grid.Column="0" x:Name="frmPage" Source="HomePage.xaml" NavigationUIVisibility="Hidden"></Frame>
+            <ListBox Grid.Column="1" Visibility="{Binding ElementName=chkLogShow,Path=IsChecked,Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ListBoxItem Content="Coffie"></ListBoxItem>
+                <ListBoxItem Content="Tea"></ListBoxItem>
+                <ListBoxItem Content="Orange Juice"></ListBoxItem>
+                <ListBoxItem Content="Milk"></ListBoxItem>
+                <ListBoxItem Content="Iced Tea"></ListBoxItem>
+                <ListBoxItem Content="Mango Shake"></ListBoxItem>
+            </ListBox>
+        </Grid>
     </Grid>
 </Window>

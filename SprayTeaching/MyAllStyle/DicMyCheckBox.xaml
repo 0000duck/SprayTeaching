@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:SprayTeaching">
+    <!--定义checkbox的style-->
     <Style TargetType="CheckBox" x:Key="MyCheckBox">
         <Setter Property="Template">
             <Setter.Value>
@@ -47,4 +48,6 @@
         </Setter>
     </Style>
 
+    <!--将bool类型转换为Visibility数据类型-->
+    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 </ResourceDictionary>

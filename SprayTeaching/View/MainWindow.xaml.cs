@@ -21,10 +21,33 @@ namespace SprayTeaching
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        public MainWindow( )
         {
-            InitializeComponent();
-            this.DataContext = new ConnectViewVM();
+            InitializeComponent( );
+            this.DataContext = new ConnectViewVM( );
+        }
+
+        private void Button_PageExchange( object sender, RoutedEventArgs e )
+        {
+            Control btn = sender as Control;
+            string strTag = (string)btn.Tag;
+            switch (strTag)
+            {
+                case "PAGE_HOME":
+                    break;
+                case "PAGE_CONNECT":
+                    break;
+                case "PAGE_CONTROL":
+                    break;
+                case "PAGE_UPDATE":
+                    break;
+                case "PAGE_WATCH":
+                    break;
+                case "PAGE_CALIBRATION":
+                    break;
+                case "PAGE_SETUP":
+                    break;
+            }
         }
     }
 }
