@@ -1,0 +1,49 @@
+﻿<Window x:Class="SprayTeaching.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="484.75" Width="690">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <!--<TextBlock Grid.Row="0" Text="{Binding ModelViewModel.MainDataModel.RobotJoint1}" Margin="10" Padding="10"></TextBlock>
+        <TextBlock Grid.Row="1" Text="{Binding ModelViewModel.MainDataModel.SerialPortDataReceived}" HorizontalAlignment="Center" Margin="10" Padding="10"></TextBlock>
+        <CheckBox Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center" Content="串口:  " Style="{StaticResource MyCheckBox}"
+                  Command="{Binding OpenCloseSerialPort}" IsChecked="{Binding ModelViewModel.MainDataModel.SerialPortIsOpened,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>-->
+        <DockPanel Grid.Row="0">
+            <ToolBar DockPanel.Dock="Top">
+                <ToolBar.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="White" Offset="0"/>
+                        <GradientStop Color="Green" Offset="1"/>
+                    </LinearGradientBrush>
+                </ToolBar.Background>
+                <Button>
+                    <Image Source="../MyImage/imgHome.png"></Image>
+                </Button>
+                <Button>
+                    <Image Source="../MyImage/imgConnect.png"></Image>
+                </Button>
+                <Button>
+                    <Image Source="../MyImage/imgControl.png"></Image>
+                </Button>
+                <Button>
+                    <Image Source="../MyImage/imgUpdate.png"></Image>
+                </Button>
+                <Button>
+                    <Image Source="../MyImage/imgWatch.png"></Image>
+                </Button>
+                <Button>
+                    <Image Source="../MyImage/imgCalibration.png"></Image>
+                </Button>
+                <Button>
+                    <Image Source="../MyImage/imgSetup.png"></Image>
+                </Button>                
+                <CheckBox>
+                    <Image Source="../MyImage/imgLog.png"></Image>
+                </CheckBox>
+            </ToolBar>
+        </DockPanel>
+    </Grid>
+</Window>
