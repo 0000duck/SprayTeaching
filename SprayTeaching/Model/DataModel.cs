@@ -14,7 +14,7 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 机器人关节坐标系下的关节1角度
         /// </summary>
-        private double _dblRobotJoint1 = 0.0;
+        private double _dblRobotJoint1 = 1.0;
         
         public double RobotJoint1
         {
@@ -25,7 +25,7 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 机器人关节坐标系下的关节2角度
         /// </summary>
-        private double _dblRobotJoint2 = 0.0;
+        private double _dblRobotJoint2 = 2.0;
 
         public double RobotJoint2
         {
@@ -36,7 +36,7 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 机器人关节坐标系下的关节3角度
         /// </summary>
-        private double _dblRobotJoint3 = 0.0;
+        private double _dblRobotJoint3 = 3.0;
 
         public double RobotJoint3
         {
@@ -47,7 +47,7 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 机器人关节坐标系下的关节4角度
         /// </summary>
-        private double _dblRobotJoint4 = 0.0;
+        private double _dblRobotJoint4 = 4.0;
 
         public double RobotJoint4
         {
@@ -58,7 +58,7 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 机器人关节坐标系下的关节5角度
         /// </summary>
-        private double _dblRobotJoint5 = 0.0;
+        private double _dblRobotJoint5 = 5.0;
 
         public double RobotJoint5
         {
@@ -69,7 +69,7 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 机器人关节坐标系下的关节6角度
         /// </summary>
-        private double _dblRobotJoint6 = 0.0;
+        private double _dblRobotJoint6 = 6.0;
 
         public double RobotJoint6
         {
@@ -83,7 +83,7 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 机器人直角坐标系下的X坐标值
         /// </summary>
-        private double _dblRobotRectangularX = 0.0;
+        private double _dblRobotRectangularX = 1.0;
 
         public double RobotRectangularX
         {
@@ -94,7 +94,7 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 机器人直角坐标系下的Y坐标值
         /// </summary>
-        private double _dblRobotRectangularY = 0.0;
+        private double _dblRobotRectangularY = 2.0;
 
         public double RobotRectangularY
         {
@@ -105,7 +105,7 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 机器人直角坐标系下的Z坐标值
         /// </summary>
-        private double _dblRobotRectangularZ = 0.0;
+        private double _dblRobotRectangularZ = 3.0;
 
         public double RobotRectangularZ
         {
@@ -116,7 +116,7 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 机器人直角坐标系下的U坐标值
         /// </summary>
-        private double _dblRobotRectangularU = 0.0;
+        private double _dblRobotRectangularU = 4.0;
 
         public double RobotRectangularU
         {
@@ -127,7 +127,7 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 机器人直角坐标系下的V坐标值
         /// </summary>
-        private double _dblRobotRectangularV = 0.0;
+        private double _dblRobotRectangularV = 5.0;
 
         public double RobotRectangularV
         {
@@ -138,7 +138,7 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 机器人直角坐标系下的W坐标值
         /// </summary>
-        private double _dblRobotRectangularW = 0.0;
+        private double _dblRobotRectangularW = 6.0;
 
         public double RobotRectangularW
         {
@@ -226,6 +226,32 @@ namespace SprayTeaching.Model
             get { return _strSerialPortDataReceived; }
             set { _strSerialPortDataReceived = value; RaisePropertyChanged("SerialPortDataReceived"); }
         }
+        #endregion
+
+        #region 日志相关参数
+
+        /// <summary>
+        /// 日志文件的路径
+        /// </summary>
+        private string _strLogFilePath = "./Log.txt";
+
+        public string LogFilePath
+        {
+            get { return _strLogFilePath; }
+            set { _strLogFilePath = value; RaisePropertyChanged("LogFilePath"); }
+        }
+
+        /// <summary>
+        /// 日志文件中的内容
+        /// </summary>
+        private string _strLogFileContent = string.Empty;
+
+        public string LogFileContent
+        {
+            get { return _strLogFileContent; }
+            set { _strLogFileContent = value; RaisePropertyChanged("LogFileContent"); }
+        }
+
         #endregion
     }
 }

@@ -53,9 +53,36 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="MyAllClass\MyLog.cs" />
+    <Compile Include="MyAllClass\MyRoboDKExtension.cs" />
+    <Compile Include="MyAllClass\RoboDK.cs" />
+    <Compile Include="View\CalibrationPage.xaml.cs">
+      <DependentUpon>CalibrationPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\SetupPage.xaml.cs">
+      <DependentUpon>SetupPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\UpdatePage.xaml.cs">
+      <DependentUpon>UpdatePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\WatchPage.xaml.cs">
+      <DependentUpon>WatchPage.xaml</DependentUpon>
+    </Compile>
     <Page Include="MyAllStyle\DicMyCheckBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\CalibrationPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\ConnectPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\ControlPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\HomePage.xaml">
       <SubType>Designer</SubType>
@@ -78,6 +105,12 @@
     <Compile Include="MyAllClass\MySerialPort.cs" />
     <Compile Include="ViewModel\ConnectModelVM.cs" />
     <Compile Include="ViewModel\ConnectViewVM.cs" />
+    <Compile Include="View\ConnectPage.xaml.cs">
+      <DependentUpon>ConnectPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\ControlPage.xaml.cs">
+      <DependentUpon>ControlPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\HomePage.xaml.cs">
       <DependentUpon>HomePage.xaml</DependentUpon>
     </Compile>
@@ -85,6 +118,18 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="View\SetupPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\UpdatePage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\WatchPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -118,9 +163,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="MyImage\imgSetup.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="MyImage\imgLog.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="MyImage\imgConnect.png" />
