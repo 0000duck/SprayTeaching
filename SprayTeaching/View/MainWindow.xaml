@@ -1,18 +1,21 @@
 ﻿<Window x:Class="SprayTeaching.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         Title="MainWindow" Height="600" Width="900"
         WindowStartupLocation="CenterScreen">
+    <!--对windows窗口的事件进行监控响应-->
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <i:InvokeCommandAction Command="{Binding ClosingWindowCommand}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
-        </Grid.RowDefinitions>
-        <!--<TextBlock Grid.Row="0" Text="{Binding ModelViewModel.MainDataModel.RobotJoint1}" Margin="10" Padding="10"></TextBlock>
-        <TextBlock Grid.Row="1" Text="{Binding ModelViewModel.MainDataModel.SerialPortDataReceived}" HorizontalAlignment="Center" Margin="10" Padding="10"></TextBlock>
-        <CheckBox Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center" Content="串口:  " Style="{StaticResource MyCheckBox}"
-                  Command="{Binding OpenCloseSerialPort}" IsChecked="{Binding ModelViewModel.MainDataModel.SerialPortIsOpened,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>-->
+        </Grid.RowDefinitions>        
         <ToolBar Grid.Row="0" DockPanel.Dock="Top">
             <ToolBar.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -55,8 +58,7 @@
                 </StatusBarItem>
                 <Separator HorizontalAlignment="Right"/>                
             </StatusBar>
-            <StatusBar Grid.Column="1">
-                
+            <StatusBar Grid.Column="1">                
                 <Separator HorizontalAlignment="Right"/>
             </StatusBar>
             <StatusBar Grid.Column="2">
@@ -87,24 +89,24 @@
                             <ColumnDefinition Width="*"></ColumnDefinition>
                             <ColumnDefinition Width="2*"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="关节1:" Margin="3" Padding="2" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="关节1:"/>
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ModelViewModel.MainDataModel.RobotJoint1,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"
-                                   Margin="3" Padding="2" HorizontalAlignment="Left"/>
-                        <TextBlock Grid.Row="0" Grid.Column="2" Text="关节2:" Margin="3" Padding="2" HorizontalAlignment="Center"/>
+                                   MinWidth="50"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="关节2:"/>
                         <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding ModelViewModel.MainDataModel.RobotJoint2,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" 
-                                   Margin="3" Padding="2" HorizontalAlignment="Left"/>
-                        <TextBlock Grid.Row="0" Grid.Column="4" Text="关节3:" Margin="3" Padding="2" HorizontalAlignment="Center"/>
+                                   MinWidth="50"/>
+                        <TextBlock Grid.Row="0" Grid.Column="4" Text="关节3:"/>
                         <TextBlock Grid.Row="0" Grid.Column="5" Text="{Binding ModelViewModel.MainDataModel.RobotJoint3,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" 
-                                   Margin="3" Padding="2" HorizontalAlignment="Left"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="关节4:" Margin="3" Padding="2" HorizontalAlignment="Center"/>
+                                   MinWidth="50"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="关节4:"/>
                         <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ModelViewModel.MainDataModel.RobotJoint4,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" 
-                                   Margin="3" Padding="2" HorizontalAlignment="Left"/>
-                        <TextBlock Grid.Row="1" Grid.Column="2" Text="关节5:" Margin="3" Padding="2" HorizontalAlignment="Center"/>
+                                   MinWidth="50"/>
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="关节5:"/>
                         <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding ModelViewModel.MainDataModel.RobotJoint5,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" 
-                                   Margin="3" Padding="2" HorizontalAlignment="Left"/>
-                        <TextBlock Grid.Row="1" Grid.Column="4" Text="关节6:" Margin="3" Padding="2" HorizontalAlignment="Center"/>
+                                   MinWidth="50"/>
+                        <TextBlock Grid.Row="1" Grid.Column="4" Text="关节6:"/>
                         <TextBlock Grid.Row="1" Grid.Column="5" Text="{Binding ModelViewModel.MainDataModel.RobotJoint6,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" 
-                                   Margin="3" Padding="2" HorizontalAlignment="Left"/>                
+                                   MinWidth="50"/>                
                     </Grid>
                 </GroupBox>
                 <GroupBox DockPanel.Dock="Top" Header="直角坐标系" Margin="2">
@@ -121,34 +123,36 @@
                             <ColumnDefinition Width="*"></ColumnDefinition>
                             <ColumnDefinition Width="2*"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="X轴:" Margin="3" Padding="2" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="X轴:"/>
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ModelViewModel.MainDataModel.RobotRectangularX,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" 
-                                   Margin="3" Padding="2" HorizontalAlignment="Left"/>
-                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Y轴:" Margin="3" Padding="2" HorizontalAlignment="Center"/>
+                                   />
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Y轴:"/>
                         <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding ModelViewModel.MainDataModel.RobotRectangularY,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" 
-                                   Margin="3" Padding="2" HorizontalAlignment="Left"/>
-                        <TextBlock Grid.Row="0" Grid.Column="4" Text="Z轴:" Margin="3" Padding="2" HorizontalAlignment="Center"/>
+                                   />
+                        <TextBlock Grid.Row="0" Grid.Column="4" Text="Z轴:"/>
                         <TextBlock Grid.Row="0" Grid.Column="5" Text="{Binding ModelViewModel.MainDataModel.RobotRectangularZ,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" 
-                                   Margin="3" Padding="2" HorizontalAlignment="Left"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="U轴:" Margin="3" Padding="2" HorizontalAlignment="Center"/>
+                                  />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="U轴:"/>
                         <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ModelViewModel.MainDataModel.RobotRectangularU,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" 
-                                   Margin="3" Padding="2" HorizontalAlignment="Left"/>
-                        <TextBlock Grid.Row="1" Grid.Column="2" Text="V轴:" Margin="3" Padding="2" HorizontalAlignment="Center"/>
+                                   />
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="V轴:"/>
                         <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding ModelViewModel.MainDataModel.RobotRectangularV,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" 
-                                   Margin="3" Padding="2" HorizontalAlignment="Left"/>
-                        <TextBlock Grid.Row="1" Grid.Column="4" Text="W轴:" Margin="3" Padding="2" HorizontalAlignment="Center"/>
+                                   />
+                        <TextBlock Grid.Row="1" Grid.Column="4" Text="W轴:"/>
                         <TextBlock Grid.Row="1" Grid.Column="5" Text="{Binding ModelViewModel.MainDataModel.RobotRectangularW,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" 
-                                   Margin="3" Padding="2" HorizontalAlignment="Left"/>
+                                   />
                     </Grid>
                 </GroupBox>
                 <GroupBox Header="日志" Margin="2">
-                    <ListView Margin="3" BorderThickness="0">
-                        <ListViewItem Content="Coffie"></ListViewItem>
-                        <ListViewItem Content="Tea"></ListViewItem>
-                        <ListViewItem Content="Orange Juice"></ListViewItem>
-                        <ListViewItem Content="Milk"></ListViewItem>
-                        <ListViewItem Content="Iced Tea"></ListViewItem>
-                        <ListViewItem Content="Mango Shake"></ListViewItem>
+                    <ListView Margin="3" BorderThickness="0" ItemsSource="{Binding ModelViewModel.MainDataModel.LogDataList,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding LogTime,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Margin="1" Padding="1" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding LogMessage,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Margin="1" Padding="1" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
                     </ListView>
                 </GroupBox>                
             </DockPanel>            

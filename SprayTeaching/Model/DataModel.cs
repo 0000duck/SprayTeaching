@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
@@ -244,12 +245,12 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 日志文件中的内容
         /// </summary>
-        private string _strLogFileContent = string.Empty;
+        private ObservableCollection<MyLogMessage> _strLogDataList = new ObservableCollection<MyLogMessage> { };
 
-        public string LogFileContent
+        public ObservableCollection<MyLogMessage> LogDataList
         {
-            get { return _strLogFileContent; }
-            set { _strLogFileContent = value; RaisePropertyChanged("LogFileContent"); }
+            get { return _strLogDataList; }
+            set { _strLogDataList = value; RaisePropertyChanged("LogDataList"); }
         }
 
         #endregion

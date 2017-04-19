@@ -50,4 +50,11 @@
 
     <!--将bool类型转换为Visibility数据类型-->
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    
+    <!--TextBlock的类型-->
+    <Style TargetType="TextBlock">
+        <Setter Property="Margin" Value="3"/>
+        <Setter Property="Padding" Value="2"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
 </ResourceDictionary>

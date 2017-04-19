@@ -36,15 +36,30 @@ namespace SprayTeaching.ViewModel
         /// <summary>
         /// 打开串口命令
         /// </summary>
-        private MyCommand _cmdOpenCloseSerialPort;
+        private MyCommand _openCloseSerialPortCommand;
 
-        public MyCommand OpenCloseSerialPort
+        public MyCommand OpenCloseSerialPortCommand
         {
             get
             {
-                if (this._cmdOpenCloseSerialPort == null)
-                    this._cmdOpenCloseSerialPort = new MyCommand(this.ExecuteOpenCloseSerialPort);
-                return this._cmdOpenCloseSerialPort;
+                if (this._openCloseSerialPortCommand == null)
+                    this._openCloseSerialPortCommand = new MyCommand(this.ExecuteOpenCloseSerialPort);
+                return this._openCloseSerialPortCommand;
+            }
+        }
+
+        /// <summary>
+        /// 关闭窗口之前命令
+        /// </summary>
+        private MyCommand _closingWindowCommand;
+
+        public MyCommand ClosingWindowCommand
+        {
+            get 
+            {
+                if (this._closingWindowCommand == null)
+                    this._closingWindowCommand = new MyCommand(this.ExecuteClosingWindow);
+                return _closingWindowCommand; 
             }
         }
 
@@ -59,6 +74,15 @@ namespace SprayTeaching.ViewModel
         private void ExecuteOpenCloseSerialPort(object objParameter = null)
         {
             this._modelViewModel.OpenCloseSerialPort();
+        }
+
+        /// <summary>
+        /// 执行关闭窗口之前的操作
+        /// </summary>
+        /// <param name="objParameter"></param>
+        private void ExecuteClosingWindow(object objParameter = null)
+        {
+            this._modelViewModel.CloseAllResource();
         }
 
         #endregion

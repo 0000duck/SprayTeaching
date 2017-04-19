@@ -1520,7 +1520,7 @@ public class RoboDK
                     arguments = arguments + "/NOSPLASH /NOSHOW";
                 }
                 System.Diagnostics.Process.Start(APPLICATION_DIR, arguments);
-                System.Threading.Thread.Sleep(1000);
+                System.Threading.Thread.Sleep(2000);                // 由于robot启动比较慢，原来的1s时间不够，会导致启动两次，而2s就可以避免这个问题，邢双修改；
             }
         }
         if (connected && !Set_connection_params())

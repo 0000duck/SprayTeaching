@@ -3,50 +3,51 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Windows.Threading;
 
 namespace SprayTeaching.MyAllClass
 {
-    public delegate void UpdateLogContentEventHandler(string strParameter);                 //更新日志内容的delegate变量声明
-    public delegate void UpdateRobotParameterEventHandler(double[] dblParameter1);          //更新机器人参数的delegate变量声明
+    public delegate void UpdateLogContentEventHandler(string strParameter);                 // 更新日志内容的delegate变量声明
+    public delegate void UpdateRobotParameterEventHandler(double[] dblParameter1,double[] dblParameter2);  // 更新机器人参数的delegate变量声明      
+    
     public class MyRoboDKExtension
     {
         private RoboDK.Item _rdkItemRobot;                                      // RoboDK中的机器人对象
         private RoboDK _rdkPlatform;                                            // RoboDK的平台
         const bool BLOCKING_MOVE = false;
 
-        private Thread _thrdUpdateRobotParameter;                               //更新机器人参数的线程
+        private Thread _thrdUpdateRobotParameter;                               // 更新机器人参数的线程
 
-        public event UpdateLogContentEventHandler UpdateLogContent;             //更新日志文件
-        public event UpdateRobotParameterEventHandler UpdateRobotParameter;     //更新机器人参数
+        public event UpdateLogContentEventHandler UpdateLogContent;             // 更新日志文件
+        public event UpdateRobotParameterEventHandler UpdateRobotParameter;     // 更新机器人参数        
 
         public MyRoboDKExtension()
         {
-            this._rdkPlatform = new RoboDK();
-            SelectRobot();                                                              //选中机器人
-            this._thrdUpdateRobotParameter = new Thread(ThreadUpdatRobotParameter);     //初始化更新机器人参数的线程
-            this._thrdUpdateRobotParameter.Start();                                     //启动线程
+            this._rdkPlatform = new RoboDK();                                                   // 选中机器人            
+
+            this._thrdUpdateRobotParameter = new Thread(this.ThreadUpdatRobotParameterHandler); // 初始化更新机器人参数的线程
+            this._thrdUpdateRobotParameter.IsBackground = true;                                 // 设置成后台线程，在前台线程结束时，所有剩余的后台线程都会停止且不会完成
+            this._thrdUpdateRobotParameter.Name = "UpdateRobotParameterHandler";                // 设置线程的名字
+            this._thrdUpdateRobotParameter.Start();                                             // 启动线程
         }
 
         /// <summary>
-        /// 更新机器人参数的线程
+        /// 关闭MyRoboDKExtension的所有资源,先关闭线程，再使变量无效
         /// </summary>
-        private void ThreadUpdatRobotParameter()
+        public void Close()
         {
-            while (Thread.CurrentThread.IsAlive)
-            {
-                if (CheckRobot())
-                {
-                    //打开了RoboDK和选中了机器人
-                    GetRobotParameter();
-                    Thread.Sleep(100);
-                }                    
-                else
-                {
-                    //没有选中机器人或者没有打开，则打开并选中
-                    SelectRobot();
-                    Thread.Sleep(60000);
-                }                    
-            }
+            this.CloseThreadUpdatRobotParameter();
+            this.CloseAllVariable();
+        }
+
+        /// <summary>
+        /// 关闭所有变量，使它们都invalidition
+        /// </summary>
+        private void CloseAllVariable()
+        {
+            this._rdkItemRobot = null;
+            this._rdkPlatform = null;
+            this._thrdUpdateRobotParameter = null;
         }
 
         /// <summary>
@@ -54,10 +55,35 @@ namespace SprayTeaching.MyAllClass
         /// </summary>
         private void CloseThreadUpdatRobotParameter()
         {
-            if(this._thrdUpdateRobotParameter!=null)
+            if (this._thrdUpdateRobotParameter != null)
             {
                 this._thrdUpdateRobotParameter.Abort();
                 this._thrdUpdateRobotParameter = null;
+            }
+        }
+
+        /// <summary>
+        /// 更新机器人参数的线程
+        /// </summary>
+        private void ThreadUpdatRobotParameterHandler()
+        {
+            this.WriteLog("已开启RoboDK线程...");
+            this.SelectRobot();                 //开始的时候先选取机器人对象
+            while (Thread.CurrentThread.IsAlive)
+            {
+                // 检查是否连接，是否选中机器人
+                if (this.CheckRobot())
+                {
+                    // 打开了RoboDK和选中了机器人
+                    this.GetRobotParameter();
+                    Thread.Sleep(100);
+                }
+                else
+                {
+                    // 没有选中机器人或者没有打开，则打开并选中                    
+                    Thread.Sleep(10000);
+                    this.SelectRobot();
+                }
             }
         }
 
@@ -66,10 +92,15 @@ namespace SprayTeaching.MyAllClass
         /// </summary>
         private void GetRobotParameter()
         {
-            if (!CheckRobot()) { return; }
+            if (!this.CheckRobot()) { return; }
             double[] dblJoints = this._rdkItemRobot.Joints();
+            //更新直角坐标系的位置坐标
+            Mat locMatPose = this._rdkItemRobot.SolveFK(dblJoints);
+            double[] dblPoses = locMatPose.ToXYZRPW();
+
+            // 更新机器人参数
             if (this.UpdateRobotParameter != null)
-                this.UpdateRobotParameter(dblJoints);
+                this.UpdateRobotParameter(dblJoints,dblPoses);
         }
 
 
@@ -87,7 +118,7 @@ namespace SprayTeaching.MyAllClass
             }
             if (!ok)
             {
-                WriteLog("未找到 RoboDK. 请先启动RoboDK.");
+                this.WriteLog("未找到 RoboDK. 请先启动RoboDK.");
             }
             return ok;
         }
@@ -98,10 +129,10 @@ namespace SprayTeaching.MyAllClass
         /// <returns></returns>
         private bool CheckRobot()
         {
-            if (!CheckRoboDK()) { return false; }
+            if (!this.CheckRoboDK()) { return false; }
             if (this._rdkItemRobot == null || !this._rdkItemRobot.Valid())
             {
-                WriteLog("未选中机器人对象.");
+                //this.WriteLog("未选中机器人对象.");
                 return false;
             }
             return true;
@@ -113,16 +144,16 @@ namespace SprayTeaching.MyAllClass
         /// <returns>是否选中机器人</returns>
         private bool SelectRobot()
         {
-            if (!CheckRoboDK()) { return false; }
+            if (!this.CheckRoboDK()) { return false; }
             this._rdkItemRobot = this._rdkPlatform.ItemUserPick("Select a robot", RoboDK.ITEM_TYPE_ROBOT); // select robot among available robots
             if (this._rdkItemRobot.Valid())
             {
-                WriteLog("机器人: " + this._rdkItemRobot.Name() + ".");
+                this.WriteLog("已选中机器人: " + this._rdkItemRobot.Name() + ".");
                 return true;
             }
             else
             {
-                WriteLog("没有机器人可以选取.");
+                this.WriteLog("没有机器人可以选取.");
                 return false;
             }
         }
@@ -130,14 +161,16 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 将消息写入日志
         /// </summary>
-        /// <param name="strParameter">消息内容</param>
-        private void WriteLog(string strParameter)
+        /// <param name="strMessage">消息内容</param>
+        private void WriteLog(string strMessage)
         {
             if (this.UpdateLogContent != null)
             {
-                this.UpdateLogContent(strParameter);
-            }
+                this.UpdateLogContent(strMessage);
+            }           
         }
+
+        
 
 
     }

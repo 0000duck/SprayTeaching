@@ -36,6 +36,10 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>MyDllFile\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -53,9 +57,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BaseClassLib\MyLogMessage.cs" />
     <Compile Include="MyAllClass\MyLog.cs" />
     <Compile Include="MyAllClass\MyRoboDKExtension.cs" />
-    <Compile Include="MyAllClass\RoboDK.cs" />
+    <Compile Include="BaseClassLib\RoboDK.cs" />
     <Compile Include="View\CalibrationPage.xaml.cs">
       <DependentUpon>CalibrationPage.xaml</DependentUpon>
     </Compile>
@@ -178,6 +183,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="MyImage\imgUpdate.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="MyDllFile\System.Windows.Interactivity.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
