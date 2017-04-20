@@ -23,5 +23,22 @@ namespace SprayTeaching.View
         {
             InitializeComponent();
         }
+
+        private void RadioButton_Click(object sender, RoutedEventArgs e)
+        {
+            RadioButton rb = sender as RadioButton;
+            string strWay = rb.Tag.ToString();
+            switch(strWay)
+            {
+                case "SerialPortWay":
+                    this.gridCommunicate.ColumnDefinitions[0].Width = GridLength.Auto;
+                    this.gridCommunicate.ColumnDefinitions[1].Width = new GridLength(0);
+                    break;
+                case "WifiWay":
+                    this.gridCommunicate.ColumnDefinitions[0].Width = new GridLength(0);
+                    this.gridCommunicate.ColumnDefinitions[1].Width = GridLength.Auto;
+                    break;
+            }
+        }
     }
 }

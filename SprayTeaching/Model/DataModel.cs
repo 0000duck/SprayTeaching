@@ -16,7 +16,7 @@ namespace SprayTeaching.Model
         /// 机器人关节坐标系下的关节1角度
         /// </summary>
         private double _dblRobotJoint1 = 1.0;
-        
+
         public double RobotJoint1
         {
             get { return _dblRobotJoint1; }
@@ -159,7 +159,7 @@ namespace SprayTeaching.Model
         public string SerialPortName
         {
             get { return _strSerialPortName; }
-            set { _strSerialPortName = value; RaisePropertyChanged("SerialPortNum"); }
+            set { _strSerialPortName = value; RaisePropertyChanged("SerialPortName"); }
         }
 
         /// <summary>
@@ -227,6 +227,25 @@ namespace SprayTeaching.Model
             get { return _strSerialPortDataReceived; }
             set { _strSerialPortDataReceived = value; RaisePropertyChanged("SerialPortDataReceived"); }
         }
+
+        private List<string> _listSerialPortName = new List<string> { { "COM1" }, { "COM2" }, { "COM3" }, { "COM4" }, { "COM5" }, { "COM6" }, { "COM7" } };
+        public List<string> ListSerialPortName
+        {
+            get{ return _listSerialPortName; }
+        }
+
+        private List<SerialPortBaudRates> _listSerialPortBaudRate = new List<SerialPortBaudRates> 
+        { 
+            { SerialPortBaudRates.BaudRate_75 },{SerialPortBaudRates.BaudRate_300},{SerialPortBaudRates.BaudRate_600},{SerialPortBaudRates.BaudRate_1200},
+            {SerialPortBaudRates.BaudRate_2400},{SerialPortBaudRates.BaudRate_4800},{SerialPortBaudRates.BaudRate_9600},{SerialPortBaudRates.BaudRate_14400},
+            {SerialPortBaudRates.BaudRate_19200},{SerialPortBaudRates.BaudRate_115200}
+        };
+
+        public List<SerialPortBaudRates> ListSerialPortBaudRate
+        {
+            get { return _listSerialPortBaudRate; }
+        }
+
         #endregion
 
         #region 日志相关参数
@@ -254,5 +273,39 @@ namespace SprayTeaching.Model
         }
 
         #endregion
+
+        /// <summary>
+        /// 与硬件设备的通信方式，1为串口方式，2为wifi方式
+        /// </summary>
+        private string _strCommunicateHardwareWay = "1";
+
+        public string CommunicateHardwareWay
+        {
+            get { return _strCommunicateHardwareWay; }
+            set { _strCommunicateHardwareWay = value; RaisePropertyChanged("CommunicateHardwareWay"); }
+        }
+
+        /// <summary>
+        /// 网络通讯，socket的IP地址
+        /// </summary>
+        private string _strSocketIPAddress = "10.8.193.177";
+
+        public string SocketIPAddress
+        {
+            get { return _strSocketIPAddress; }
+            set { _strSocketIPAddress = value; RaisePropertyChanged("SocketIPAddress"); }
+        }
+
+        /// <summary>
+        /// 网络通讯，socket的端口号
+        /// </summary>
+        private string _strSocketPortNum = "12000";
+
+        public string SocketPortNum
+        {
+            get { return _strSocketPortNum; }
+            set { _strSocketPortNum = value; RaisePropertyChanged("SocketPortNum"); }
+        }
+
     }
 }

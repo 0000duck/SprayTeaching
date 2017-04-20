@@ -70,10 +70,12 @@
         </Grid>        
         <Grid Grid.Row="1" x:Name="gridBottom">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <Frame Grid.Column="0" x:Name="frmPage" Source="HomePage.xaml" NavigationUIVisibility="Hidden"></Frame>
+            <DockPanel Grid.Column="0" LastChildFill="True">
+                <Frame x:Name="frmPage" Source="HomePage.xaml" NavigationUIVisibility="Hidden" ></Frame>
+            </DockPanel>            
             <DockPanel Grid.Column="1">
                 <GroupBox DockPanel.Dock="Top" Header="关节坐标系" Margin="2">
                     <Grid>

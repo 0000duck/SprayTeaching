@@ -35,7 +35,7 @@ namespace SprayTeaching.ViewModel
         #region  构造函数
         public ConnectModelVM()
         {
-            this._mainDataModel = new DataModel();
+            this._mainDataModel = new DataModel();          // 所有数据的对象
             this._dlgtUpdateDifThreadParam = new UpdateDifferentThreadParameterEventHandler(UpdateDifferentThreadParam);    // 用于更新不同线程的参数
 
             this._myLogObject = new MyLog(this._mainDataModel.LogFilePath);
@@ -159,7 +159,7 @@ namespace SprayTeaching.ViewModel
         private void UpdateDifferentThreadParam(object objParameter)
         {
             MyLogMessage myLogMessage = objParameter as MyLogMessage;
-            this._mainDataModel.LogDataList.Add(myLogMessage);
+            this._mainDataModel.LogDataList.Insert(0,myLogMessage);
         }
         #endregion
 

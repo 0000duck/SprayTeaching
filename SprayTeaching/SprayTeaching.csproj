@@ -58,6 +58,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="BaseClassLib\MyLogMessage.cs" />
+    <Compile Include="BaseClassLib\MyConverter.cs" />
     <Compile Include="MyAllClass\MyLog.cs" />
     <Compile Include="MyAllClass\MyRoboDKExtension.cs" />
     <Compile Include="BaseClassLib\RoboDK.cs" />

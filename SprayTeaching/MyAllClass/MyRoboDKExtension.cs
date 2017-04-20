@@ -12,15 +12,26 @@ namespace SprayTeaching.MyAllClass
 
     public class MyRoboDKExtension
     {
-        private RoboDK.Item _rdkItemRobot;                                      // RoboDK中的机器人对象
+        #region 所有变量
+
+        private RoboDK.Item _rdkItemRobot;                                      // RoboDK中的机器人模型对象
         private RoboDK _rdkPlatform;                                            // RoboDK的平台
-        //private bool _bolIsSelectedRobot;                                       // 是否选中机器人，true为选中，false为没有选中；在新启动的RoboDK软件时，机器人对象是未选中的，一定要选中后才能进行相关操作                           
+
         private const bool BLOCKING_MOVE = false;
 
         private Thread _thrdUpdateRobotParameter;                               // 更新机器人参数的线程
+        private bool _bolIsThreadAlive = true;                                  // 控制线程活着
+
+        #endregion
+
+        #region 外部事件
 
         public event UpdateLogContentEventHandler UpdateLogContent;             // 更新日志文件
-        public event UpdateRobotParameterEventHandler UpdateRobotParameter;     // 更新机器人参数        
+        public event UpdateRobotParameterEventHandler UpdateRobotParameter;     // 更新机器人参数  
+
+        #endregion
+
+        #region 构造函数，初始化
 
         public MyRoboDKExtension()
         {
@@ -43,7 +54,6 @@ namespace SprayTeaching.MyAllClass
             try
             {
                 this._rdkPlatform = new RoboDK();                                               // 创建RoboDK对象，其中会对RoboDK平台进行连接  
-                //this._bolIsSelectedRobot = false;                                               // 标识是否选中RoboDK中的机器人对象，新创建RoboDK肯定是未选中的
                 this.WriteLog("已开启RoboDK软件.");
             }
             catch
@@ -59,13 +69,27 @@ namespace SprayTeaching.MyAllClass
             this._thrdUpdateRobotParameter.Start();                                             // 启动线程
         }
 
+        #endregion
+
+        #region 方法
+        #region 关闭所有资源
         /// <summary>
         /// 关闭MyRoboDKExtension的所有资源,先关闭线程，再使变量无效
         /// </summary>
         public void Close()
         {
             this.CloseThreadUpdatRobotParameter();
+            this.CloseCommunicate();
             this.CloseAllVariable();
+        }
+
+        /// <summary>
+        /// 关闭和RoboDK的socket通信
+        /// </summary>
+        private void CloseCommunicate()
+        {
+            if (this._rdkPlatform != null)
+                this._rdkPlatform.Close();
         }
 
         /// <summary>
@@ -85,11 +109,16 @@ namespace SprayTeaching.MyAllClass
         {
             if (this._thrdUpdateRobotParameter != null)
             {
-                this._thrdUpdateRobotParameter.Abort();
+                this._bolIsThreadAlive = false;         // 关闭线程
+                Thread.Sleep(150);                      // 等待线程关闭
+                this._thrdUpdateRobotParameter.Abort();                
                 this._thrdUpdateRobotParameter = null;
             }
         }
 
+        #endregion
+
+        #region 更新机器人参数
         /// <summary>
         /// 更新机器人参数的线程
         /// </summary>
@@ -97,14 +126,14 @@ namespace SprayTeaching.MyAllClass
         {
             this.WriteLog("已开启RoboDK接收机器人参数线程.");
             this.SelectRobot();                 //开始的时候先选取机器人对象
-            while (Thread.CurrentThread.IsAlive)
+            while (this._bolIsThreadAlive)
             {
                 // 检查是否连接，是否选中机器人
                 if (this.CheckRobot())
                 {
                     // 打开了RoboDK和选中了机器人
                     this.GetRobotParameter();
-                    Thread.Sleep(100);
+                    Thread.Sleep(200);
                 }
                 else
                 {
@@ -136,12 +165,13 @@ namespace SprayTeaching.MyAllClass
             }
             catch
             {
-                this.WriteLog("选中的机器人无效或者不存在.");
+                this.WriteLog("选中的机器人模型无效或者不存在.");
             }
         }
 
+        #endregion
 
-
+        #region 对RoboDK的检查
         /// <summary>
         /// 检查是否和RoboDK的连接状态，true为连接，false为断开
         /// </summary>
@@ -171,7 +201,7 @@ namespace SprayTeaching.MyAllClass
             if (!this.CheckRoboDK()) { return false; }
             if (this._rdkItemRobot == null || !this._rdkItemRobot.Valid())
             {
-                this.WriteLog("未选中机器人对象.");
+                this.WriteLog("未选中机器人对象，请添加机器人模型.");
                 return false;
             }
             return true;
@@ -188,7 +218,6 @@ namespace SprayTeaching.MyAllClass
             if (this._rdkItemRobot.Valid())
             {
                 this.WriteLog("已选中机器人: " + this._rdkItemRobot.Name() + ".");
-                //this._bolIsSelectedRobot = true;            // 标识已经选中RoboDK软件中的机器人对象
                 return true;
             }
             else
@@ -198,6 +227,9 @@ namespace SprayTeaching.MyAllClass
             }
         }
 
+        #endregion
+
+        #region 写入日志
         /// <summary>
         /// 将消息写入日志
         /// </summary>
@@ -209,9 +241,8 @@ namespace SprayTeaching.MyAllClass
                 this.UpdateLogContent(strMessage);
             }
         }
+        #endregion
 
-
-
-
+        #endregion
     }
 }

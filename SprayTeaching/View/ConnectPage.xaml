@@ -4,10 +4,105 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       mc:Ignorable="d" 
-      d:DesignHeight="300" d:DesignWidth="300"
+      d:DesignHeight="300"
 	Title="ConnectPage">
 
     <Grid>
-        <TextBlock Text="Connect" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBlock>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <DockPanel>
+                <GroupBox Header="通信方式" DockPanel.Dock="Left" HorizontalAlignment="Left" Margin="5">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <RadioButton GroupName="rbCommunicateWay" Content="串口方式" Margin="5" Tag="SerialPortWay" Click="RadioButton_Click"
+                             IsChecked="{Binding ModelViewModel.MainDataModel.CommunicateHardwareWay, Converter={StaticResource RadioConverter},ConverterParameter=1, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                        <RadioButton GroupName="rbCommunicateWay" Content="Wifi方式" Margin="5" Tag="WifiWay" Click="RadioButton_Click"
+                             IsChecked="{Binding ModelViewModel.MainDataModel.CommunicateHardwareWay, Converter={StaticResource RadioConverter},ConverterParameter=2, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="状态" Margin="5">
+                    
+                </GroupBox>
+            </DockPanel>
+        </Grid>
+        <Grid Grid.Row="1" x:Name="gridCommunicate">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="0"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Border BorderBrush="Black" BorderThickness="1"  Margin="5">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="端   口：" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                        <ComboBox Grid.Row="0" Grid.Column="1" MinWidth="110" Margin="5" ItemsSource="{Binding ModelViewModel.MainDataModel.ListSerialPortName}"
+                                  SelectedItem="{Binding ModelViewModel.MainDataModel.SerialPortName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="波特率：" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                        <ComboBox Grid.Row="1" Grid.Column="1" MinWidth="110" Margin="5" ItemsSource="{Binding ModelViewModel.MainDataModel.ListSerialPortBaudRate}"
+                                  SelectedItem="{Binding ModelViewModel.MainDataModel.SerialPortBaudRate,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="校验位：" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                        <ComboBox Grid.Row="2" Grid.Column="1" MinWidth="110" Margin="5"></ComboBox>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="数据为：" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                        <ComboBox Grid.Row="3" Grid.Column="1" MinWidth="110" Margin="5"></ComboBox>
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="停止位：" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                        <ComboBox Grid.Row="4" Grid.Column="1" MinWidth="110" Margin="5" ></ComboBox>
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding ModelViewModel.MainDataModel.SerialPortBaudRate,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                        <CheckBox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource MyCheckBox}" Content="串口：" Margin="5" 
+                                  x:Name="chkSerialPort" VerticalAlignment="Bottom" HorizontalAlignment="Right"></CheckBox>
+                    </Grid>
+                </Border>
+            </Grid>
+            <Grid Grid.Column="1">
+                <Border BorderBrush="Black" BorderThickness="1"  Margin="5">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="IP地址：" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                        <TextBox Grid.Row="0" Grid.Column="1" Width="114" Text="{Binding ModelViewModel.MainDataModel.SocketIPAddress,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                 IsEnabled="{Binding ElementName=chkSocket,Path=IsChecked,Converter={StaticResource NegativeConverter}}" Margin="3" Padding="2" VerticalAlignment="Center"></TextBox>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="端口号：" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                        <TextBox Grid.Row="1" Grid.Column="1" Width="114" Text="{Binding ModelViewModel.MainDataModel.SocketPortNum,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                 IsEnabled="{Binding ElementName=chkSocket,Path=IsChecked,Converter={StaticResource NegativeConverter}}" Margin="3" Padding="2" VerticalAlignment="Center"></TextBox>
+                        <CheckBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" x:Name="chkSocket" Style="{StaticResource MyCheckBox}" Content="网络通讯：" Margin="5" VerticalAlignment="Bottom" HorizontalAlignment="Right"></CheckBox>
+                    </Grid>
+                </Border>
+            </Grid>
+            <Grid Grid.Column="2">
+                <Border BorderBrush="Black" BorderThickness="1"  Margin="5">
+                    <RichTextBox >
+                        <FlowDocument>
+                            <Paragraph>
+                                <!-- 这里加上你的内容 -->
+                                This is a richTextBox. I can
+                                <Bold>Bold</Bold> ,
+                                <Italic>Italicize</Italic> ,
+                                <Hyperlink>Hyperlink stuff</Hyperlink> right in my document.
+                            </Paragraph>
+                        </FlowDocument>
+                    </RichTextBox>
+                </Border>
+            </Grid>
+        </Grid>
     </Grid>
 </Page>

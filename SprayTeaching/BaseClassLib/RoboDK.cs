@@ -1002,6 +1002,16 @@ public class RoboDK
         return COM.Connected;
     }
 
+
+    /// <summary>
+    /// 关闭RoboDK通信
+    /// </summary>
+    public void Close()
+    {
+        if (COM.Connected)
+            COM.Close();
+    }
+
     /// <summary>
     /// Checks if the object is currently linked to RoboDK
     /// </summary>

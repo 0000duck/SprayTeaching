@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:SprayTeaching">
+                    xmlns:local="clr-namespace:SprayTeaching"
+                    xmlns:localbase="clr-namespace:SprayTeaching.BaseClassLib">
     <!--定义checkbox的style-->
     <Style TargetType="CheckBox" x:Key="MyCheckBox">
         <Setter Property="Template">
@@ -16,11 +17,11 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <Border Grid.Column="0" Name="myBorderLeft" BorderBrush="Green" BorderThickness="0.5" Background="White">
-                                        <TextBlock  Name="MyTextLeft" Text="关闭" Margin="5" Padding="1" >
+                                        <TextBlock  Name="MyTextLeft" Text="关闭" Margin="2" Padding="1" >
                                         </TextBlock>
                                     </Border>
                                     <Border Grid.Column="1" Name="myBorderRight" BorderBrush="Green" BorderThickness="0.5" Background="White">
-                                        <TextBlock  Name="MyTextRight" Text="" Margin="5" Padding="1" ></TextBlock>
+                                        <TextBlock  Name="MyTextRight" Text="" Margin="2" Padding="1" ></TextBlock>
                                     </Border>
                                 </Grid>
                             </Border>
@@ -31,7 +32,7 @@
                             <Setter TargetName="myBorderLeft" Property="Background" Value="Green"/>
                             <Setter TargetName="myBorderRight" Property="Background" Value="White"/>
                             <Setter TargetName="MyTextLeft" Property="Text" Value="      "/>
-                            <Setter TargetName="MyTextRight" Property="Text" Value="开启"/>
+                            <Setter TargetName="MyTextRight" Property="Text" Value="关闭"/>
                         </Trigger>
                         <Trigger Property="IsChecked" Value="{x:Null}">
                             <Setter TargetName="myBorderLeft" Property="Grid.Column" Value="0"/>
@@ -39,7 +40,7 @@
                         <Trigger Property="IsChecked" Value="false">
                             <Setter TargetName="myBorderLeft" Property="Background" Value="White"/>
                             <Setter TargetName="myBorderRight" Property="Background" Value="White"/>
-                            <Setter TargetName="MyTextLeft" Property="Text" Value="关闭"/>
+                            <Setter TargetName="MyTextLeft" Property="Text" Value="打开"/>
                             <Setter TargetName="MyTextRight" Property="Text" Value="      "/>
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -50,7 +51,11 @@
 
     <!--将bool类型转换为Visibility数据类型-->
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-    
+
+    <localbase:MyRadioConverter x:Key="RadioConverter"></localbase:MyRadioConverter>
+
+    <localbase:MyNegativeConverte x:Key="NegativeConverter"></localbase:MyNegativeConverte>
+
     <!--TextBlock的类型-->
     <Style TargetType="TextBlock">
         <Setter Property="Margin" Value="3"/>
