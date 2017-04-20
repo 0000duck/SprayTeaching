@@ -74,7 +74,7 @@
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Frame Grid.Column="0" x:Name="frmPage" Source="HomePage.xaml" NavigationUIVisibility="Hidden"></Frame>
-            <DockPanel Grid.Column="1" >
+            <DockPanel Grid.Column="1">
                 <GroupBox DockPanel.Dock="Top" Header="关节坐标系" Margin="2">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -147,9 +147,9 @@
                     <ListView Margin="3" BorderThickness="0" ItemsSource="{Binding ModelViewModel.MainDataModel.LogDataList,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding LogTime,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Margin="1" Padding="1" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding LogMessage,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Margin="1" Padding="1" VerticalAlignment="Center"/>
+                                <StackPanel Orientation="Horizontal"  MaxWidth="400">
+                                    <TextBlock Text="{Binding LogTime,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Margin="1" Padding="1" VerticalAlignment="Top"/>
+                                    <TextBlock Text="{Binding LogMessage,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" MaxWidth="250" Margin="1" Padding="1" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>

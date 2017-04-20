@@ -170,9 +170,9 @@ namespace SprayTeaching.ViewModel
         /// </summary>
         public void CloseAllResource()
         {
-            this._myRoboDKExtension.Close();        // 关闭与RoboDK相关的资源
-            this._mySerialPortMain.ClosePort();     // 关闭与串口相关的资源
             this._myLogObject.Close();              // 关闭日志相关的资源
+            this._myRoboDKExtension.Close();        // 关闭与RoboDK相关的资源
+            this._mySerialPortMain.ClosePort();     // 关闭与串口相关的资源            
         }
         #endregion
 

@@ -88,7 +88,7 @@ namespace SprayTeaching.MyAllClass
         /// </summary>
         private void ThreadWriteLogIntoTextHandler()
         {
-            this.WriteLog("已开启日志线程...");
+            this.WriteLog("已开启日志更新线程.");
             while (Thread.CurrentThread.IsAlive)
             {
                 if (this._queueTempStoreLogMessage.Count != 0)
