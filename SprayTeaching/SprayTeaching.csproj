@@ -57,11 +57,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BaseClassLib\MyConstString.cs" />
     <Compile Include="BaseClassLib\MyLogMessage.cs" />
     <Compile Include="BaseClassLib\MyConverter.cs" />
     <Compile Include="MyAllClass\MyLog.cs" />
     <Compile Include="MyAllClass\MyRoboDKExtension.cs" />
     <Compile Include="BaseClassLib\RoboDK.cs" />
+    <Compile Include="MyAllClass\MySocketCom.cs" />
     <Compile Include="View\CalibrationPage.xaml.cs">
       <DependentUpon>CalibrationPage.xaml</DependentUpon>
     </Compile>
@@ -187,6 +189,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="MyDllFile\System.Windows.Interactivity.dll" />
+    <Resource Include="MyImage\imgSocketDisconnect.png" />
+    <Resource Include="MyImage\imgSocketConnect.png" />
+    <Resource Include="MyImage\imgSerialPortConnect.png" />
+    <Resource Include="MyImage\imgSerialPortDisconnect.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

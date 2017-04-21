@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Windows.Media.Imaging;
 using SprayTeaching.BaseClassLib;
 using SprayTeaching.MyAllClass;
 
@@ -165,9 +166,9 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 串口的波特率，默认是9600
         /// </summary>
-        private SerialPortBaudRates _brSerialPortBaudRate = SerialPortBaudRates.BaudRate_9600;
+        private int _brSerialPortBaudRate = (int)SerialPortBaudRates.BaudRate_9600;
 
-        public SerialPortBaudRates SerialPortBaudRate
+        public int SerialPortBaudRate
         {
             get { return _brSerialPortBaudRate; }
             set { _brSerialPortBaudRate = value; RaisePropertyChanged("SerialPortBaudRate"); }
@@ -176,34 +177,34 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 串口的奇偶校验位，默认是NONE
         /// </summary>
-        private Parity _prtSerialPortParityBits = Parity.None;
+        private int _prtSerialPortParityBit = (int)Parity.None;
 
-        public Parity SerialPortParityBits
+        public int SerialPortParityBit
         {
-            get { return _prtSerialPortParityBits; }
-            set { _prtSerialPortParityBits = value; RaisePropertyChanged("SerialPortParityBits"); }
+            get { return _prtSerialPortParityBit; }
+            set { _prtSerialPortParityBit = value; RaisePropertyChanged("SerialPortParityBit"); }
         }
 
         /// <summary>
         /// 串口的停止位，默认是1
         /// </summary>
-        private StopBits _sbSerialPortStopBits = StopBits.One;
+        private int _sbSerialPortStopBit = (int)StopBits.One;
 
-        public StopBits SerialPortStopBits
+        public int SerialPortStopBit
         {
-            get { return _sbSerialPortStopBits; }
-            set { _sbSerialPortStopBits = value; RaisePropertyChanged("SerialPortStopBits"); }
+            get { return _sbSerialPortStopBit; }
+            set { _sbSerialPortStopBit = value; RaisePropertyChanged("SerialPortStopBit"); }
         }
 
         /// <summary>
         /// 串口的数据位，默认为8
         /// </summary>
-        private SerialPortDataBits _spdSerialPortDataBits = SerialPortDataBits.EightBits;
+        private int _spdSerialPortDataBit = (int)SerialPortDataBits.EightBits;
 
-        public SerialPortDataBits SerialPortDataBits
+        public int SerialPortDataBit
         {
-            get { return _spdSerialPortDataBits; }
-            set { _spdSerialPortDataBits = value; RaisePropertyChanged("SerialPortDataBits"); }
+            get { return _spdSerialPortDataBit; }
+            set { _spdSerialPortDataBit = value; RaisePropertyChanged("SerialPortDataBit"); }
         }
 
         /// <summary>
@@ -214,7 +215,15 @@ namespace SprayTeaching.Model
         public bool SerialPortIsOpened
         {
             get { return _bolSerialPortIsOpened; }
-            set { _bolSerialPortIsOpened = value; RaisePropertyChanged("SerialPortBaudRate"); }
+            set { _bolSerialPortIsOpened = value; RaisePropertyChanged("SerialPortIsOpened"); }
+        }
+
+        private string _strSerialPortIsOpenedImage = MyConstString.IMG_SERIAL_PORT_DISCONNECT;
+
+        public string SerialPortIsOpenedImage
+        {
+            get { return _strSerialPortIsOpenedImage; }
+            set { _strSerialPortIsOpenedImage = value; RaisePropertyChanged("SerialPortIsOpenedImage"); }
         }
 
         /// <summary>
@@ -228,22 +237,44 @@ namespace SprayTeaching.Model
             set { _strSerialPortDataReceived = value; RaisePropertyChanged("SerialPortDataReceived"); }
         }
 
-        private List<string> _listSerialPortName = new List<string> { { "COM1" }, { "COM2" }, { "COM3" }, { "COM4" }, { "COM5" }, { "COM6" }, { "COM7" } };
+        /// <summary>
+        /// 所有可以选择的串口端口号，分别为COM1，COM2，COM3，COM4，COM5，COM6，COM7
+        /// </summary>
         public List<string> ListSerialPortName
         {
-            get{ return _listSerialPortName; }
+            get { return new List<string> { { "COM1" }, { "COM2" }, { "COM3" }, { "COM4" }, { "COM5" }, { "COM6" }, { "COM7" } }; }
         }
 
-        private List<SerialPortBaudRates> _listSerialPortBaudRate = new List<SerialPortBaudRates> 
-        { 
-            { SerialPortBaudRates.BaudRate_75 },{SerialPortBaudRates.BaudRate_300},{SerialPortBaudRates.BaudRate_600},{SerialPortBaudRates.BaudRate_1200},
-            {SerialPortBaudRates.BaudRate_2400},{SerialPortBaudRates.BaudRate_4800},{SerialPortBaudRates.BaudRate_9600},{SerialPortBaudRates.BaudRate_14400},
-            {SerialPortBaudRates.BaudRate_19200},{SerialPortBaudRates.BaudRate_115200}
-        };
-
-        public List<SerialPortBaudRates> ListSerialPortBaudRate
+        /// <summary>
+        /// 所有可以选择的串口波特率，分别为75,300,600,1200,2400,4800,9600,14400,19200,115200
+        /// </summary>
+        public List<int> ListSerialPortBaudRate
         {
-            get { return _listSerialPortBaudRate; }
+            get { return new List<int> { { 75 }, { 300 }, { 600 }, { 1200 }, { 2400 }, { 4800 }, { 9600 }, { 14400 }, { 19200 }, { 115200 }}; }
+        }
+
+        /// <summary>
+        /// 所有可以选择的串口奇偶校验位，分别为0,1,2,3,4
+        /// </summary>
+        public List<int> ListSerialPortParityBit
+        {
+            get { return new List<int> { { 0 }, { 1 }, { 2 }, { 3 }, { 4 } }; }
+        }
+
+        /// <summary>
+        /// 所有可以选择的串口数据位，分别为5,6,7,8,9,10
+        /// </summary>
+        public List<int> ListSerialPortDataBit
+        {
+            get { return new List<int> { { 5 }, { 6 }, { 7 }, { 8 }, { 9 }, { 10 } }; }
+        }
+
+        /// <summary>
+        /// 所有可以选择的串口停止位，分别为0,1,2,3
+        /// </summary>
+        public List<int> ListSerialPortStopBit
+        {
+            get { return new List<int> { { 0 }, { 1 }, { 2 }, { 3 } }; }
         }
 
         #endregion
@@ -285,6 +316,7 @@ namespace SprayTeaching.Model
             set { _strCommunicateHardwareWay = value; RaisePropertyChanged("CommunicateHardwareWay"); }
         }
 
+        #region 网络通信
         /// <summary>
         /// 网络通讯，socket的IP地址
         /// </summary>
@@ -307,5 +339,22 @@ namespace SprayTeaching.Model
             set { _strSocketPortNum = value; RaisePropertyChanged("SocketPortNum"); }
         }
 
+        private bool _bolSocketIsConnected = false;
+
+        public bool SocketIsConnected
+        {
+            get { return _bolSocketIsConnected; }
+            set { _bolSocketIsConnected = value; RaisePropertyChanged("SocketIsConnected"); }
+        }
+
+        private string _strSocketIsConnectedImage = MyConstString.IMG_SOCKET_DISCONNECT;
+
+        public string SocketIsConnectedImage
+        {
+            get { return _strSocketIsConnectedImage; }
+            set { _strSocketIsConnectedImage = value; RaisePropertyChanged("SocketIsConnectedImage"); }
+        }
+
+        #endregion
     }
 }

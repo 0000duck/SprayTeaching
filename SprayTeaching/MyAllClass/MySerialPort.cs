@@ -4,6 +4,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SprayTeaching.BaseClassLib;
 
 namespace SprayTeaching.MyAllClass
 {
@@ -11,14 +12,16 @@ namespace SprayTeaching.MyAllClass
     public class MySerialPort
     {
         #region 内部私有变量
-        private string _portName = "COM1";                                          //串口号，默认COM1
-        private SerialPortBaudRates _baudRate = SerialPortBaudRates.BaudRate_9600;  //波特率，默认9600
-        private Parity _parity = Parity.None;                                       //校验位，默认NONE
-        private StopBits _stopBits = StopBits.One;                                  //停止位，默认1
-        private SerialPortDataBits _dataBits = SerialPortDataBits.EightBits;        //数据位，默认8
+        private string _portName = "COM1";                                          // 串口号，默认COM1
+        private SerialPortBaudRates _baudRate = SerialPortBaudRates.BaudRate_9600;  // 波特率，默认9600
+        private Parity _parity = Parity.None;                                       // 校验位，默认NONE
+        private StopBits _stopBit = StopBits.One;                                   // 停止位，默认1
+        private SerialPortDataBits _dataBit = SerialPortDataBits.EightBits;         // 数据位，默认8
 
-        private SerialPort comPort = new SerialPort( ); 
-                                    
+        private StringBuilder _sbReceiveDataStorage = new StringBuilder();          // 存储所有接收的数据
+
+        private SerialPort _comPort = new SerialPort();                              // 串口的对象
+
         //串口对象
         /// <summary>
         /// 接收事件是否有效 false表示有效
@@ -34,6 +37,12 @@ namespace SprayTeaching.MyAllClass
         /// 结束符比特
         /// </summary>
         private byte EndByte = 0x5D;     //string End = "]";
+        #endregion
+
+        #region 外部事件
+
+        public event UpdateLogContentEventHandler UpdateLogContent;             // 更新日志文件
+
         #endregion
 
         #region 外部公有接口变量
@@ -67,7 +76,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 奇偶校验位
         /// </summary>
-        public Parity ParityBits
+        public Parity ParityBit
         {
             get { return _parity; }
             set { _parity = value; }
@@ -76,19 +85,19 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 数据位
         /// </summary>
-        public SerialPortDataBits DataBits
+        public SerialPortDataBits DataBit
         {
-            get { return _dataBits; }
-            set { _dataBits = value; }
+            get { return _dataBit; }
+            set { _dataBit = value; }
         }
 
         /// <summary>
         /// 停止位
         /// </summary>
-        public StopBits StopBits
+        public StopBits StopBit
         {
-            get { return _stopBits; }
-            set { _stopBits = value; }
+            get { return _stopBit; }
+            set { _stopBit = value; }
         }
 
         /// <summary>
@@ -96,10 +105,16 @@ namespace SprayTeaching.MyAllClass
         /// </summary>
         public bool IsOpen
         {
-            get
-            {
-                return comPort.IsOpen;
-            }
+            get { return _comPort.IsOpen; }
+        }
+
+        /// <summary>
+        /// 存储所有接收的数据
+        /// </summary>
+        public StringBuilder ReceiveDataStorage
+        {
+            get { return _sbReceiveDataStorage; }
+            set { _sbReceiveDataStorage = value; }
         }
         #endregion
 
@@ -113,16 +128,16 @@ namespace SprayTeaching.MyAllClass
         /// <param name="sBits">停止位</param>
         /// <param name="dBits">数据位</param>
         /// <param name="name">串口号</param>
-        public MySerialPort( string name, SerialPortBaudRates baud, Parity par, SerialPortDataBits dBits, StopBits sBits )
+        public MySerialPort(string name, SerialPortBaudRates baud, Parity par, SerialPortDataBits dBits, StopBits sBits)
         {
             _portName = name;
             _baudRate = baud;
             _parity = par;
-            _dataBits = dBits;
-            _stopBits = sBits;
+            _dataBit = dBits;
+            _stopBit = sBits;
 
-            comPort.DataReceived += new SerialDataReceivedEventHandler( comPort_DataReceived );
-            comPort.ErrorReceived += new SerialErrorReceivedEventHandler( comPort_ErrorReceived );
+            _comPort.DataReceived += new SerialDataReceivedEventHandler(comPort_DataReceived);
+            _comPort.ErrorReceived += new SerialErrorReceivedEventHandler(comPort_ErrorReceived);
         }
 
         /// <summary>
@@ -133,31 +148,31 @@ namespace SprayTeaching.MyAllClass
         /// <param name="sBits">停止位</param>
         /// <param name="dBits">数据位</param>
         /// <param name="name">串口号</param>
-        public MySerialPort( string name, string baud, string par, string dBits, string sBits )
+        public MySerialPort(string name, string baud, string par, string dBits, string sBits)
         {
             _portName = name;
-            _baudRate = (SerialPortBaudRates)Enum.Parse( typeof( SerialPortBaudRates ), baud );
-            _parity = (Parity)Enum.Parse( typeof( Parity ), par );
-            _dataBits = (SerialPortDataBits)Enum.Parse( typeof( SerialPortDataBits ), dBits );
-            _stopBits = (StopBits)Enum.Parse( typeof( StopBits ), sBits );
+            _baudRate = (SerialPortBaudRates)Enum.Parse(typeof(SerialPortBaudRates), baud);
+            _parity = (Parity)Enum.Parse(typeof(Parity), par);
+            _dataBit = (SerialPortDataBits)Enum.Parse(typeof(SerialPortDataBits), dBits);
+            _stopBit = (StopBits)Enum.Parse(typeof(StopBits), sBits);
 
-            comPort.DataReceived += new SerialDataReceivedEventHandler( comPort_DataReceived );
-            comPort.ErrorReceived += new SerialErrorReceivedEventHandler( comPort_ErrorReceived );
+            _comPort.DataReceived += new SerialDataReceivedEventHandler(comPort_DataReceived);
+            _comPort.ErrorReceived += new SerialErrorReceivedEventHandler(comPort_ErrorReceived);
         }
 
         /// <summary>
         /// 默认构造函数
         /// </summary>
-        public MySerialPort( )
+        public MySerialPort()
         {
             _portName = "COM1";
             _baudRate = SerialPortBaudRates.BaudRate_9600;
             _parity = Parity.None;
-            _dataBits = SerialPortDataBits.EightBits;
-            _stopBits = StopBits.One;
+            _dataBit = SerialPortDataBits.EightBits;
+            _stopBit = StopBits.One;
 
-            comPort.DataReceived += new SerialDataReceivedEventHandler( comPort_DataReceived );
-            comPort.ErrorReceived += new SerialErrorReceivedEventHandler( comPort_ErrorReceived );
+            _comPort.DataReceived += new SerialDataReceivedEventHandler(comPort_DataReceived);
+            _comPort.ErrorReceived += new SerialErrorReceivedEventHandler(comPort_ErrorReceived);
         }
 
         #endregion
@@ -165,66 +180,100 @@ namespace SprayTeaching.MyAllClass
         #region  方法
 
         /// <summary>
-        /// 打开端口
+        /// 关闭串口的所有资源
         /// </summary>
-        /// <returns></returns>
-        public void OpenPort( )
+        public void Close()
         {
-            if (comPort.IsOpen) comPort.Close( );
+            this.ClosePort();       // 关闭串口
+        }
 
-            comPort.PortName = _portName;
-            comPort.BaudRate = (int)_baudRate;
-            comPort.Parity = _parity;
-            comPort.DataBits = (int)_dataBits;
-            comPort.StopBits = _stopBits;
+        /// <summary>
+        /// 打开或关闭串口
+        /// </summary>
+        public void OpenCloseSerialPort(ref bool bolIsOpen,ref string strIsOpenImage)
+        {
             try
             {
-                comPort.Open( );
+                //若串口是打开着的，则关闭串口；若串口是关闭着的，则打开串口
+                if (!this._comPort.IsOpen)
+                {
+                    this.OpenPort();
+                    bolIsOpen = this._comPort.IsOpen;         //更新串口状态，是否打开
+                    strIsOpenImage = MyConstString.IMG_SERIAL_PORT_CONNECT;
+                }
+                else
+                {
+                    this.ClosePort();
+                    bolIsOpen = this._comPort.IsOpen;         //更新串口状态，是否打开
+                    strIsOpenImage = MyConstString.IMG_SERIAL_PORT_DISCONNECT;
+                }
             }
             catch (Exception e)
             {
-                throw new Exception( "unable open serial port" + e.Message );
+                //throw new Exception(e.Message);
+                this.WriteLog(e.Message);
+            }
+        }
+
+        /// <summary>
+        /// 打开端口
+        /// </summary>
+        /// <returns></returns>
+        private void OpenPort()
+        {
+            if (_comPort.IsOpen) _comPort.Close();
+
+            _comPort.PortName = _portName;
+            _comPort.BaudRate = (int)_baudRate;
+            _comPort.Parity = _parity;
+            _comPort.DataBits = (int)_dataBit;
+            _comPort.StopBits = _stopBit;
+            try
+            {
+                _comPort.Open();
+            }
+            catch (Exception e)
+            {
+                throw new Exception("unable open serial port" + e.Message);
             }
         }
 
         /// <summary>
         /// 关闭端口
         /// </summary>
-        public void ClosePort( )
+        private void ClosePort()
         {
-            if (comPort.IsOpen) comPort.Close( );
+            if (_comPort.IsOpen) _comPort.Close();
         }
 
         /// <summary>
         /// 数据接收处理
         /// </summary>
-        private void comPort_DataReceived( object sender, SerialDataReceivedEventArgs e )
+        private void comPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            //禁止接收事件时直接退出
+            // 禁止接收事件时直接退出
             if (ReceiveEventFlag) return;
 
-            //读取数据
-            List<byte> byteData = ReadData( );
+            // 对接收数据的处理
+            string readString = this.DataReceivedHandler();
 
-            //字符转换
-            string readString = System.Text.Encoding.Default.GetString( byteData.ToArray( ), 0, byteData.Count );
-
-            //触发整条记录的处理
+            // 触发数据的处理
             if (DataReceived != null)
             {
-                DataReceived( readString );
+                DataReceived(readString);
             }
         }
 
         /// <summary>
-        /// 错误处理函数
+        /// 对数据接收的处理，经过数据的读取，数据转换，数据存储
         /// </summary>
-        private void comPort_ErrorReceived( object sender, SerialErrorReceivedEventArgs e )
+        /// <returns></returns>
+        private string DataReceivedHandler()
         {
-            if (Error != null)
-            {
-                Error( sender, e );
-            }
+            List<byte> byteData = ReadData();                       // 读取数据
+            string readString = System.Text.Encoding.Default.GetString(byteData.ToArray(), 0, byteData.Count);  // 字节型数据转换为字符型数据
+            this._sbReceiveDataStorage.Append(readString);          // 存储接收的数据
+            return readString;
         }
 
         /// <summary>
@@ -233,13 +282,13 @@ namespace SprayTeaching.MyAllClass
         /// <returns>读取的数据</returns>
         private List<byte> ReadData()
         {
-            List<byte> byteData = new List<byte>( );
+            List<byte> byteData = new List<byte>();
             bool bEndFlag = false;      //是否检测到结束符号
             bool bStartFlag = false;    //是否检测到开始符号
-            while (comPort.BytesToRead > 0 || !bStartFlag || !bEndFlag)
+            while (_comPort.BytesToRead > 0 || !bStartFlag || !bEndFlag)
             {
-                byte[] readBuffer = new byte[comPort.ReadBufferSize + 1];
-                int count = comPort.Read( readBuffer, 0, comPort.ReadBufferSize );
+                byte[] readBuffer = new byte[_comPort.ReadBufferSize + 1];
+                int count = _comPort.Read(readBuffer, 0, _comPort.ReadBufferSize);
                 for (int i = 0; i < count; i++)
                 {
                     //寻找到起始位时，将开始标志位设置为true，结束标志位设置为false
@@ -247,7 +296,7 @@ namespace SprayTeaching.MyAllClass
                     {
                         bStartFlag = true;
                         bEndFlag = false;
-                        byteData.Clear( );
+                        byteData.Clear();
                         continue;  //检测到开始符号，后面就不执行了
                     }
 
@@ -260,10 +309,21 @@ namespace SprayTeaching.MyAllClass
 
                     //只有在开始标志位为true，结束标志位为false时添加数据
                     if (bStartFlag == true && bEndFlag == false)
-                        byteData.Add( readBuffer[i] );                   
+                        byteData.Add(readBuffer[i]);
                 }
             }
             return byteData;
+        }
+
+        /// <summary>
+        /// 错误处理函数
+        /// </summary>
+        private void comPort_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
+        {
+            if (Error != null)
+            {
+                Error(sender, e);
+            }
         }
 
         #region 数据写入操作
@@ -274,9 +334,9 @@ namespace SprayTeaching.MyAllClass
         /// <param name="msg"></param>
         public void WriteData(string msg)
         {
-            if (!(comPort.IsOpen)) comPort.Open();
+            if (!(_comPort.IsOpen)) _comPort.Open();
 
-            comPort.Write(msg);
+            _comPort.Write(msg);
         }
 
         /// <summary>
@@ -285,9 +345,9 @@ namespace SprayTeaching.MyAllClass
         /// <param name="msg">写入端口的字节数组</param>
         public void WriteData(byte[] msg)
         {
-            if (!(comPort.IsOpen)) comPort.Open();
+            if (!(_comPort.IsOpen)) _comPort.Open();
 
-            comPort.Write(msg, 0, msg.Length);
+            _comPort.Write(msg, 0, msg.Length);
         }
 
         /// <summary>
@@ -298,9 +358,9 @@ namespace SprayTeaching.MyAllClass
         /// <param name="count">要写入的字节数</param>
         public void WriteData(byte[] msg, int offset, int count)
         {
-            if (!(comPort.IsOpen)) comPort.Open();
+            if (!(_comPort.IsOpen)) _comPort.Open();
 
-            comPort.Write(msg, offset, count);
+            _comPort.Write(msg, offset, count);
         }
 
         /// <summary>
@@ -312,26 +372,40 @@ namespace SprayTeaching.MyAllClass
         /// <returns></returns>
         public int SendCommand(byte[] SendData, ref  byte[] ReceiveData, int Overtime)
         {
-            if (!(comPort.IsOpen)) comPort.Open();
+            if (!(_comPort.IsOpen)) _comPort.Open();
 
             ReceiveEventFlag = true;        //关闭接收事件
-            comPort.DiscardInBuffer();      //清空接收缓冲区                 
-            comPort.Write(SendData, 0, SendData.Length);
+            _comPort.DiscardInBuffer();      //清空接收缓冲区                 
+            _comPort.Write(SendData, 0, SendData.Length);
 
             int num = 0, ret = 0;
             while (num++ < Overtime)
             {
-                if (comPort.BytesToRead >= ReceiveData.Length) break;
+                if (_comPort.BytesToRead >= ReceiveData.Length) break;
                 System.Threading.Thread.Sleep(1);
             }
 
-            if (comPort.BytesToRead >= ReceiveData.Length)
+            if (_comPort.BytesToRead >= ReceiveData.Length)
             {
-                ret = comPort.Read(ReceiveData, 0, ReceiveData.Length);
+                ret = _comPort.Read(ReceiveData, 0, ReceiveData.Length);
             }
 
             ReceiveEventFlag = false;       //打开事件
             return ret;
+        }
+        #endregion
+
+        #region 写入日志
+        /// <summary>
+        /// 将消息写入日志
+        /// </summary>
+        /// <param name="strMessage">消息内容</param>
+        private void WriteLog(string strMessage)
+        {
+            if (this.UpdateLogContent != null)
+            {
+                this.UpdateLogContent(strMessage);
+            }
         }
         #endregion
 

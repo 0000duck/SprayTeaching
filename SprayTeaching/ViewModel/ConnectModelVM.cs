@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using SprayTeaching.Model;
+using System.IO.Ports;
 
+using SprayTeaching.Model;
 using SprayTeaching.BaseClassLib;
 using SprayTeaching.MyAllClass;
 
@@ -28,27 +29,26 @@ namespace SprayTeaching.ViewModel
         {
             get { return _mainDataModel; }
             set { _mainDataModel = value; RaisePropertyChanged("MainDataModel"); }
-        }       
+        }
 
         #endregion
 
         #region  构造函数
         public ConnectModelVM()
         {
-            this._mainDataModel = new DataModel();          // 所有数据的对象
-            this._dlgtUpdateDifThreadParam = new UpdateDifferentThreadParameterEventHandler(UpdateDifferentThreadParam);    // 用于更新不同线程的参数
+            this._mainDataModel = new DataModel();                                                                              // 所有数据的对象
+            this._dlgtUpdateDifThreadParam = new UpdateDifferentThreadParameterEventHandler(UpdateDifferentThreadParam);        // 用于更新不同线程的参数,目前用于更新listview的绑定的数据
 
-            this._myLogObject = new MyLog(this._mainDataModel.LogFilePath);
-            this._myLogObject.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);
+            this._myLogObject = new MyLog(this._mainDataModel.LogFilePath);                                                     // 日志更新的对象
+            this._myLogObject.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                    // 日志中线程初始化的时候写日志，自己写自己，因为要将数据写到listview中，只能统一采用外部方式
 
-            this._mySerialPortMain = new MySerialPort();
-            this._mySerialPortMain.DataReceived += new DataReceivedEventHandler(DataReceiveHandler);
+            this._mySerialPortMain = new MySerialPort();                                                                        // 串口的对象
+            this._mySerialPortMain.DataReceived += new DataReceivedEventHandler(DataReceiveHandler);                            // 接收数据的处理
+            this._mySerialPortMain.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);               // 串口写日志
 
-            this._myRoboDKExtension = new MyRoboDKExtension();
-            this._myRoboDKExtension.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);
-            this._myRoboDKExtension.UpdateRobotParameter += new UpdateRobotParameterEventHandler(UpdateRobotParameterHandler);
-
-            
+            this._myRoboDKExtension = new MyRoboDKExtension();                                                                  // RoboDK的对象
+            this._myRoboDKExtension.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);              // RoboDK写日志
+            this._myRoboDKExtension.UpdateRobotParameter += new UpdateRobotParameterEventHandler(UpdateRobotParameterHandler);  // 更新机器人参数
         }
 
         #endregion
@@ -56,6 +56,7 @@ namespace SprayTeaching.ViewModel
         #region 方法
 
         #region 串口相关的方法
+
         /// <summary>
         /// 打开或关闭串口
         /// </summary>
@@ -63,28 +64,21 @@ namespace SprayTeaching.ViewModel
         {
             //更新串口参数
             this._mySerialPortMain.PortName = this._mainDataModel.SerialPortName;
-            this._mySerialPortMain.BaudRate = this._mainDataModel.SerialPortBaudRate;
-            this._mySerialPortMain.ParityBits = this._mainDataModel.SerialPortParityBits;
-            this._mySerialPortMain.StopBits = this._mainDataModel.SerialPortStopBits;
-            this._mySerialPortMain.DataBits = this._mainDataModel.SerialPortDataBits;
-            try
-            {
-                //若串口是打开着的，则关闭串口；若串口是关闭着的，则打开串口
-                if (!this._mySerialPortMain.IsOpen)
-                {
-                    this._mySerialPortMain.OpenPort();
-                    this._mainDataModel.SerialPortIsOpened = this._mySerialPortMain.IsOpen;         //更新串口状态，是否打开
-                }
-                else
-                {
-                    this._mySerialPortMain.ClosePort();
-                    this._mainDataModel.SerialPortIsOpened = this._mySerialPortMain.IsOpen;         //更新串口状态，是否打开
-                }
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
+            this._mySerialPortMain.BaudRate = (SerialPortBaudRates)this._mainDataModel.SerialPortBaudRate;
+            this._mySerialPortMain.ParityBit = (Parity)this._mainDataModel.SerialPortParityBit;
+            this._mySerialPortMain.StopBit = (StopBits)this._mainDataModel.SerialPortStopBit;
+            this._mySerialPortMain.DataBit = (SerialPortDataBits)this._mainDataModel.SerialPortDataBit;
+
+            // 临时存储串口是否打开，串口的通断图
+            bool bolSerialPortIsOpened = false;
+            string strSerialPortIsOpenedImage = string.Empty;
+
+            // 这么做的原因是由于“属性或索引器不得作为 out 或 ref 参数传递”
+            this._mySerialPortMain.OpenCloseSerialPort(ref bolSerialPortIsOpened, ref strSerialPortIsOpenedImage);      
+
+            // 更新串口的参数
+            this._mainDataModel.SerialPortIsOpened=bolSerialPortIsOpened;
+            this._mainDataModel.SerialPortIsOpenedImage=strSerialPortIsOpenedImage;
         }
 
         /// <summary>
@@ -93,8 +87,9 @@ namespace SprayTeaching.ViewModel
         /// <param name="strDataReceive">接收的数据</param>
         private void DataReceiveHandler(string strDataReceive)
         {
-            this._mainDataModel.SerialPortDataReceived = strDataReceive;
+            this._mainDataModel.SerialPortDataReceived += strDataReceive + "\r\n";
         }
+
         #endregion
 
         #region  RoboDK相关的方法
@@ -103,7 +98,7 @@ namespace SprayTeaching.ViewModel
         /// 更新机器人的参数
         /// </summary>
         /// <param name="dblJoints">6个关节角度</param>
-        private void UpdateRobotParameterHandler(double[] dblJoints,double[] dblPoses)
+        private void UpdateRobotParameterHandler(double[] dblJoints, double[] dblPoses)
         {
             this.UpdateRobotJoints(dblJoints);
             this.UpdateRobotPoses(dblPoses);
@@ -149,17 +144,17 @@ namespace SprayTeaching.ViewModel
         {
             string strTime = this._myLogObject.AddLogMessage(strMessage);
             MyLogMessage myLogMessage = new MyLogMessage() { LogTime = strTime, LogMessage = strMessage };
-            App.Current.Dispatcher.BeginInvoke(this._dlgtUpdateDifThreadParam, myLogMessage);               // 使用调度者dispatcher来异步处理多线程
+            App.Current.Dispatcher.BeginInvoke(this._dlgtUpdateDifThreadParam, myLogMessage);               // 使用调度者dispatcher来异步处理多线程，目前用于更新listview中的数据
         }
 
         /// <summary>
-        /// 异步更新日志数据
+        /// 异步更新日志数据，目前是用于更新listview中的数据
         /// </summary>
         /// <param name="objParameter"></param>
         private void UpdateDifferentThreadParam(object objParameter)
         {
             MyLogMessage myLogMessage = objParameter as MyLogMessage;
-            this._mainDataModel.LogDataList.Insert(0,myLogMessage);
+            this._mainDataModel.LogDataList.Insert(0, myLogMessage);
         }
         #endregion
 
@@ -172,7 +167,7 @@ namespace SprayTeaching.ViewModel
         {
             this._myLogObject.Close();              // 关闭日志相关的资源
             this._myRoboDKExtension.Close();        // 关闭与RoboDK相关的资源
-            this._mySerialPortMain.ClosePort();     // 关闭与串口相关的资源            
+            this._mySerialPortMain.Close();         // 关闭与串口相关的资源            
         }
         #endregion
 

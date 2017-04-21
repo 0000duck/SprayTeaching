@@ -34,7 +34,7 @@ namespace SprayTeaching.ViewModel
         #region  在界面中要绑定的命令
 
         /// <summary>
-        /// 打开串口命令
+        /// 打开关闭串口命令
         /// </summary>
         private MyCommand _openCloseSerialPortCommand;
 
@@ -45,6 +45,21 @@ namespace SprayTeaching.ViewModel
                 if (this._openCloseSerialPortCommand == null)
                     this._openCloseSerialPortCommand = new MyCommand(this.ExecuteOpenCloseSerialPort);
                 return this._openCloseSerialPortCommand;
+            }
+        }
+
+        /// <summary>
+        /// 打开关闭socket命令
+        /// </summary>
+        private MyCommand _openCloseSocketCommand;
+
+        public MyCommand OpenCloseSocketCommand
+        {
+            get 
+            {
+                if (this._openCloseSocketCommand == null)
+                    this._openCloseSocketCommand = new MyCommand(this.ExecuteOpenCloseSocket);
+                return _openCloseSocketCommand; 
             }
         }
 
@@ -74,6 +89,15 @@ namespace SprayTeaching.ViewModel
         private void ExecuteOpenCloseSerialPort(object objParameter = null)
         {
             this._modelViewModel.OpenCloseSerialPort();
+        }
+
+        /// <summary>
+        /// 执行打开或关闭socket操作
+        /// </summary>
+        /// <param name="objParameter"></param>
+        private void ExecuteOpenCloseSocket(object objParameter=null)
+        {
+            System.Windows.MessageBox.Show("socket");
         }
 
         /// <summary>
