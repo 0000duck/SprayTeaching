@@ -21,6 +21,7 @@ namespace SprayTeaching.ViewModel
         private MyLog _myLogObject;                         // 日志文件的对象
         private MyRoboDKExtension _myRoboDKExtension;       // RoboDK的对象
         private MySerialPort _mySerialPortMain;             // 串口的对象
+        private MySocketCom _mySocketCom;                   // Socket通信对象
 
         private delegate void UpdateDifferentThreadParameterEventHandler(object strParameter);      // 更新不同线程的参数的delegate变量声明，主要用于对绑定控件数据的更改 
         private UpdateDifferentThreadParameterEventHandler _dlgtUpdateDifThreadParam;               // 更新不同线程的数据
@@ -45,6 +46,12 @@ namespace SprayTeaching.ViewModel
             this._mySerialPortMain = new MySerialPort();                                                                        // 串口的对象
             this._mySerialPortMain.DataReceived += new DataReceivedEventHandler(DataReceiveHandler);                            // 接收数据的处理
             this._mySerialPortMain.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);               // 串口写日志
+            this._mySerialPortMain.UpdateSerialPortIsOpened += new UpdateSerialPortIsOpenedEventHandler(UpdateSerialPortIsOpened);
+
+            this._mySocketCom = new MySocketCom();                                                                              // socket通信的对象
+            this._mySocketCom.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                    // socket写日志
+            this._mySocketCom.DataReceived += new DataReceivedEventHandler(DataReceiveHandler);                                 // 接收数据的处理
+            this._mySocketCom.UpdateSocketIsConnected += new UpdateSocketIsConnectedEventHandler(UpdateSocketIsConnectedHandler);
 
             this._myRoboDKExtension = new MyRoboDKExtension();                                                                  // RoboDK的对象
             this._myRoboDKExtension.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);              // RoboDK写日志
@@ -69,17 +76,69 @@ namespace SprayTeaching.ViewModel
             this._mySerialPortMain.StopBit = (StopBits)this._mainDataModel.SerialPortStopBit;
             this._mySerialPortMain.DataBit = (SerialPortDataBits)this._mainDataModel.SerialPortDataBit;
 
-            // 临时存储串口是否打开，串口的通断图
-            bool bolSerialPortIsOpened = false;
-            string strSerialPortIsOpenedImage = string.Empty;
+            //// 临时存储串口是否打开，串口的通断图
+            //bool bolSerialPortIsOpened = false;
+            //string strSerialPortIsOpenedImage = string.Empty;
 
-            // 这么做的原因是由于“属性或索引器不得作为 out 或 ref 参数传递”
-            this._mySerialPortMain.OpenCloseSerialPort(ref bolSerialPortIsOpened, ref strSerialPortIsOpenedImage);      
+            //// 这么做的原因是由于“属性或索引器不得作为 out 或 ref 参数传递”
+            //this._mySerialPortMain.OpenCloseSerialPort(ref bolSerialPortIsOpened, ref strSerialPortIsOpenedImage);      
 
-            // 更新串口的参数
-            this._mainDataModel.SerialPortIsOpened=bolSerialPortIsOpened;
-            this._mainDataModel.SerialPortIsOpenedImage=strSerialPortIsOpenedImage;
+            //// 更新串口的参数
+            //this._mainDataModel.SerialPortIsOpened=bolSerialPortIsOpened;
+            //this._mainDataModel.SerialPortIsOpenedImage=strSerialPortIsOpenedImage;
+
+            bool bolSerialPortIsOpened = this._mainDataModel.SerialPortIsOpened;
+            this._mySerialPortMain.OpenCloseSerialPort(bolSerialPortIsOpened);
         }
+
+        private void UpdateSerialPortIsOpened(bool bolIsOpened)
+        {
+            if (bolIsOpened)
+                this._mainDataModel.SerialPortIsOpenedImage = MyConstString.IMG_SERIAL_PORT_CONNECT;
+            else
+                this._mainDataModel.SerialPortIsOpenedImage = MyConstString.IMG_SERIAL_PORT_DISCONNECT;
+
+            this._mainDataModel.SerialPortIsOpened = bolIsOpened;
+        }
+
+        #endregion
+
+        #region Scoket相关的方法
+
+        public void OpenCloseSocketHandler()
+        {
+            this._mySocketCom.SocketIPAddress = this._mainDataModel.SocketIPAddress;
+            this._mySocketCom.SocketPortNum = this._mainDataModel.SocketPortNum;
+
+            //bool bolSocketIsConnected = this._mainDataModel.SocketIsConnected;
+            //string strSocketIsConnectedImage = this._mainDataModel.SocketIsConnectedImage;
+            //this._mySocketCom.OpenCloseSocketHandler(ref bolSocketIsConnected, ref strSocketIsConnectedImage);
+
+            //this._mainDataModel.SocketIsConnected = bolSocketIsConnected;
+            //this._mainDataModel.SocketIsConnectedImage = strSocketIsConnectedImage;
+
+            bool bolSocketIsConnected = this._mainDataModel.SocketIsConnected;
+            this._mySocketCom.OpenCloseSocket(bolSocketIsConnected);
+        }
+
+        private void UpdateSocketIsConnectedHandler(bool bolIsConnected)
+        {
+            if (bolIsConnected)
+                this._mainDataModel.SocketIsConnectedImage = MyConstString.IMG_SOCKET_CONNECT;
+            else
+                this._mainDataModel.SocketIsConnectedImage = MyConstString.IMG_SOCKET_DISCONNECT;
+
+            this._mainDataModel.SocketIsConnected = bolIsConnected;
+        }
+
+        public void SocketSendDataHandler()
+        {
+            this._mySocketCom.SendDataHandler();
+        }
+
+        #endregion
+
+        #region 数据接收
 
         /// <summary>
         /// 对串口中接收的数据进行处理
@@ -144,11 +203,11 @@ namespace SprayTeaching.ViewModel
         {
             string strTime = this._myLogObject.AddLogMessage(strMessage);
             MyLogMessage myLogMessage = new MyLogMessage() { LogTime = strTime, LogMessage = strMessage };
-            App.Current.Dispatcher.BeginInvoke(this._dlgtUpdateDifThreadParam, myLogMessage);               // 使用调度者dispatcher来异步处理多线程，目前用于更新listview中的数据
+            App.Current.Dispatcher.BeginInvoke(this._dlgtUpdateDifThreadParam, myLogMessage);               // 使用调度者dispatcher来异步处理多线程，目前用于更新listview绑定的数据
         }
 
         /// <summary>
-        /// 异步更新日志数据，目前是用于更新listview中的数据
+        /// 异步更新日志数据，目前是用于更新listview绑定的数据
         /// </summary>
         /// <param name="objParameter"></param>
         private void UpdateDifferentThreadParam(object objParameter)
@@ -163,11 +222,13 @@ namespace SprayTeaching.ViewModel
         /// <summary>
         /// 关闭所有资源
         /// </summary>
-        public void CloseAllResource()
+        public void CloseAllResourceHandler()
         {
             this._myLogObject.Close();              // 关闭日志相关的资源
+            this._mySerialPortMain.Close();         // 关闭与串口相关的资源 
+            this._mySocketCom.Close();              // 关闭与socket相关的资源
             this._myRoboDKExtension.Close();        // 关闭与RoboDK相关的资源
-            this._mySerialPortMain.Close();         // 关闭与串口相关的资源            
+
         }
         #endregion
 

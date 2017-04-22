@@ -59,7 +59,7 @@ namespace SprayTeaching.ViewModel
             {
                 if (this._openCloseSocketCommand == null)
                     this._openCloseSocketCommand = new MyCommand(this.ExecuteOpenCloseSocket);
-                return _openCloseSocketCommand; 
+                return this._openCloseSocketCommand; 
             }
         }
 
@@ -74,7 +74,19 @@ namespace SprayTeaching.ViewModel
             {
                 if (this._closingWindowCommand == null)
                     this._closingWindowCommand = new MyCommand(this.ExecuteClosingWindow);
-                return _closingWindowCommand; 
+                return this._closingWindowCommand; 
+            }
+        }
+
+        private MyCommand _socketSendDataCommand;
+
+        public MyCommand SocketSendDataCommand
+        {
+            get
+            {
+                if (this._socketSendDataCommand == null)
+                    this._socketSendDataCommand = new MyCommand(this.ExecuteSocketSendData);
+                return this._socketSendDataCommand;
             }
         }
 
@@ -97,7 +109,7 @@ namespace SprayTeaching.ViewModel
         /// <param name="objParameter"></param>
         private void ExecuteOpenCloseSocket(object objParameter=null)
         {
-            System.Windows.MessageBox.Show("socket");
+            this._modelViewModel.OpenCloseSocketHandler();
         }
 
         /// <summary>
@@ -106,7 +118,12 @@ namespace SprayTeaching.ViewModel
         /// <param name="objParameter"></param>
         private void ExecuteClosingWindow(object objParameter = null)
         {
-            this._modelViewModel.CloseAllResource();
+            this._modelViewModel.CloseAllResourceHandler();
+        }
+
+        private void ExecuteSocketSendData(object objParameter=null)
+        {
+            this._modelViewModel.SocketSendDataHandler();
         }
 
         #endregion

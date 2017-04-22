@@ -331,9 +331,9 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 网络通讯，socket的端口号
         /// </summary>
-        private string _strSocketPortNum = "12000";
+        private int _strSocketPortNum = 12000;
 
-        public string SocketPortNum
+        public int SocketPortNum
         {
             get { return _strSocketPortNum; }
             set { _strSocketPortNum = value; RaisePropertyChanged("SocketPortNum"); }

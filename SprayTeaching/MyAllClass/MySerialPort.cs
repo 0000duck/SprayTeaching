@@ -8,7 +8,7 @@ using SprayTeaching.BaseClassLib;
 
 namespace SprayTeaching.MyAllClass
 {
-    public delegate void DataReceivedEventHandler(string strDataReceive);
+    
     public class MySerialPort
     {
         #region 内部私有变量
@@ -42,6 +42,7 @@ namespace SprayTeaching.MyAllClass
         #region 外部事件
 
         public event UpdateLogContentEventHandler UpdateLogContent;             // 更新日志文件
+        public event UpdateSerialPortIsOpenedEventHandler UpdateSerialPortIsOpened; // 更新串口的通断状态
 
         #endregion
 
@@ -216,6 +217,32 @@ namespace SprayTeaching.MyAllClass
         }
 
         /// <summary>
+        /// 打开或关闭串口
+        /// </summary>
+        public void OpenCloseSerialPort(bool bolIsOpen)
+        {
+            try
+            {
+                //若串口是打开着的，则关闭串口；若串口是关闭着的，则打开串口
+                if (!bolIsOpen)
+                {
+                    this.OpenPort();
+                }
+                else
+                {
+                    this.ClosePort();
+                }
+
+                UpdateConnectState(this._comPort.IsOpen);   // 更新串口的连接状态
+            }
+            catch (Exception e)
+            {
+                //throw new Exception(e.Message);
+                this.WriteLog(e.Message);
+            }
+        }
+
+        /// <summary>
         /// 打开端口
         /// </summary>
         /// <returns></returns>
@@ -231,6 +258,7 @@ namespace SprayTeaching.MyAllClass
             try
             {
                 _comPort.Open();
+                this.WriteLog(string.Format("串口开启成功，串口号为{0}.", this._portName));
             }
             catch (Exception e)
             {
@@ -244,6 +272,7 @@ namespace SprayTeaching.MyAllClass
         private void ClosePort()
         {
             if (_comPort.IsOpen) _comPort.Close();
+            this.WriteLog("串口已关闭.");
         }
 
         /// <summary>
@@ -394,6 +423,16 @@ namespace SprayTeaching.MyAllClass
             return ret;
         }
         #endregion
+
+        /// <summary>
+        /// 更新串口的连接状态
+        /// </summary>
+        /// <param name="bolIsOpen"></param>
+        private void UpdateConnectState(bool bolIsOpen)
+        {
+            if (this.UpdateSerialPortIsOpened != null)
+                this.UpdateSerialPortIsOpened(bolIsOpen);
+        }
 
         #region 写入日志
         /// <summary>

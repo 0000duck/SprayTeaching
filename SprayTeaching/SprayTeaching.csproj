@@ -58,6 +58,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="BaseClassLib\MyConstString.cs" />
+    <Compile Include="BaseClassLib\MyDelegateEventHandler.cs" />
     <Compile Include="BaseClassLib\MyLogMessage.cs" />
     <Compile Include="BaseClassLib\MyConverter.cs" />
     <Compile Include="MyAllClass\MyLog.cs" />

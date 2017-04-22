@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Windows.Threading;
+using SprayTeaching.BaseClassLib;
 
 namespace SprayTeaching.MyAllClass
 {
-    public delegate void UpdateLogContentEventHandler(string strParameter);                 // 更新日志内容的delegate变量声明
-    public delegate void UpdateRobotParameterEventHandler(double[] dblParameter1, double[] dblParameter2);  // 更新机器人参数的delegate变量声明      
+        
 
     public class MyRoboDKExtension
     {
@@ -26,7 +26,7 @@ namespace SprayTeaching.MyAllClass
 
         #region 外部事件
 
-        public event UpdateLogContentEventHandler UpdateLogContent;             // 更新日志文件
+        public event UpdateLogContentEventHandler UpdateLogContent;             // 更新日志文件        
         public event UpdateRobotParameterEventHandler UpdateRobotParameter;     // 更新机器人参数  
 
         #endregion

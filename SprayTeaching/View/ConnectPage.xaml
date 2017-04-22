@@ -75,7 +75,7 @@
                         </StackPanel>
                         <StackPanel Grid.Row="5" Grid.Column="1"  VerticalAlignment="Bottom" Orientation="Vertical" Margin="5">
                             <CheckBox Grid.Row="5" Grid.Column="1" Style="{StaticResource MyCheckBox}" Content="串口："  
-                                  IsChecked="{Binding ModelViewModel.MainDataModel.SerialPortIsOpened,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                  IsChecked="{Binding ModelViewModel.MainDataModel.SerialPortIsOpened,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"
                                   Command="{Binding OpenCloseSerialPortCommand}"
                                   x:Name="chkSerialPort"></CheckBox>
                         </StackPanel>
@@ -87,6 +87,7 @@
                 <Border BorderBrush="Black" BorderThickness="1"  Margin="5">
                     <Grid>
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
                             <RowDefinition Height="Auto"></RowDefinition>
                             <RowDefinition Height="Auto"></RowDefinition>
                             <RowDefinition></RowDefinition>
@@ -101,12 +102,14 @@
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="端口号：" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
                         <TextBox Grid.Row="1" Grid.Column="1" Width="110" Text="{Binding ModelViewModel.MainDataModel.SocketPortNum,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
                                  IsEnabled="{Binding ElementName=chkSocket,Path=IsChecked,Converter={StaticResource NegativeConverter}}" Margin="3" Padding="2" VerticalAlignment="Center"></TextBox>
-                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="5" VerticalAlignment="Bottom" Orientation="Horizontal">
+                        <StackPanel Grid.Row="3" Grid.Column="0" Margin="5" VerticalAlignment="Bottom" Orientation="Horizontal">
                             <TextBlock Text="通断:" VerticalAlignment="Center"/>
                             <Image Source="{Binding ModelViewModel.MainDataModel.SocketIsConnectedImage,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Stretch="None" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <CheckBox Grid.Row="2" Grid.Column="1" x:Name="chkSocket" Style="{StaticResource MyCheckBox}" Content="网络：" Margin="5" VerticalAlignment="Bottom" 
-                                  Command="{Binding OpenCloseSocketCommand}" HorizontalAlignment="Right"></CheckBox>
+                        <CheckBox Grid.Row="3" Grid.Column="1" x:Name="chkSocket" Style="{StaticResource MyCheckBox}" Content="网络：" Margin="5" VerticalAlignment="Bottom" 
+                                  Command="{Binding OpenCloseSocketCommand}" IsChecked="{Binding ModelViewModel.MainDataModel.SocketIsConnected,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"
+                                  HorizontalAlignment="Right"></CheckBox>
+                        <Button Grid.Row="2" Grid.Column="0" Content="发送" Command="{Binding SocketSendDataCommand}"/>
                     </Grid>
                 </Border>
             </Grid>

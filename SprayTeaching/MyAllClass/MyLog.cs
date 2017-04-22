@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using SprayTeaching.BaseClassLib;
+
 
 namespace SprayTeaching.MyAllClass
 {
