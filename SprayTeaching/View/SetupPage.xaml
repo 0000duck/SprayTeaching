@@ -6,8 +6,131 @@
       mc:Ignorable="d" 
       d:DesignHeight="300" d:DesignWidth="300"
 	Title="SetupPage">
-
     <Grid>
-        <TextBlock Text="Setup" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBlock>
+        <TabControl TabStripPlacement="Left" Margin="5">
+            <TabItem Header="频&#13;&#10;率" Padding="6" >
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="频率设置:" Margin="5" FontSize="15" FontWeight="Bold"/>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Top">
+                        <TextBlock Text="设置频率4Hz~20Hz:" VerticalAlignment="Center" Margin="5" Padding="2"></TextBlock>
+                        <TextBox MinWidth="70" Text="0" VerticalAlignment="Center" Margin="5" Padding="2"></TextBox>
+                        <Button Content="设置" VerticalAlignment="Center" Margin="5" MinWidth="50" Padding="2"></Button>
+                    </StackPanel>
+                    <Button Grid.Row="3" Content="查询" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5" MinWidth="50" Padding="2"></Button>
+                </Grid>
+            </TabItem>
+            <TabItem Header="轴&#13;&#10;地&#13;&#10;址" Padding="6">
+            </TabItem>
+            <TabItem Header="机&#13;&#10;器&#13;&#10;人&#13;&#10;模&#13;&#10;型" Padding="6">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Margin="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="选择机器人模型:" Margin="5" FontSize="15" FontWeight="Bold"/>
+                        <StackPanel Grid.Row="1" Orientation="Vertical">
+                            <RadioButton GroupName="RobotModel" Content="3KG模型" Margin="3"/>
+                            <RadioButton GroupName="RobotModel" Content="10KG模型" Margin="3"/>
+                            <RadioButton GroupName="RobotModel" Content="20KG模型" Margin="3"/>
+                            <RadioButton GroupName="RobotModel" Content="ABB" Margin="3"/>
+                            <RadioButton GroupName="RobotModel" Content="FANUC" Margin="3"/>
+                        </StackPanel>
+                    </Grid>
+                    <Rectangle Grid.Row="1" Stroke="Black" Height="0.6" Margin="5"/>
+                    <Grid Grid.Row="2" Margin="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="视角参数:" Margin="3" FontSize="15" FontWeight="Bold"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="X轴偏移:" VerticalAlignment="Center" Margin="3"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="0" Margin="3" VerticalAlignment="Center" MinWidth="100"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Y轴偏移:" VerticalAlignment="Center" Margin="3"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="0" Margin="3" VerticalAlignment="Center" MinWidth="100"/>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Z轴偏移:" VerticalAlignment="Center" Margin="3"/>
+                        <TextBox Grid.Row="3" Grid.Column="1" Text="0" Margin="3" VerticalAlignment="Center" MinWidth="100"/>
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="比例参数:" VerticalAlignment="Center" Margin="3"/>
+                        <TextBox Grid.Row="4" Grid.Column="1" Text="0" Margin="3" VerticalAlignment="Center" MinWidth="100"/>
+                    </Grid>
+                    <Rectangle Grid.Row="3" Stroke="Black" Height="0.6" Margin="5"/>
+                    <StackPanel Grid.Row="4" Margin="5" Orientation="Horizontal">
+                        <Button Content="最优参数" Padding="2" Margin="5" VerticalAlignment="Center"/>
+                        <Button Content="确定参数" Padding="2" Margin="5" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="下&#13;&#10;载&#13;&#10;位&#13;&#10;置" Padding="6">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="文件下载地址设置:" Margin="5" FontSize="15" FontWeight="Bold"/>
+                    <Border Grid.Row="1" BorderBrush="Black" BorderThickness="0.6" Margin="5">
+                        <TextBlock  Text="C:/myself.exe" Margin="2" Padding="2"/>
+                    </Border>
+                    
+                    <Button Grid.Row="2" Content="设置" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5" MinWidth="50" Padding="2"></Button>
+                </Grid>
+            </TabItem>
+            <TabItem Header="滤&#13;&#10;波&#13;&#10;器" Padding="6">
+            </TabItem>
+        </TabControl>
     </Grid>
+
+    <!--<Border BorderBrush="Black" BorderThickness="0.6" Margin="5">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+            <Rectangle Grid.Row="1" Stroke="Black" Height="0.6" Margin="5"/>
+            <Rectangle Grid.Row="3" Stroke="Black" Height="0.6" Margin="5"/>
+            <Rectangle Grid.Row="5" Stroke="Black" Height="0.6" Margin="5"/>
+            <Rectangle Grid.Row="7" Stroke="Black" Height="0.6" Margin="5"/>
+            <Rectangle Grid.Row="9" Stroke="Black" Height="0.6" Margin="5"/>
+            <Grid Grid.Row="0" Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="频率设置" Margin="5" FontSize="14" FontWeight="Bold"/>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Top">
+                    <TextBlock Text="设置频率4Hz~20Hz:" VerticalAlignment="Center" Margin="5" Padding="2"></TextBlock>
+                    <TextBox MinWidth="70" Text="0" VerticalAlignment="Center" Margin="5" Padding="2"></TextBox>
+                    <Button Content="设置" VerticalAlignment="Center" Margin="5" MinWidth="50" Padding="2"></Button>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>-->
 </Page>

@@ -55,11 +55,11 @@ namespace SprayTeaching.ViewModel
 
         public MyCommand OpenCloseSocketCommand
         {
-            get 
+            get
             {
                 if (this._openCloseSocketCommand == null)
                     this._openCloseSocketCommand = new MyCommand(this.ExecuteOpenCloseSocket);
-                return this._openCloseSocketCommand; 
+                return this._openCloseSocketCommand;
             }
         }
 
@@ -70,14 +70,17 @@ namespace SprayTeaching.ViewModel
 
         public MyCommand ClosingWindowCommand
         {
-            get 
+            get
             {
                 if (this._closingWindowCommand == null)
                     this._closingWindowCommand = new MyCommand(this.ExecuteClosingWindow);
-                return this._closingWindowCommand; 
+                return this._closingWindowCommand;
             }
         }
 
+        /// <summary>
+        /// socket发送数据命令
+        /// </summary>
         private MyCommand _socketSendDataCommand;
 
         public MyCommand SocketSendDataCommand
@@ -87,6 +90,18 @@ namespace SprayTeaching.ViewModel
                 if (this._socketSendDataCommand == null)
                     this._socketSendDataCommand = new MyCommand(this.ExecuteSocketSendData);
                 return this._socketSendDataCommand;
+            }
+        }
+
+        private MyCommand _selectCommunicateWayCommand;
+
+        public MyCommand SelectCommunicateWayCommand
+        {
+            get
+            {
+                if (this._selectCommunicateWayCommand == null)
+                    this._selectCommunicateWayCommand = new MyCommand(this.ExecuteSelectCommunicateWay);
+                return this._selectCommunicateWayCommand;
             }
         }
 
@@ -100,14 +115,14 @@ namespace SprayTeaching.ViewModel
         /// <param name="objParameter"></param>
         private void ExecuteOpenCloseSerialPort(object objParameter = null)
         {
-            this._modelViewModel.OpenCloseSerialPort();
+            this._modelViewModel.OpenCloseSerialPortHandler();
         }
 
         /// <summary>
         /// 执行打开或关闭socket操作
         /// </summary>
         /// <param name="objParameter"></param>
-        private void ExecuteOpenCloseSocket(object objParameter=null)
+        private void ExecuteOpenCloseSocket(object objParameter = null)
         {
             this._modelViewModel.OpenCloseSocketHandler();
         }
@@ -121,9 +136,14 @@ namespace SprayTeaching.ViewModel
             this._modelViewModel.CloseAllResourceHandler();
         }
 
-        private void ExecuteSocketSendData(object objParameter=null)
+        private void ExecuteSocketSendData(object objParameter = null)
         {
             this._modelViewModel.SocketSendDataHandler();
+        }
+
+        private void ExecuteSelectCommunicateWay(object objParameter = null)
+        {
+            this._modelViewModel.SelectCommunicateWayHandler(objParameter);
         }
 
         #endregion

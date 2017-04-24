@@ -12,6 +12,7 @@ namespace SprayTeaching.Model
 {
     public class DataModel : BaseNotifyPropertyChanged
     {
+        #region RoboDK相关参数
         #region  机器人关节坐标系下的6个角度值
         /// <summary>
         /// 机器人关节坐标系下的关节1角度
@@ -146,6 +147,19 @@ namespace SprayTeaching.Model
         {
             get { return _dblRobotRectangularW; }
             set { _dblRobotRectangularW = value; RaisePropertyChanged("RobotRectangularW"); }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// 机器人的运动速度
+        /// </summary>
+        private double _dblRobotMoveSpeed = 0.0;
+
+        public double RobotMoveSpeed
+        {
+            get { return _dblRobotMoveSpeed; }
+            set { _dblRobotMoveSpeed = value; RaisePropertyChanged("RobotMoveSpeed"); }
         }
 
         #endregion
@@ -318,7 +332,7 @@ namespace SprayTeaching.Model
 
         #region 网络通信
         /// <summary>
-        /// 网络通讯，socket的IP地址
+        /// 网络通信，socket的IP地址
         /// </summary>
         private string _strSocketIPAddress = "10.8.193.177";
 
@@ -329,7 +343,7 @@ namespace SprayTeaching.Model
         }
 
         /// <summary>
-        /// 网络通讯，socket的端口号
+        /// 网络通信，socket的端口号
         /// </summary>
         private int _strSocketPortNum = 12000;
 
@@ -339,6 +353,9 @@ namespace SprayTeaching.Model
             set { _strSocketPortNum = value; RaisePropertyChanged("SocketPortNum"); }
         }
 
+        /// <summary>
+        /// 网络通信，socket通断标识符
+        /// </summary>
         private bool _bolSocketIsConnected = false;
 
         public bool SocketIsConnected
@@ -347,6 +364,9 @@ namespace SprayTeaching.Model
             set { _bolSocketIsConnected = value; RaisePropertyChanged("SocketIsConnected"); }
         }
 
+        /// <summary>
+        /// 网络通信，socket通断标识图片
+        /// </summary>
         private string _strSocketIsConnectedImage = MyConstString.IMG_SOCKET_DISCONNECT;
 
         public string SocketIsConnectedImage

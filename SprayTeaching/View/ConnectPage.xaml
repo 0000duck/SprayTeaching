@@ -14,23 +14,25 @@
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <DockPanel>
-                <GroupBox Header="通信方式" DockPanel.Dock="Left" HorizontalAlignment="Left" Margin="5">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <RadioButton GroupName="rbCommunicateWay" Content="串口方式" Margin="5" Tag="SerialPortWay" Click="RadioButton_Click"
-                             IsChecked="{Binding ModelViewModel.MainDataModel.CommunicateHardwareWay, Converter={StaticResource RadioConverter},ConverterParameter=1, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
-                        <RadioButton GroupName="rbCommunicateWay" Content="Wifi方式" Margin="5" Tag="WifiWay" Click="RadioButton_Click"
-                             IsChecked="{Binding ModelViewModel.MainDataModel.CommunicateHardwareWay, Converter={StaticResource RadioConverter},ConverterParameter=2, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+                <GroupBox Header="通信方式" DockPanel.Dock="Left" HorizontalAlignment="Left"  Margin="5">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                        <RadioButton GroupName="rbCommunicateWay" Content="串口方式" Margin="10,5,10,5" Tag="SerialPortWay" Click="RadioButton_Click"
+                             IsChecked="{Binding ModelViewModel.MainDataModel.CommunicateHardwareWay, Converter={StaticResource RadioConverter},ConverterParameter=1, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                     Command="{Binding SelectCommunicateWayCommand}" CommandParameter="SerialPortWay"/>
+                        <RadioButton GroupName="rbCommunicateWay" Content="Wifi方式" Margin="10,5,10,5" Tag="WifiWay" Click="RadioButton_Click"
+                             IsChecked="{Binding ModelViewModel.MainDataModel.CommunicateHardwareWay, Converter={StaticResource RadioConverter},ConverterParameter=2, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                     Command="{Binding SelectCommunicateWayCommand}" CommandParameter="WifiWay"/>
                     </StackPanel>
                 </GroupBox>
-                <GroupBox Header="状态" Margin="5">
+                <!--<GroupBox Header="状态" Margin="5">
 
-                </GroupBox>
+                </GroupBox>-->
             </DockPanel>
         </Grid>
         <Grid Grid.Row="1" x:Name="gridCommunicate">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="0"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
@@ -70,8 +72,8 @@
                                   SelectedItem="{Binding ModelViewModel.MainDataModel.SerialPortStopBit,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
 
                         <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Horizontal" Margin="5" VerticalAlignment="Bottom">
-                            <TextBlock Text="通断:" VerticalAlignment="Center"/>
-                            <Image Source="{Binding ModelViewModel.MainDataModel.SerialPortIsOpenedImage}" Stretch="None" VerticalAlignment="Center"/>
+                            <TextBlock Text="通断:" VerticalAlignment="Center" Margin="5"/>
+                            <Image Source="{Binding ModelViewModel.MainDataModel.SerialPortIsOpenedImage}" Margin="1" Stretch="None" VerticalAlignment="Center"/>
                         </StackPanel>
                         <StackPanel Grid.Row="5" Grid.Column="1"  VerticalAlignment="Bottom" Orientation="Vertical" Margin="5">
                             <CheckBox Grid.Row="5" Grid.Column="1" Style="{StaticResource MyCheckBox}" Content="串口："  
@@ -97,14 +99,15 @@
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="IP地址：" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
-                        <TextBox Grid.Row="0" Grid.Column="1" Width="110" Text="{Binding ModelViewModel.MainDataModel.SocketIPAddress,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                        <TextBox Grid.Row="0" Grid.Column="1" Width="100" Text="{Binding ModelViewModel.MainDataModel.SocketIPAddress,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
                                  IsEnabled="{Binding ElementName=chkSocket,Path=IsChecked,Converter={StaticResource NegativeConverter}}" Margin="3" Padding="2" VerticalAlignment="Center"></TextBox>
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="端口号：" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
-                        <TextBox Grid.Row="1" Grid.Column="1" Width="110" Text="{Binding ModelViewModel.MainDataModel.SocketPortNum,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                        <TextBox Grid.Row="1" Grid.Column="1" Width="100" Text="{Binding ModelViewModel.MainDataModel.SocketPortNum,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
                                  IsEnabled="{Binding ElementName=chkSocket,Path=IsChecked,Converter={StaticResource NegativeConverter}}" Margin="3" Padding="2" VerticalAlignment="Center"></TextBox>
                         <StackPanel Grid.Row="3" Grid.Column="0" Margin="5" VerticalAlignment="Bottom" Orientation="Horizontal">
-                            <TextBlock Text="通断:" VerticalAlignment="Center"/>
-                            <Image Source="{Binding ModelViewModel.MainDataModel.SocketIsConnectedImage,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Stretch="None" VerticalAlignment="Center"/>
+                            <TextBlock Text="通断:" VerticalAlignment="Center" Margin="5"/>
+                            <Image Source="{Binding ModelViewModel.MainDataModel.SocketIsConnectedImage,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" 
+                                   Margin="1" Stretch="None" VerticalAlignment="Center"/>
                         </StackPanel>
                         <CheckBox Grid.Row="3" Grid.Column="1" x:Name="chkSocket" Style="{StaticResource MyCheckBox}" Content="网络：" Margin="5" VerticalAlignment="Bottom" 
                                   Command="{Binding OpenCloseSocketCommand}" IsChecked="{Binding ModelViewModel.MainDataModel.SocketIsConnected,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"

@@ -8,7 +8,7 @@ namespace SprayTeaching.BaseClassLib
     // 公共委托事件
     public delegate void DataReceivedEventHandler(string strDataReceive);        // 对接收的数据进行处理
     public delegate void UpdateLogContentEventHandler(string strParameter);      // 更新日志内容的delegate变量声明    
-    public delegate void UpdateRobotParameterEventHandler(double[] dblParameter1, double[] dblParameter2);  // 更新机器人参数的delegate变量声明  
+    public delegate void UpdateRobotParameterEventHandler(Dictionary<string, object> dblParameter);  // 更新机器人参数的delegate变量声明  
     public delegate void UpdateSocketIsConnectedEventHandler(bool bolParameter);    // 更新socket通信是否连接
     public delegate void UpdateSerialPortIsOpenedEventHandler(bool bolParameter);   // 更新串口是否打开
 

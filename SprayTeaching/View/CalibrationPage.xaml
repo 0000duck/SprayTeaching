@@ -8,6 +8,145 @@
 	Title="CalibrationPage">
 
     <Grid>
-        <TextBlock Text="Calibration" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBlock>
+        <TabControl TabStripPlacement="Top" Margin="5">
+            <TabItem Header="原点标定">
+                <Grid >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                            <!--<RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>-->
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
+                            <TextBlock Text="关节角度1:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
+                            <TextBlock Text="关节角度2:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
+                            <TextBlock Text="关节角度3:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                        </StackPanel>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                            <TextBlock Text="关节角度4:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                            <TextBlock Text="关节角度5:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                            <TextBlock Text="关节角度6:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Grid.Row="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Row="0" Grid.Column="0" Content="1轴归原点" Margin="5" Padding="2"/>
+                        <Button Grid.Row="0" Grid.Column="1" Content="正向" Margin="5" Padding="2"/>
+                        <Button Grid.Row="1" Grid.Column="0" Content="2轴归原点" Margin="5" Padding="2"/>
+                        <Button Grid.Row="1" Grid.Column="1" Content="反向" Margin="5" Padding="2"/>
+                        <Button Grid.Row="2" Grid.Column="0" Content="3轴归原点" Margin="5" Padding="2"/>
+                        <Button Grid.Row="2" Grid.Column="1" Content="正向" Margin="5" Padding="2"/>
+                        <Button Grid.Row="3" Grid.Column="0" Content="4轴归原点" Margin="5" Padding="2"/>
+                        <Button Grid.Row="3" Grid.Column="1" Content="正向" Margin="5" Padding="2"/>
+                        <Button Grid.Row="4" Grid.Column="0" Content="5轴归原点" Margin="5" Padding="2"/>
+                        <Button Grid.Row="4" Grid.Column="1" Content="反向" Margin="5" Padding="2"/>
+                        <Button Grid.Row="5" Grid.Column="0" Content="6轴归原点" Margin="5" Padding="2"/>
+                        <Button Grid.Row="5" Grid.Column="1" Content="正向" Margin="5" Padding="2"/>   
+                    </Grid>
+                    <Grid Grid.Row="3" Grid.Column="0" >
+                        <Button VerticalAlignment="Top" HorizontalAlignment="Left" Content="标定" Margin="5" Padding="2"/>
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="姿态标定">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                            <!--<RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>-->
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
+                            <TextBlock Text="关节角度1:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
+                            <TextBlock Text="关节角度2:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
+                            <TextBlock Text="关节角度3:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                        </StackPanel>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                            <TextBlock Text="关节角度4:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                            <TextBlock Text="关节角度5:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                            <TextBlock Text="关节角度6:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Grid.Row="1" Grid.Column="0" >
+                        <Grid.RowDefinitions>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Button Grid.Row="0" Content="记录关节臂角度" Margin="5" Padding="2" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                        <Button Grid.Row="1" Content="记录机器人角度" Margin="5" Padding="2" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                    </Grid>
+                    <Grid Grid.Row="2" >
+                        <Button Content="标定" Margin="5" Padding="2" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                    </Grid>                    
+                </Grid>                
+            </TabItem>
+        </TabControl>
     </Grid>
 </Page>

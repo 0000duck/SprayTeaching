@@ -46,7 +46,7 @@ namespace SprayTeaching.ViewModel
             this._mySerialPortMain = new MySerialPort();                                                                        // 串口的对象
             this._mySerialPortMain.DataReceived += new DataReceivedEventHandler(DataReceiveHandler);                            // 接收数据的处理
             this._mySerialPortMain.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);               // 串口写日志
-            this._mySerialPortMain.UpdateSerialPortIsOpened += new UpdateSerialPortIsOpenedEventHandler(UpdateSerialPortIsOpened);
+            this._mySerialPortMain.UpdateSerialPortIsOpened += new UpdateSerialPortIsOpenedEventHandler(UpdateSerialPortIsOpenedHandler);
 
             this._mySocketCom = new MySocketCom();                                                                              // socket通信的对象
             this._mySocketCom.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                    // socket写日志
@@ -67,7 +67,7 @@ namespace SprayTeaching.ViewModel
         /// <summary>
         /// 打开或关闭串口
         /// </summary>
-        public void OpenCloseSerialPort()
+        public void OpenCloseSerialPortHandler()
         {
             //更新串口参数
             this._mySerialPortMain.PortName = this._mainDataModel.SerialPortName;
@@ -81,7 +81,7 @@ namespace SprayTeaching.ViewModel
             //string strSerialPortIsOpenedImage = string.Empty;
 
             //// 这么做的原因是由于“属性或索引器不得作为 out 或 ref 参数传递”
-            //this._mySerialPortMain.OpenCloseSerialPort(ref bolSerialPortIsOpened, ref strSerialPortIsOpenedImage);      
+            //this._mySerialPortMain.OpenCloseSerialPortHandler(ref bolSerialPortIsOpened, ref strSerialPortIsOpenedImage);      
 
             //// 更新串口的参数
             //this._mainDataModel.SerialPortIsOpened=bolSerialPortIsOpened;
@@ -91,7 +91,11 @@ namespace SprayTeaching.ViewModel
             this._mySerialPortMain.OpenCloseSerialPort(bolSerialPortIsOpened);
         }
 
-        private void UpdateSerialPortIsOpened(bool bolIsOpened)
+        /// <summary>
+        /// 更新串口的通断状态
+        /// </summary>
+        /// <param name="bolIsOpened">是否连接，true为连接，false为断开</param>
+        private void UpdateSerialPortIsOpenedHandler(bool bolIsOpened)
         {
             if (bolIsOpened)
                 this._mainDataModel.SerialPortIsOpenedImage = MyConstString.IMG_SERIAL_PORT_CONNECT;
@@ -105,6 +109,9 @@ namespace SprayTeaching.ViewModel
 
         #region Scoket相关的方法
 
+        /// <summary>
+        /// 打开或者关闭socket事件处理
+        /// </summary>
         public void OpenCloseSocketHandler()
         {
             this._mySocketCom.SocketIPAddress = this._mainDataModel.SocketIPAddress;
@@ -121,6 +128,10 @@ namespace SprayTeaching.ViewModel
             this._mySocketCom.OpenCloseSocket(bolSocketIsConnected);
         }
 
+        /// <summary>
+        /// 更新socket的连接状态事件处理
+        /// </summary>
+        /// <param name="bolIsConnected"></param>
         private void UpdateSocketIsConnectedHandler(bool bolIsConnected)
         {
             if (bolIsConnected)
@@ -131,6 +142,9 @@ namespace SprayTeaching.ViewModel
             this._mainDataModel.SocketIsConnected = bolIsConnected;
         }
 
+        /// <summary>
+        /// socket发送数据事件处理
+        /// </summary>
         public void SocketSendDataHandler()
         {
             this._mySocketCom.SendDataHandler();
@@ -157,38 +171,73 @@ namespace SprayTeaching.ViewModel
         /// 更新机器人的参数
         /// </summary>
         /// <param name="dblJoints">6个关节角度</param>
-        private void UpdateRobotParameterHandler(double[] dblJoints, double[] dblPoses)
+        private void UpdateRobotParameterHandler(Dictionary<string, object> dicData)
         {
-            this.UpdateRobotJoints(dblJoints);
-            this.UpdateRobotPoses(dblPoses);
+            this.UpdateRobotJoints(dicData["RobotJoint1"], dicData["RobotJoint2"], dicData["RobotJoint3"], dicData["RobotJoint4"], dicData["RobotJoint5"],dicData["RobotJoint6"]);
+            this.UpdateRobotPoses(dicData["RobotPoseX"], dicData["RobotPoseY"], dicData["RobotPoseZ"], dicData["RobotPoseU"], dicData["RobotPoseV"], dicData["RobotPoseW"]);
+            this.UpdateRobotMoveSpeed(dicData["RobotMoveSpeed"]);
         }
 
         /// <summary>
         /// 更新机器人关节角度
         /// </summary>
-        /// <param name="dblJoints">6个关节角度</param>
-        private void UpdateRobotJoints(double[] dblJoints)
+        /// <param name="objJoint1">关节1</param>
+        /// <param name="objJoint2">关节2</param>
+        /// <param name="objJoint3">关节3</param>
+        /// <param name="objJoint4">关节4</param>
+        /// <param name="objJoint5">关节5</param>
+        /// <param name="objJoint6">关节6</param>
+        private void UpdateRobotJoints(object objJoint1, object objJoint2, object objJoint3, object objJoint4, object objJoint5, object objJoint6)
         {
-            this._mainDataModel.RobotJoint1 = Math.Round(dblJoints[0], 3);
-            this._mainDataModel.RobotJoint2 = Math.Round(dblJoints[1], 3);
-            this._mainDataModel.RobotJoint3 = Math.Round(dblJoints[2], 3);
-            this._mainDataModel.RobotJoint4 = Math.Round(dblJoints[3], 3);
-            this._mainDataModel.RobotJoint5 = Math.Round(dblJoints[4], 3);
-            this._mainDataModel.RobotJoint6 = Math.Round(dblJoints[5], 3);
+            double dblJoint1 = (double)objJoint1;
+            double dblJoint2 = (double)objJoint2;
+            double dblJoint3 = (double)objJoint3;
+            double dblJoint4 = (double)objJoint4;
+            double dblJoint5 = (double)objJoint5;
+            double dblJoint6 = (double)objJoint6;
+
+            this._mainDataModel.RobotJoint1 = Math.Round(dblJoint1, 3);
+            this._mainDataModel.RobotJoint2 = Math.Round(dblJoint2, 3);
+            this._mainDataModel.RobotJoint3 = Math.Round(dblJoint3, 3);
+            this._mainDataModel.RobotJoint4 = Math.Round(dblJoint4, 3);
+            this._mainDataModel.RobotJoint5 = Math.Round(dblJoint5, 3);
+            this._mainDataModel.RobotJoint6 = Math.Round(dblJoint6, 3);
         }
 
         /// <summary>
         /// 更新机器人6个直角坐标系的值
         /// </summary>
-        /// <param name="dblPoses"></param>
-        private void UpdateRobotPoses(double[] dblPoses)
+        /// <param name="objPoseX">X轴</param>
+        /// <param name="objPoseY">Y轴</param>
+        /// <param name="objPoseZ">Z轴</param>
+        /// <param name="objPoseU">U轴</param>
+        /// <param name="objPoseV">V轴</param>
+        /// <param name="objPoseW">W轴</param>
+        private void UpdateRobotPoses(object objPoseX, object objPoseY, object objPoseZ, object objPoseU, object objPoseV, object objPoseW)
         {
-            this._mainDataModel.RobotRectangularX = Math.Round(dblPoses[0], 3);
-            this._mainDataModel.RobotRectangularY = Math.Round(dblPoses[1], 3);
-            this._mainDataModel.RobotRectangularZ = Math.Round(dblPoses[2], 3);
-            this._mainDataModel.RobotRectangularU = Math.Round(dblPoses[3], 3);
-            this._mainDataModel.RobotRectangularV = Math.Round(dblPoses[4], 3);
-            this._mainDataModel.RobotRectangularW = Math.Round(dblPoses[5], 3);
+            double dblPoseX = (double)objPoseX;
+            double dblPoseY = (double)objPoseY;
+            double dblPoseZ = (double)objPoseZ;
+            double dblPoseU = (double)objPoseU;
+            double dblPoseV = (double)objPoseV;
+            double dblPoseW = (double)objPoseW;
+
+            this._mainDataModel.RobotRectangularX = Math.Round(dblPoseX, 3);
+            this._mainDataModel.RobotRectangularY = Math.Round(dblPoseY, 3);
+            this._mainDataModel.RobotRectangularZ = Math.Round(dblPoseZ, 3);
+            this._mainDataModel.RobotRectangularU = Math.Round(dblPoseU, 3);
+            this._mainDataModel.RobotRectangularV = Math.Round(dblPoseV, 3);
+            this._mainDataModel.RobotRectangularW = Math.Round(dblPoseW, 3);
+        }
+
+        /// <summary>
+        /// 机器人的运动速度
+        /// </summary>
+        /// <param name="dblMoveSpeed">速度</param>
+        private void UpdateRobotMoveSpeed(object objMoveSpeed)
+        {
+            double dblMoveSpeed = (double)objMoveSpeed;
+            this._mainDataModel.RobotMoveSpeed = dblMoveSpeed;
         }
 
         #endregion
@@ -231,6 +280,24 @@ namespace SprayTeaching.ViewModel
 
         }
         #endregion
+
+        public void SelectCommunicateWayHandler(object obj)
+        {
+            string strWay = obj as string;
+            switch(strWay)
+            {
+                case "SerialPortWay":
+                    if (this._mainDataModel.SocketIsConnected)
+                        this._mySocketCom.CloseSocket();
+                    this.UpdateLogContentHandler("选择串口方式通信.");
+                    break;
+                case "WifiWay":
+                    if (this._mainDataModel.SerialPortIsOpened)
+                        this._mySerialPortMain.ClosePort();
+                    this.UpdateLogContentHandler("选择Wifi方式通信.");
+                    break;
+            }
+        }
 
         #endregion
     }

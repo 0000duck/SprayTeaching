@@ -117,7 +117,7 @@ namespace SprayTeaching.MyAllClass
             else
                 this.CloseSocket();
 
-            this.UpdateSocketIsConnected(this.IsSocketConnected());
+            
         }
 
         /// <summary>
@@ -175,7 +175,8 @@ namespace SprayTeaching.MyAllClass
             try
             {
                 this.Connect();
-                this.WriteLog(string.Format("Wifi连接成功,主机为{0}:{1}.", this._strSocketIPAddress, this._intSocketPortNum));
+                this.UpdateSocketIsConnected(this.IsSocketConnected());
+                this.WriteLog(string.Format("Wifi连接成功,主机为{0}:{1}.", this._strSocketIPAddress, this._intSocketPortNum));                
             }
             catch (Exception e)
             {
@@ -193,6 +194,7 @@ namespace SprayTeaching.MyAllClass
                 this._sktCommunicate.Close();
                 this._sktCommunicate = null;
             }
+            this.UpdateSocketIsConnected(this.IsSocketConnected());
             this.WriteLog("Wifi已关闭.");
         }
 

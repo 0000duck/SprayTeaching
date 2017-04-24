@@ -58,7 +58,7 @@ namespace SprayTeaching.MyAllClass
             }
             catch
             {
-                this.WriteLog("RoboDK软件无法启动，可能路径有误." + "\r\n重新设置正确路径，然后重启.");
+                this.WriteLog("RoboDK软件无法启动，可能路径有误，" + "重新设置正确路径，然后重启.");
                 return;
             }
 
@@ -132,7 +132,7 @@ namespace SprayTeaching.MyAllClass
                 if (this.CheckRobot())
                 {
                     // 打开了RoboDK和选中了机器人
-                    this.GetRobotParameter();
+                    this.GetRobotParameters();
                     Thread.Sleep(200);
                 }
                 else
@@ -147,7 +147,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 获取机器人相关的参数
         /// </summary>
-        private void GetRobotParameter()
+        private void GetRobotParameters()
         {
             if (!this.CheckRobot()) { return; }
             try
@@ -159,14 +159,54 @@ namespace SprayTeaching.MyAllClass
                 Mat locMatPose = this._rdkItemRobot.SolveFK(dblJoints);
                 double[] dblPoses = locMatPose.ToXYZRPW();
 
+                // RoboDK中机器人的运动速度
+                double dblRobotMoveSpeed = this._rdkPlatform.SimulationSpeed();
+
+                // 机器人参数整合在字典中，一起传出去
+                Dictionary<string, object> dicData = RobotParametersIntegrity(dblJoints, dblPoses, dblRobotMoveSpeed);
+
                 // 更新机器人参数
                 if (this.UpdateRobotParameter != null)
-                    this.UpdateRobotParameter(dblJoints, dblPoses);
+                    this.UpdateRobotParameter(dicData);
             }
             catch
             {
-                this.WriteLog("选中的机器人模型无效或者不存在.");
+                this._rdkItemRobot = null; // 一旦在传输的过程中出现问题，都需要重新选择机器人模型，都将机器人对象置为null
+                this.WriteLog("选中的机器人模型无效或者不存在，请重新选择.");
             }
+        }
+
+        /// <summary>
+        /// 将关于机器人的所有参数都整合在一起，然后在界面中显示
+        /// </summary>
+        /// <param name="dblJoints">关节角度</param>
+        /// <param name="dblPoses">姿态坐标</param>
+        /// <param name="dblMoveSpeed">机器人运动速度</param>
+        /// <returns>所有数据整合到一起的字典</returns>
+        private Dictionary<string, object> RobotParametersIntegrity(double[] dblJoints, double[] dblPoses, double dblMoveSpeed)
+        {
+            Dictionary<string, object> dic = new Dictionary<string, object>();
+
+            // 6个关节坐标系的角度
+            dic.Add("RobotJoint1", dblJoints[0]);
+            dic.Add("RobotJoint2", dblJoints[1]);
+            dic.Add("RobotJoint3", dblJoints[2]);
+            dic.Add("RobotJoint4", dblJoints[3]);
+            dic.Add("RobotJoint5", dblJoints[4]);
+            dic.Add("RobotJoint6", dblJoints[5]);
+
+            // 6个直角坐标系的坐标
+            dic.Add("RobotPoseX", dblPoses[0]);
+            dic.Add("RobotPoseY", dblPoses[1]);
+            dic.Add("RobotPoseZ", dblPoses[2]);
+            dic.Add("RobotPoseU", dblPoses[3]);
+            dic.Add("RobotPoseV", dblPoses[4]);
+            dic.Add("RobotPoseW", dblPoses[5]);
+
+            // 机器人的运动速度
+            dic.Add("RobotMoveSpeed", dblMoveSpeed);
+
+            return dic;
         }
 
         #endregion

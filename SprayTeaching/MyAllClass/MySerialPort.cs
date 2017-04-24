@@ -8,7 +8,7 @@ using SprayTeaching.BaseClassLib;
 
 namespace SprayTeaching.MyAllClass
 {
-    
+
     public class MySerialPort
     {
         #region 内部私有变量
@@ -191,7 +191,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 打开或关闭串口
         /// </summary>
-        public void OpenCloseSerialPort(ref bool bolIsOpen,ref string strIsOpenImage)
+        public void OpenCloseSerialPort(ref bool bolIsOpen, ref string strIsOpenImage)
         {
             try
             {
@@ -221,24 +221,14 @@ namespace SprayTeaching.MyAllClass
         /// </summary>
         public void OpenCloseSerialPort(bool bolIsOpen)
         {
-            try
+            //若串口是打开着的，则关闭串口；若串口是关闭着的，则打开串口
+            if (!bolIsOpen)
             {
-                //若串口是打开着的，则关闭串口；若串口是关闭着的，则打开串口
-                if (!bolIsOpen)
-                {
-                    this.OpenPort();
-                }
-                else
-                {
-                    this.ClosePort();
-                }
-
-                UpdateConnectState(this._comPort.IsOpen);   // 更新串口的连接状态
+                this.OpenPort();
             }
-            catch (Exception e)
+            else
             {
-                //throw new Exception(e.Message);
-                this.WriteLog(e.Message);
+                this.ClosePort();
             }
         }
 
@@ -258,21 +248,24 @@ namespace SprayTeaching.MyAllClass
             try
             {
                 _comPort.Open();
-                this.WriteLog(string.Format("串口开启成功，串口号为{0}.", this._portName));
+                this.WriteLog(string.Format("串口开启成功,串口号为{0}.", this._portName));
+                UpdateConnectState(this._comPort.IsOpen);           // 更新串口的连接状态
             }
             catch (Exception e)
             {
-                throw new Exception("unable open serial port" + e.Message);
+                this.WriteLog("无法开启串口" + e.Message);
+                //throw new Exception("unable open serial port" + e.Message);
             }
         }
 
         /// <summary>
         /// 关闭端口
         /// </summary>
-        private void ClosePort()
+        public void ClosePort()
         {
-            if (_comPort.IsOpen) _comPort.Close();
+            if (_comPort.IsOpen) this._comPort.Close();
             this.WriteLog("串口已关闭.");
+            UpdateConnectState(this._comPort.IsOpen);               // 更新串口的连接状态
         }
 
         /// <summary>
