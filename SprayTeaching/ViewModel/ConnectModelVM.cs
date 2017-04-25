@@ -76,17 +76,6 @@ namespace SprayTeaching.ViewModel
             this._mySerialPortMain.StopBit = (StopBits)this._mainDataModel.SerialPortStopBit;
             this._mySerialPortMain.DataBit = (SerialPortDataBits)this._mainDataModel.SerialPortDataBit;
 
-            //// 临时存储串口是否打开，串口的通断图
-            //bool bolSerialPortIsOpened = false;
-            //string strSerialPortIsOpenedImage = string.Empty;
-
-            //// 这么做的原因是由于“属性或索引器不得作为 out 或 ref 参数传递”
-            //this._mySerialPortMain.OpenCloseSerialPortHandler(ref bolSerialPortIsOpened, ref strSerialPortIsOpenedImage);      
-
-            //// 更新串口的参数
-            //this._mainDataModel.SerialPortIsOpened=bolSerialPortIsOpened;
-            //this._mainDataModel.SerialPortIsOpenedImage=strSerialPortIsOpenedImage;
-
             bool bolSerialPortIsOpened = this._mainDataModel.SerialPortIsOpened;
             this._mySerialPortMain.OpenCloseSerialPort(bolSerialPortIsOpened);
         }
@@ -167,6 +156,7 @@ namespace SprayTeaching.ViewModel
 
         #region  RoboDK相关的方法
 
+        #region RoboDK接收机器人参数部分
         /// <summary>
         /// 更新机器人的参数
         /// </summary>
@@ -238,6 +228,14 @@ namespace SprayTeaching.ViewModel
         {
             double dblMoveSpeed = (double)objMoveSpeed;
             this._mainDataModel.RobotMoveSpeed = dblMoveSpeed;
+        }
+        #endregion
+
+        public void SelectRobotModelHandler(object objParameter)
+        {
+            if (objParameter == null)
+                return;
+            this._myRoboDKExtension.SelectRobotModelHandler(objParameter);
         }
 
         #endregion

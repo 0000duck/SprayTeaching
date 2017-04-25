@@ -183,7 +183,7 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="bbb" Property="Background" Value="Gray" />
-                            <Setter TargetName="bbb" Property="Padding" Value="3" />
+                            <Setter TargetName="bbb" Property="Padding" Value="0" />
                         </Trigger>
                         <Trigger Property="TabStripPlacement" Value="Left">
                             <Setter Property="LayoutTransform">

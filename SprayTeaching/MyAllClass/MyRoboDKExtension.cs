@@ -8,7 +8,7 @@ using SprayTeaching.BaseClassLib;
 
 namespace SprayTeaching.MyAllClass
 {
-        
+
 
     public class MyRoboDKExtension
     {
@@ -20,7 +20,9 @@ namespace SprayTeaching.MyAllClass
         private const bool BLOCKING_MOVE = false;
 
         private Thread _thrdUpdateRobotParameter;                               // 更新机器人参数的线程
-        private bool _bolIsThreadAlive = true;                                  // 控制线程活着
+        private Object _thisLock = new object();                                // 用于锁定修改部分的数据
+        private bool _bolIsThreadAlive = true;                                  // 控制线程活着，true为活着，false为死亡
+        private bool _bolIsThreadSuspend = false;                               // 控制线程暂停，true为暂停，false为不暂停
 
         #endregion
 
@@ -111,7 +113,7 @@ namespace SprayTeaching.MyAllClass
             {
                 this._bolIsThreadAlive = false;         // 关闭线程
                 Thread.Sleep(150);                      // 等待线程关闭
-                this._thrdUpdateRobotParameter.Abort();                
+                this._thrdUpdateRobotParameter.Abort();
                 this._thrdUpdateRobotParameter = null;
             }
         }
@@ -125,22 +127,55 @@ namespace SprayTeaching.MyAllClass
         private void ThreadUpdatRobotParameterHandler()
         {
             this.WriteLog("已开启RoboDK接收机器人参数线程.");
-            this.SelectRobot();                 //开始的时候先选取机器人对象
+            this.SelectRobotItem();                 //开始的时候先选取机器人对象
             while (this._bolIsThreadAlive)
             {
+                // 线程是否暂停，暂停后后面不执行
+                if (this._bolIsThreadSuspend)
+                {
+                    //Thread.Sleep(50);
+                    continue;
+                }
+
                 // 检查是否连接，是否选中机器人
                 if (this.CheckRobot())
                 {
                     // 打开了RoboDK和选中了机器人
                     this.GetRobotParameters();
-                    Thread.Sleep(200);
+                    Thread.Sleep(100);
                 }
                 else
                 {
                     // 没有选中机器人或者没有打开，则打开并选中                    
                     Thread.Sleep(10000);
-                    this.SelectRobot();
+                    this.SelectRobotItem();
                 }
+            }
+        }
+
+        /// <summary>
+        /// 暂停更新机器人相关参数线程
+        /// </summary>
+        private void SuspendThreadUpdateRobotParameter()
+        {
+            lock (this._thisLock)
+            {
+                if (this._bolIsThreadAlive)
+                    this._bolIsThreadSuspend = true;
+            }
+            // 在切换选择机器人的时候会出现异常，因此暂时采用延迟执行后续内容，防止后续操作和线程中的操作冲突，猜测是这个问题
+            Thread.Sleep(100);
+        }
+
+        /// <summary>
+        /// 唤醒更新机器人相关参数线程
+        /// </summary>
+        private void ResumeThreadUpdateRobotParameter()
+        {
+            lock (this._thisLock)
+            {
+                if (this._bolIsThreadAlive)
+                    this._bolIsThreadSuspend = false;
             }
         }
 
@@ -248,10 +283,10 @@ namespace SprayTeaching.MyAllClass
         }
 
         /// <summary>
-        /// 选中机器人
+        /// 选中机器人对象
         /// </summary>
         /// <returns>是否选中机器人</returns>
-        private bool SelectRobot()
+        private bool SelectRobotItem()
         {
             if (!this.CheckRoboDK()) { return false; }
             this._rdkItemRobot = this._rdkPlatform.ItemUserPick("Select a robot", RoboDK.ITEM_TYPE_ROBOT); // select robot among available robots
@@ -282,6 +317,190 @@ namespace SprayTeaching.MyAllClass
             }
         }
         #endregion
+
+        /// <summary>
+        /// 选择机器人模型的处理事件
+        /// </summary>
+        /// <param name="objParameter">机器人对应的编号</param>
+        public void SelectRobotModelHandler(object objParameter)
+        {
+            //Thread thrd = new Thread(ThreadSelectRobotModel);
+            //thrd.IsBackground = true;
+            //thrd.Name = "SelectRobotModel";
+            //thrd.Start(objParameter);
+            // 判断是否可以执行选择机器人模型的操作
+            if (!this.IsEnableReselectRobotModel(objParameter))
+                return;
+
+            string strFileName = this.GetRobotModelFileName(objParameter);  // 获取对应机器人的文件名
+            this.SuspendThreadUpdateRobotParameter();                       // 线程暂停                                          
+            this.DeleteAllRobotModel();                                     // 删除工作站中的所有机器人模型 
+            this.LoadRobotModel(strFileName);                               // 载入机器人模型   
+            this.SelectRobotItem();                                         // 选中机器人对象           
+            this.ResumeThreadUpdateRobotParameter();                        // 线程继续执行
+        }
+
+        //private void ThreadSelectRobotModel(object objParameter)
+        //{
+        //    // 判断是否可以执行选择机器人模型的操作
+        //    if (!this.IsEnableReselectRobotModel(objParameter))
+        //        return;
+        //    lock (this._thisLock)
+        //    {
+        //        string strFileName = this.GetRobotModelFileName(objParameter);  // 获取对应机器人的文件名
+        //        this.SuspendThreadUpdateRobotParameter();                       // 线程暂停                                          
+        //        this.DeleteAllRobotModel();                                     // 删除工作站中的所有机器人模型 
+        //        Thread.Sleep(100);
+        //        this.LoadRobotModel(strFileName);                               // 载入机器人模型   
+        //        this.SelectRobotItem();                                         // 选中机器人对象           
+        //        this.ResumeThreadUpdateRobotParameter();                        // 线程继续执行
+        //    }
+        //}
+
+        /// <summary>
+        /// 是否可以重新选择机器人对象，true为可以，false为不可以
+        /// </summary>
+        /// <param name="objParameter">选中的机器人编号</param>
+        /// <returns></returns>
+        private bool IsEnableReselectRobotModel(object objParameter)
+        {
+            if (objParameter == null)
+                return false;
+            if (this._rdkItemRobot == null)
+                return true;
+            if (!this._rdkItemRobot.Valid())
+                return true;
+
+            // 避免重复载入相同的机器人模型
+            // 判断当前的机器人名字和选中的名字是否一致，一致则不需要重选，不一致则重选
+            string strName = this.GetRobotModelName(objParameter);
+            if (strName == this._rdkItemRobot.Name())
+                return false;       // 机器人名字一样              
+            else
+                return true;        // 机器人名字不一样
+        }
+
+        /// <summary>
+        /// 删除机器人模型
+        /// </summary>
+        private void DeleteAllRobotModel()
+        {
+            if (this._rdkItemRobot == null)
+                return;
+            //this._rdkItemRobot.Delete();
+            RoboDK.Item station = this._rdkPlatform.getItem("", RoboDK.ITEM_TYPE_STATION);
+            RoboDK.Item[] station_childs = station.Childs();
+            while (station_childs.Length > 0)
+            {
+                int sum = station_childs.Length;
+                for (int i = 0; i < sum; i++)
+                    station_childs[i].Delete();
+                station = this._rdkPlatform.getItem("", RoboDK.ITEM_TYPE_STATION);
+                station_childs = station.Childs();
+            }
+        }
+
+        /// <summary>
+        /// 关闭工作站
+        /// </summary>
+        private void CloseAllStations()
+        {
+            if (this._rdkPlatform == null)
+                return;
+            // get the first station available:
+            RoboDK.Item station = this._rdkPlatform.getItem("", RoboDK.ITEM_TYPE_STATION);
+            // check if the station has any items (object, robots, reference frames, ...)
+            RoboDK.Item[] station_childs = station.Childs();
+            while (station_childs.Length > 0)
+            {
+                this._rdkPlatform.CloseStation();
+                station = this._rdkPlatform.getItem("", RoboDK.ITEM_TYPE_STATION);
+                station_childs = station.Childs();
+            }
+        }
+
+        /// <summary>
+        /// 载入机器人模型
+        /// </summary>
+        /// <param name="strName">对应的文件名</param>
+        private void LoadRobotModel(string strFileName)
+        {
+            if (this._rdkPlatform == null)
+                return;
+            strFileName = System.IO.Path.GetFullPath(strFileName);
+            if (strFileName.EndsWith(".robot", StringComparison.InvariantCultureIgnoreCase))
+            {
+                try
+                {
+                    this._rdkPlatform.AddFile(strFileName);
+                }
+                catch (Exception e)
+                {
+                    this.WriteLog(e.Message);
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// 获取机器人的文件名，也是文件路径
+        /// </summary>
+        /// <param name="objParameter">机器人对应的编号</param>
+        /// <returns>机器人的文件名</returns>
+        private string GetRobotModelFileName(object objParameter)
+        {
+            string strNum = (string)objParameter;
+            string strFileName = string.Empty;
+            switch (strNum)
+            {
+                case "1":
+                    strFileName = MyConstString.ROBOTDK_ROBOT_FILE_NAME_ABB_IRB_1200_7_0_7;
+                    break;
+                case "2":
+                    strFileName = MyConstString.ROBOTDK_ROBOT_FILE_NAME_ABB_IRB_120_3_0_6;
+                    break;
+                case "3":
+                    strFileName = MyConstString.ROBOTDK_ROBOT_FILE_NAME_ABB_IRB_6700_155_2_85;
+                    break;
+                case "4":
+                    strFileName = MyConstString.ROBOTDK_ROBOT_FILE_NAME_UR10;
+                    break;
+                case "5":
+                    strFileName = MyConstString.ROBOTDK_ROBOT_FILE_NAME_UR3;
+                    break;
+            }
+            return strFileName;
+        }
+
+        /// <summary>
+        /// 获取机器人模型的名称
+        /// </summary>
+        /// <param name="objParameter">对应机器人的编号</param>
+        /// <returns>机器人的名称</returns>
+        private string GetRobotModelName(object objParameter)
+        {
+            string strNum = (string)objParameter;
+            string strName = string.Empty;
+            switch (strNum)
+            {
+                case "1":
+                    strName = MyConstString.ROBOTDK_ROBOT_NAME_ABB_IRB_1200_7_0_7;
+                    break;
+                case "2":
+                    strName = MyConstString.ROBOTDK_ROBOT_NAME_ABB_IRB_120_3_0_6;
+                    break;
+                case "3":
+                    strName = MyConstString.ROBOTDK_ROBOT_NAME_ABB_IRB_6700_155_2_85;
+                    break;
+                case "4":
+                    strName = MyConstString.ROBOTDK_ROBOT_NAME_UR10;
+                    break;
+                case "5":
+                    strName = MyConstString.ROBOTDK_ROBOT_NAME_UR3;
+                    break;
+            }
+            return strName;
+        }
 
         #endregion
     }
