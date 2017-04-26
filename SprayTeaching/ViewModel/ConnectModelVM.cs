@@ -1,4 +1,7 @@
-﻿using System;
+﻿//**************************************************************************************************//
+// 此处是软件核心，主要是用于数据更新
+//**************************************************************************************************//
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -46,12 +49,12 @@ namespace SprayTeaching.ViewModel
             this._mySerialPortMain = new MySerialPort();                                                                        // 串口的对象
             this._mySerialPortMain.DataReceived += new DataReceivedEventHandler(DataReceiveHandler);                            // 接收数据的处理
             this._mySerialPortMain.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);               // 串口写日志
-            this._mySerialPortMain.UpdateSerialPortIsOpened += new UpdateSerialPortIsOpenedEventHandler(UpdateSerialPortIsOpenedHandler);
+            this._mySerialPortMain.UpdateSerialPortIsOpened += new UpdateSerialPortIsOpenedEventHandler(UpdateSerialPortIsOpenedHandler);   // 更新串口通断状态信息
 
             this._mySocketCom = new MySocketCom();                                                                              // socket通信的对象
             this._mySocketCom.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                    // socket写日志
             this._mySocketCom.DataReceived += new DataReceivedEventHandler(DataReceiveHandler);                                 // 接收数据的处理
-            this._mySocketCom.UpdateSocketIsConnected += new UpdateSocketIsConnectedEventHandler(UpdateSocketIsConnectedHandler);
+            this._mySocketCom.UpdateSocketIsConnected += new UpdateSocketIsConnectedEventHandler(UpdateSocketIsConnectedHandler);           // 更新socket通断的状态信息
 
             this._myRoboDKExtension = new MyRoboDKExtension();                                                                  // RoboDK的对象
             this._myRoboDKExtension.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);              // RoboDK写日志
@@ -275,10 +278,10 @@ namespace SprayTeaching.ViewModel
             this._mySerialPortMain.Close();         // 关闭与串口相关的资源 
             this._mySocketCom.Close();              // 关闭与socket相关的资源
             this._myRoboDKExtension.Close();        // 关闭与RoboDK相关的资源
-
         }
         #endregion
 
+        #region 通信方式选择
         public void SelectCommunicateWayHandler(object obj)
         {
             string strWay = obj as string;
@@ -296,6 +299,7 @@ namespace SprayTeaching.ViewModel
                     break;
             }
         }
+        #endregion
 
         #endregion
     }

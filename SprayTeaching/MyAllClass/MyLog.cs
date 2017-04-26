@@ -66,11 +66,15 @@ namespace SprayTeaching.MyAllClass
         }
 
         /// <summary>
-        /// 关闭所有变量，使它们都invalidition
+        /// 
         /// </summary>
         private void CloseAllVariable()
         {
             this._thrdWriteLogIntoText = null;
+            this._autoEvent = null;
+            this._thisLock = null;
+            this._strFilePath = string.Empty;
+            this._queueTempStoreLogMessage.Clear();
         }
 
         /// <summary>

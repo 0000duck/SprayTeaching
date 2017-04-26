@@ -62,6 +62,7 @@
     </ApplicationDefinition>
     <Compile Include="BaseClassLib\MyLogMessage.cs" />
     <Compile Include="BaseClassLib\MyConverter.cs" />
+    <Compile Include="MyAllClass\MyDataMessage.cs" />
     <Compile Include="MyAllClass\MyLog.cs" />
     <Compile Include="MyAllClass\MyRoboDKExtension.cs" />
     <Compile Include="BaseClassLib\RoboDK.cs" />
@@ -111,7 +112,7 @@
     <Compile Include="BaseClassLib\MyCommandGeneric.cs" />
     <Compile Include="Model\DataModel.cs" />
     <Compile Include="MyAllClass\MyConfigFileINI.cs" />
-    <Compile Include="MyAllClass\MyEnum.cs" />
+    <Compile Include="BaseClassLib\MyEnum.cs" />
     <Compile Include="MyAllClass\MySerialPort.cs" />
     <Compile Include="ViewModel\ConnectModelVM.cs" />
     <Compile Include="ViewModel\ConnectViewVM.cs" />

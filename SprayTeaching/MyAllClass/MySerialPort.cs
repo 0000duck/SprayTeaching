@@ -186,6 +186,16 @@ namespace SprayTeaching.MyAllClass
         public void Close()
         {
             this.ClosePort();       // 关闭串口
+            this.CloseVariables();  // 关闭所有变量
+        }
+
+        /// <summary>
+        /// 关闭所有变量，使它们都invalidition
+        /// </summary>
+        private void CloseVariables()
+        {
+            this._comPort = null;
+            this._sbReceiveDataStorage = null;
         }
 
         /// <summary>

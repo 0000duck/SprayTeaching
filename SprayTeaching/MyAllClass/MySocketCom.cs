@@ -115,9 +115,7 @@ namespace SprayTeaching.MyAllClass
             if (!bolSocketIsConnected)
                 this.OpenSocket();
             else
-                this.CloseSocket();
-
-            
+                this.CloseSocket();            
         }
 
         /// <summary>
@@ -201,11 +199,22 @@ namespace SprayTeaching.MyAllClass
         #endregion
 
         /// <summary>
+        /// 关闭所有变量，使它们都invalidition
+        /// </summary>
+        private void CloseVariables()
+        {
+            this._sktCommunicate = null;
+            this._sbReceiveDataStorage = null;
+            this._lstBytReceiveData = null;
+        }
+
+        /// <summary>
         /// 关闭socket相关的所有资源
         /// </summary>
         public void Close()
         {
             this.CloseSocket();
+            this.CloseVariables();
         }
 
         #region 接收数据并处理相关方法

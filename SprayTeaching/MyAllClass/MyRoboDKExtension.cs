@@ -60,6 +60,7 @@ namespace SprayTeaching.MyAllClass
             }
             catch
             {
+                this._rdkPlatform = null;
                 this.WriteLog("RoboDK软件无法启动，可能路径有误，" + "重新设置正确路径，然后重启.");
                 return;
             }
@@ -102,6 +103,10 @@ namespace SprayTeaching.MyAllClass
             this._rdkItemRobot = null;
             this._rdkPlatform = null;
             this._thrdUpdateRobotParameter = null;
+            this._thisLock = null;
+
+            this._bolIsThreadAlive = false;
+            this._bolIsThreadSuspend = false;
         }
 
         /// <summary>
@@ -318,6 +323,7 @@ namespace SprayTeaching.MyAllClass
         }
         #endregion
 
+        #region 选择机器人模型
         /// <summary>
         /// 选择机器人模型的处理事件
         /// </summary>
@@ -365,11 +371,22 @@ namespace SprayTeaching.MyAllClass
         private bool IsEnableReselectRobotModel(object objParameter)
         {
             if (objParameter == null)
+            {
+                this.WriteLog("选择机器人模型传入参数有误.");
                 return false;
-            if (this._rdkItemRobot == null)
+            }                
+            if (this._rdkPlatform == null)
+            {
+                this.WriteLog("RoboDK尚未打开.");
+                return false;
+            }
+                
+            if ((this._rdkItemRobot == null)||(!this._rdkItemRobot.Valid()))
+            {
+                this.WriteLog("未选中机器人对象.");
                 return true;
-            if (!this._rdkItemRobot.Valid())
-                return true;
+            }
+                
 
             // 避免重复载入相同的机器人模型
             // 判断当前的机器人名字和选中的名字是否一致，一致则不需要重选，不一致则重选
@@ -501,6 +518,7 @@ namespace SprayTeaching.MyAllClass
             }
             return strName;
         }
+        #endregion
 
         #endregion
     }

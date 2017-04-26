@@ -12,6 +12,15 @@ namespace SprayTeaching.BaseClassLib
     public delegate void UpdateSocketIsConnectedEventHandler(bool bolParameter);    // 更新socket通信是否连接
     public delegate void UpdateSerialPortIsOpenedEventHandler(bool bolParameter);   // 更新串口是否打开
 
+    public delegate void UpdateMessageStateInformEventHandler(bool bolParameter);                   // 更新下位机发送上来的状态信息
+    public delegate void UpdateMessageAxisErrorEventHandler(int intParameter);                      // 更新下位机发送上来的哪个轴没有响应
+    public delegate void UpdateMessageAxisAddressEventHandler(double[]  dblParameter);              // 更新下位机发送上来的轴地址
+    public delegate void UpdateMessageAxisDataEventHandler(double[] dblParameter);                  // 更新下位机发送上来的各个轴数据
+    public delegate void UpdateMessageAxisModifiedIsSuccessEventHandler(int intParameter);          // 更新下位机发送上来的修改轴地址成功
+    public delegate void UpdateMessageSampleInformEventHandler(double dblPar1,double dblPar2);      // 更新下位机发送上来的采样频率和采样周期
+    public delegate void UpdateMessageSetFrequentIsSuccessed(bool bolParameter, double dblParameter); // 更新下位机发送上来的设置频率是否成功
+    
+
     public class MyLogMessage
     {
         public string LogTime { get; set; }
