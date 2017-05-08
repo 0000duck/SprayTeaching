@@ -167,6 +167,9 @@ namespace SprayTeaching.MyAllClass
         {
             bool bolIsConnected = false;
 
+            if (byteDataMessage[0] == 0xF0)
+                bolIsConnected = true;
+
             if (this.UpdateMcuIsConnected != null)
                 this.UpdateMcuIsConnected(bolIsConnected);
         }
@@ -178,6 +181,10 @@ namespace SprayTeaching.MyAllClass
         private void UpdateMcuIsReadyHandler(byte[] byteDataMessage)
         {
             bool bolIsReady = false;
+
+            if (byteDataMessage[1] == 0xF1)
+                bolIsReady = true;
+
             if (this.UpdateMcuIsReady != null)
                 this.UpdateMcuIsReady(bolIsReady);
         }
@@ -189,6 +196,10 @@ namespace SprayTeaching.MyAllClass
         private void UpdateSDIsReadedHandler(byte[] byteDataMessage)
         {
             bool bolIsReaded = false;
+
+            if (byteDataMessage[1] == 0xF2)
+                bolIsReaded = true;
+
             if (this.UpdateSDIsReaded != null)
                 this.UpdateSDIsReaded(bolIsReaded);
         }
@@ -200,6 +211,10 @@ namespace SprayTeaching.MyAllClass
         private void UpdateSampleIsStoppedHandler(byte[] byteDataMessage)
         {
             bool bolIsStopped = false;
+
+            if (byteDataMessage[0] == 0xF4)
+                bolIsStopped = true;
+
             if (this.UpdateSampleIsStopped != null)
                 this.UpdateSampleIsStopped(bolIsStopped);
         }
@@ -211,6 +226,12 @@ namespace SprayTeaching.MyAllClass
         private void UpdateLance1IsOpenedHandler(byte[] byteDataMessage)
         {
             bool bolIsOpened = false;
+
+            if (byteDataMessage[0] == 0xF5)
+                bolIsOpened = true;
+            else
+                bolIsOpened = false;
+
             if (this.UpdateLance1IsOpened != null)
                 this.UpdateSampleIsStopped(bolIsOpened);
         }
@@ -222,6 +243,10 @@ namespace SprayTeaching.MyAllClass
         private void UpdateMotorIsRanHandler(byte[] byteDataMessage)
         {
             bool bolIsRan = false;
+
+            if (byteDataMessage[0] == 0xF7)
+                bolIsRan = true;
+
             if (this.UpdateMotorIsRan != null)
                 this.UpdateMotorIsRan(bolIsRan);
         }
@@ -233,6 +258,12 @@ namespace SprayTeaching.MyAllClass
         private void UpdateLance2IsOpenedHandler(byte[] byteDataMessage)
         {
             bool bolIsOpened = false;
+
+            if (byteDataMessage[0] == 0xF8)
+                bolIsOpened = true;
+            else
+                bolIsOpened = false;
+
             if (this.UpdateLance2IsOpened != null)
                 this.UpdateLance2IsOpened(bolIsOpened);
         }
@@ -245,6 +276,10 @@ namespace SprayTeaching.MyAllClass
         {
             double dblSampleFrequent = 0.0;
             double dblSampleTime = 0.0;
+
+            dblSampleFrequent = byteDataMessage[1];
+            dblSampleTime = byteDataMessage[2];
+
             if (this.UpdateSampleInform != null)
                 this.UpdateSampleInform(dblSampleFrequent, dblSampleTime);
         }
@@ -256,6 +291,9 @@ namespace SprayTeaching.MyAllClass
         private void UpdateAxisErrorHandler(byte[] byteDataMessage)
         {
             int intAxisID = 0;
+
+            intAxisID = byteDataMessage[1];
+
             if (this.UpdateAxisError != null)
                 this.UpdateAxisError(intAxisID);
         }
@@ -267,6 +305,14 @@ namespace SprayTeaching.MyAllClass
         private void UpdateAxisAddressHandler(byte[] byteDataMessage)
         {
             double[] dblAxisAddress = new double[] { };
+
+            dblAxisAddress[0] = BitConverter.ToDouble(new byte[] { byteDataMessage[1], byteDataMessage[2] }, 0);
+            dblAxisAddress[1] = BitConverter.ToDouble(new byte[] { byteDataMessage[3], byteDataMessage[4] }, 0);
+            dblAxisAddress[2] = BitConverter.ToDouble(new byte[] { byteDataMessage[5], byteDataMessage[6] }, 0);
+            dblAxisAddress[3] = BitConverter.ToDouble(new byte[] { byteDataMessage[7], byteDataMessage[8] }, 0);
+            dblAxisAddress[4] = BitConverter.ToDouble(new byte[] { byteDataMessage[9], byteDataMessage[10] }, 0);
+            dblAxisAddress[5] = BitConverter.ToDouble(new byte[] { byteDataMessage[11], byteDataMessage[12] }, 0);
+
             if (this.UpdateAxisAddress != null)
                 this.UpdateAxisAddress(dblAxisAddress);
         }
