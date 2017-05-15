@@ -62,6 +62,7 @@
     </ApplicationDefinition>
     <Compile Include="BaseClassLib\MyLogMessage.cs" />
     <Compile Include="BaseClassLib\MyConverter.cs" />
+    <Compile Include="MyAllClass\MyCommunicate.cs" />
     <Compile Include="MyAllClass\MyDataMessage.cs" />
     <Compile Include="MyAllClass\MyLog.cs" />
     <Compile Include="MyAllClass\MyRoboDKExtension.cs" />

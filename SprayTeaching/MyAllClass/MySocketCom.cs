@@ -62,7 +62,7 @@ namespace SprayTeaching.MyAllClass
 
         #region 构造函数
 
-        public MySocketCom()
+        public MySocketCom( )
         {
             this._strSocketIPAddress = "10.8.193.177";
             this._intSocketPortNum = 12000;
@@ -115,14 +115,14 @@ namespace SprayTeaching.MyAllClass
             if (!bolSocketIsConnected)
                 this.OpenSocket();
             else
-                this.CloseSocket();            
+                this.CloseSocket();
         }
 
         /// <summary>
         /// Socket是否已经连接
         /// </summary>
         /// <returns>true为连接，false为未连接</returns>
-        private bool IsSocketConnected()
+        private bool IsSocketConnected( )
         {
             if (this._sktCommunicate != null)
                 return this._sktCommunicate.Connected;
@@ -133,7 +133,7 @@ namespace SprayTeaching.MyAllClass
         /// 与服务器进行连接
         /// </summary>
         /// <returns>是否连接成功，true为成功，false为失败</returns>
-        public bool Connect()
+        public bool Connect( )
         {
             IPAddress ip = IPAddress.Parse(this._strSocketIPAddress);
             IPEndPoint ipe = new IPEndPoint(ip, this._intSocketPortNum);
@@ -163,7 +163,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 打开socket，若socket已经打开，则先关闭，再重新打开
         /// </summary>
-        public void OpenSocket()
+        public void OpenSocket( )
         {
             if (this._sktCommunicate != null)
             {
@@ -173,19 +173,22 @@ namespace SprayTeaching.MyAllClass
             try
             {
                 this.Connect();
-                this.UpdateSocketIsConnected(this.IsSocketConnected());
-                this.WriteLog(string.Format("Wifi连接成功,主机为{0}:{1}.", this._strSocketIPAddress, this._intSocketPortNum));                
+                this.WriteLog(string.Format("Wifi连接成功,主机为{0}:{1}.", this._strSocketIPAddress, this._intSocketPortNum));
             }
             catch (Exception e)
             {
                 this.WriteLog(e.Message);
+            }
+            finally
+            {
+                this.UpdateConnectState(this.IsSocketConnected());
             }
         }
 
         /// <summary>
         /// 关闭socket
         /// </summary>
-        public void CloseSocket()
+        public void CloseSocket( )
         {
             if (this._sktCommunicate != null)
             {
@@ -201,7 +204,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 关闭所有变量，使它们都invalidition
         /// </summary>
-        private void CloseVariables()
+        private void CloseVariables( )
         {
             this._sktCommunicate = null;
             this._sbReceiveDataStorage = null;
@@ -211,7 +214,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 关闭socket相关的所有资源
         /// </summary>
-        public void Close()
+        public void Close( )
         {
             this.CloseSocket();
             this.CloseVariables();
@@ -285,87 +288,128 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 处理接收的数据，并清除list<byte>的缓存区
         /// </summary>
-        private void DataHandler()
+        private void DataHandler( )
         {
-            string strData = ReadData();                    // 读取数据
+            List<byte> lstByteData = ReadData();                    // 读取数据
 
-            // 当数据不为空的时候才算是有效的
-            if (!string.IsNullOrEmpty(strData))
-            {
-                this._sbReceiveDataStorage.Append(strData);     // 添加数据到存储的地方
-                UpdateReceiveData(strData);
-            }
+            // 当数据个数为16的时候才算是有效的，若为空，则不更新后续的数据
+            if (lstByteData.Count == 0)
+                return;
 
-            this._lstBytReceiveData.Clear();                // 清除list<byte>的缓存区          
+            //this._sbReceiveDataStorage.Append(lstByteData);     // 添加数据到存储的地方
+            byte[] byteData = lstByteData.ToArray();                // 将list中的数据转换为byte数组
+            UpdateReceiveData(byteData);
         }
 
         /// <summary>
         /// 读取数据
         /// </summary>
         /// <returns>返回读取的内容</returns>
-        private string ReadData()
+        private List<byte> ReadData( )
         {
-            List<byte> byteData = new List<byte>();
+            List<byte> byteData = new List<byte>();                 // 用于存储实际所需的数据
             byte[] bytTmp = this._lstBytReceiveData.ToArray();      // 所有数据
-            byte BeginByte = 0x5B;          //string Begin = "[";   起始字节
-            byte EndByte = 0x5D;            //string End = "]";     结束字节
+            byte BeginByte1 = 0xAA;          //string Begin = "[";   起始字节
+            byte BeginByte2 = 0x55;          //string Begin = "[";   起始字节
             bool bStartFlag = false;        // 起始标志位
             bool bEndFlag = false;          // 结束标志位
 
-            for (int i = 0; i < bytTmp.Length; i++)
+            for (int i = 1; i < bytTmp.Length; i++)
             {
                 // 寻找到起始位时，将开始标志位设置为true，结束标志位设置为false
-                if (bytTmp[i] == BeginByte)
+                if (bytTmp[i - 1] == BeginByte1 && bytTmp[i] == BeginByte2)
                 {
                     bStartFlag = true;
                     bEndFlag = false;
                     byteData.Clear();
-                    continue;  //检测到开始符号，后面就不执行了
-                }
-
-                // 寻找到结束符
-                if (bytTmp[i] == EndByte)
-                {
-                    bEndFlag = true;
-                    continue;  //检测到结束符号，后面就不执行了
+                    byteData.Add(bytTmp[i - 1]);
+                    byteData.Add(bytTmp[i]);
+                    continue;               // 检测到开始符号，后面就不执行了
                 }
 
                 // 只有在开始标志位为true，结束标志位为false时添加数据
                 if (bStartFlag == true && bEndFlag == false)
                     byteData.Add(bytTmp[i]);
+
+                // 检测list中的数据个数是否为16，若是则结束
+                if (byteData.Count == 16)
+                {
+                    bEndFlag = true;
+                    break;                  // 若数据个数够16个，后面就不执行了
+                }
             }
 
-            // 只有满足起始标志位为ture，结束标志位也为true，则数据是正确的数据
+            this._lstBytReceiveData.Clear();                // 在这组数据读取完毕后，清除list<byte>的缓存区   
+
+            // 只有满足起始标志位为ture，结束标志位也为true，则是正确的数据
             if (bStartFlag == true && bEndFlag == true)
             {
-                string readString = System.Text.Encoding.Default.GetString(byteData.ToArray(), 0, byteData.Count);  // 字节型数据转换为字符型数据
-                return readString;
+                // 若数据校验和错误，则清除所有数据
+                if (!DataCheckSum(byteData))
+                    byteData.Clear();
+                return byteData;
             }
             else
             {
                 byteData.Clear();
-                return string.Empty;
+                return byteData;
             }
+        }
+
+        /// <summary>
+        /// 对数据进行校验和
+        /// </summary>
+        /// <param name="byteData">接收的数据</param>
+        /// <returns>数据是否正确</returns>
+        private bool DataCheckSum(List<byte> byteData)
+        {
+            bool bolIsOk = false;
+            byte byteSum = 0x00;
+
+            // 如果数据不是16个，则数据格式错误
+            if (byteData.Count != 16)
+            {
+                bolIsOk = false;
+                return bolIsOk;
+            }
+
+            // 对前15个数据进行累加
+            for (int i = 0; i < 15; i++)
+            {
+                byteSum += byteData[i];
+            }
+
+            // 只有最后一个数据和前15个数据之和相等，则算是数据正确，否则错误
+            if (byteSum == byteData[15])
+                bolIsOk = true;
+
+            return bolIsOk;
         }
 
         #endregion
 
         #region 发送数据并处理的相关方法
-        public void SendDataHandler()
+        public void SendDataHandler(byte[] btData = null)
         {
             if (this._sktCommunicate == null)
             {
-                this.WriteLog("数据发送失败，连接已断开.");
+                this.WriteLog("数据发送失败，Wifi连接已断开.");
                 return;
             }
             if (!this.IsSocketConnected())
             {
-                this.WriteLog("连接断开.");
+                this.WriteLog("Wifi连接断开.");
                 return;
             }
-            string strData = "xingshuang\r\n";
-            byte[] bytBuffer = System.Text.Encoding.Default.GetBytes(strData);
-            this._sktCommunicate.BeginSend(bytBuffer, 0, bytBuffer.Length, SocketFlags.None, new AsyncCallback(SendDataCallbackHandler), this._sktCommunicate);
+            if (btData.Length == 0)
+            {
+                this.WriteLog("数据有误，为空.");
+                return;
+            }
+                
+            //string strData = "xingshuang\r\n";
+            //byte[] bytBuffer = System.Text.Encoding.Default.GetBytes(strData);
+            this._sktCommunicate.BeginSend(btData, 0, btData.Length, SocketFlags.None, new AsyncCallback(SendDataCallbackHandler), this._sktCommunicate);
         }
 
         /// <summary>
@@ -392,12 +436,12 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 更新接收的数据并处理
         /// </summary>
-        /// <param name="strData"></param>
-        private void UpdateReceiveData(string strData)
+        /// <param name="lstByteData"></param>
+        private void UpdateReceiveData(byte[] byteData)
         {
             // 触发数据的处理
             if (DataReceived != null)
-                DataReceived(strData);
+                DataReceived(byteData);
         }
 
         /// <summary>

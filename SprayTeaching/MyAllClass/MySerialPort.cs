@@ -12,15 +12,15 @@ namespace SprayTeaching.MyAllClass
     public class MySerialPort
     {
         #region 内部私有变量
-        private string _portName = "COM1";                                          // 串口号，默认COM1
-        private SerialPortBaudRates _baudRate = SerialPortBaudRates.BaudRate_9600;  // 波特率，默认9600
-        private Parity _parity = Parity.None;                                       // 校验位，默认NONE
-        private StopBits _stopBit = StopBits.One;                                   // 停止位，默认1
-        private SerialPortDataBits _dataBit = SerialPortDataBits.EightBits;         // 数据位，默认8
+        private string _portName = "COM1";                                              // 串口号，默认COM1
+        private SerialPortBaudRates _baudRate = SerialPortBaudRates.BaudRate_115200;    // 波特率，默认9600
+        private Parity _parity = Parity.None;                                           // 校验位，默认NONE
+        private StopBits _stopBit = StopBits.One;                                       // 停止位，默认1
+        private SerialPortDataBits _dataBit = SerialPortDataBits.EightBits;             // 数据位，默认8
 
-        private StringBuilder _sbReceiveDataStorage = new StringBuilder();          // 存储所有接收的数据
+        private StringBuilder _sbReceiveDataStorage = new StringBuilder();              // 存储所有接收的数据
 
-        private SerialPort _comPort = new SerialPort();                              // 串口的对象
+        private SerialPort _comPort = new SerialPort();                                 // 串口的对象
 
         //串口对象
         /// <summary>
@@ -31,12 +31,14 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 开始符比特
         /// </summary>
-        private byte BeginByte = 0x5B;   //string Begin = "[";
+        //private byte BeginByte = 0x5B;   //string Begin = "[";
+        private byte BeginByte1 = 0xAA;
+        private byte BeginByte2 = 0x55;
 
         /// <summary>
         /// 结束符比特
         /// </summary>
-        private byte EndByte = 0x5D;     //string End = "]";
+        //private byte EndByte = 0x5D;     //string End = "]";
         #endregion
 
         #region 外部事件
@@ -167,7 +169,7 @@ namespace SprayTeaching.MyAllClass
         public MySerialPort()
         {
             _portName = "COM1";
-            _baudRate = SerialPortBaudRates.BaudRate_9600;
+            _baudRate = SerialPortBaudRates.BaudRate_115200;
             _parity = Parity.None;
             _dataBit = SerialPortDataBits.EightBits;
             _stopBit = StopBits.One;
@@ -222,7 +224,7 @@ namespace SprayTeaching.MyAllClass
             catch (Exception e)
             {
                 //throw new Exception(e.Message);
-                this.WriteLog(e.Message);
+                this.WriteLogHandler(e.Message);
             }
         }
 
@@ -258,13 +260,15 @@ namespace SprayTeaching.MyAllClass
             try
             {
                 _comPort.Open();
-                this.WriteLog(string.Format("串口开启成功,串口号为{0}.", this._portName));
-                UpdateConnectState(this._comPort.IsOpen);           // 更新串口的连接状态
+                this.WriteLogHandler(string.Format("串口开启成功,串口号为{0}.", this._portName));
             }
             catch (Exception e)
             {
-                this.WriteLog("无法开启串口" + e.Message);
-                //throw new Exception("unable open serial port" + e.Message);
+                this.WriteLogHandler("无法开启串口" + e.Message);                
+            }
+            finally
+            {
+                UpdateConnectState(this._comPort.IsOpen);           // 更新串口的连接状态
             }
         }
 
@@ -274,7 +278,7 @@ namespace SprayTeaching.MyAllClass
         public void ClosePort()
         {
             if (_comPort.IsOpen) this._comPort.Close();
-            this.WriteLog("串口已关闭.");
+            this.WriteLogHandler("串口已关闭.");
             UpdateConnectState(this._comPort.IsOpen);               // 更新串口的连接状态
         }
 
@@ -287,12 +291,16 @@ namespace SprayTeaching.MyAllClass
             if (ReceiveEventFlag) return;
 
             // 对接收数据的处理
-            string readString = this.DataReceivedHandler();
+            byte[] byteReadData = this.DataReceivedHandler();
+
+            // 如果接收的数据为空，将不更新后续的数据
+            if (byteReadData.Length == 0)
+                return;
 
             // 触发数据的处理
             if (DataReceived != null)
             {
-                DataReceived(readString);
+                DataReceived(byteReadData);
             }
         }
 
@@ -300,12 +308,13 @@ namespace SprayTeaching.MyAllClass
         /// 对数据接收的处理，经过数据的读取，数据转换，数据存储
         /// </summary>
         /// <returns></returns>
-        private string DataReceivedHandler()
+        private byte[] DataReceivedHandler()
         {
             List<byte> byteData = ReadData();                       // 读取数据
-            string readString = System.Text.Encoding.Default.GetString(byteData.ToArray(), 0, byteData.Count);  // 字节型数据转换为字符型数据
-            this._sbReceiveDataStorage.Append(readString);          // 存储接收的数据
-            return readString;
+           
+            byte[] byteRead = byteData.ToArray();                       // 将list中的数据转换为字节数组
+            
+            return byteRead;
         }
 
         /// <summary>
@@ -315,36 +324,74 @@ namespace SprayTeaching.MyAllClass
         private List<byte> ReadData()
         {
             List<byte> byteData = new List<byte>();
-            bool bEndFlag = false;      //是否检测到结束符号
-            bool bStartFlag = false;    //是否检测到开始符号
+            bool bEndFlag = false;      // 是否结束
+            bool bStartFlag = false;    // 是否开始
             while (_comPort.BytesToRead > 0 || !bStartFlag || !bEndFlag)
             {
-                byte[] readBuffer = new byte[_comPort.ReadBufferSize + 1];
+                byte[] readBuffer = new byte[_comPort.ReadBufferSize];
                 int count = _comPort.Read(readBuffer, 0, _comPort.ReadBufferSize);
-                for (int i = 0; i < count; i++)
+
+                for (int i = 1; i < count; i++)
                 {
-                    //寻找到起始位时，将开始标志位设置为true，结束标志位设置为false
-                    if (readBuffer[i] == BeginByte)
+                    // 寻找到起始位时，将开始标志位设置为true，结束标志位设置为false
+                    if (readBuffer[i - 1] == BeginByte1 && readBuffer[i] == BeginByte2)
                     {
                         bStartFlag = true;
                         bEndFlag = false;
                         byteData.Clear();
+                        byteData.Add(readBuffer[i-1]);
+                        byteData.Add(readBuffer[i]);
                         continue;  //检测到开始符号，后面就不执行了
-                    }
+                    }                   
 
-                    //寻找到结束符
-                    if (readBuffer[i] == EndByte)
-                    {
-                        bEndFlag = true;
-                        continue;  //检测到结束符号，后面就不执行了
-                    }
-
-                    //只有在开始标志位为true，结束标志位为false时添加数据
+                    // 只有在开始标志位为true，结束标志位为false时添加数据
                     if (bStartFlag == true && bEndFlag == false)
                         byteData.Add(readBuffer[i]);
+
+                    // 检测list中的数据个数是否为16，若是，则结束
+                    if (byteData.Count == 16)
+                    {
+                        bEndFlag = true;
+                        break;  //若数据个数够16个，后面就不执行了
+                    }
                 }
             }
+
+            // 若数据校验和错误，则清除所有数据
+            if (!DataCheckSum(byteData))
+                byteData.Clear();
+
             return byteData;
+        }
+
+        /// <summary>
+        /// 对数据进行校验和
+        /// </summary>
+        /// <param name="byteData">接收的数据</param>
+        /// <returns>数据是否正确</returns>
+        private bool DataCheckSum(List<byte> byteData)
+        {
+            bool bolIsOk = false;
+            byte byteSum = 0x00;
+
+            // 如果数据不是16个，则数据格式错误
+            if (byteData.Count != 16)
+            {
+                bolIsOk = false;
+                return bolIsOk;
+            }
+
+            // 对前15个数据进行累加
+            for (int i = 0; i < 15; i++)
+            {
+                byteSum += byteData[i];
+            }
+
+            // 只有最后一个数据和前15个数据之和相等，则算是数据正确，否则错误
+            if (byteSum == byteData[15])
+                bolIsOk = true;
+
+            return bolIsOk;
         }
 
         /// <summary>
@@ -364,7 +411,7 @@ namespace SprayTeaching.MyAllClass
         /// 写入数据
         /// </summary>
         /// <param name="msg"></param>
-        public void WriteData(string msg)
+        public void SendDataHandler(string msg)
         {
             if (!(_comPort.IsOpen)) _comPort.Open();
 
@@ -375,9 +422,18 @@ namespace SprayTeaching.MyAllClass
         /// 写入数据
         /// </summary>
         /// <param name="msg">写入端口的字节数组</param>
-        public void WriteData(byte[] msg)
+        public void SendDataHandler(byte[] msg)
         {
-            if (!(_comPort.IsOpen)) _comPort.Open();
+            if (!_comPort.IsOpen)
+            {
+                this.WriteLogHandler("未打开串口，请先打开串口.");
+                return;
+            }
+            if (msg.Length == 0)
+            {
+                this.WriteLogHandler("数据有误，为空.");
+                return;
+            }
 
             _comPort.Write(msg, 0, msg.Length);
         }
@@ -388,7 +444,7 @@ namespace SprayTeaching.MyAllClass
         /// <param name="msg">包含要写入端口的字节数组</param>
         /// <param name="offset">参数从0字节开始的字节偏移量</param>
         /// <param name="count">要写入的字节数</param>
-        public void WriteData(byte[] msg, int offset, int count)
+        public void SendDataHandler(byte[] msg, int offset, int count)
         {
             if (!(_comPort.IsOpen)) _comPort.Open();
 
@@ -442,7 +498,7 @@ namespace SprayTeaching.MyAllClass
         /// 将消息写入日志
         /// </summary>
         /// <param name="strMessage">消息内容</param>
-        private void WriteLog(string strMessage)
+        private void WriteLogHandler(string strMessage)
         {
             if (this.UpdateLogContent != null)
             {

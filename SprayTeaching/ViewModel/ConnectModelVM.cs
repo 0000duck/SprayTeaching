@@ -21,10 +21,13 @@ namespace SprayTeaching.ViewModel
         /// 所有数据的对象
         /// </summary>
         private DataModel _mainDataModel;                   // 所有数据的对象        
-        private MyLog _myLogObject;                         // 日志文件的对象
+        private MyLog _myLogObject;                         // 日志文件的对象        
+        //private MySerialPort _mySerialPortCom;             // 串口的对象
+        //private MySocketCom _mySocketCom;                   // Socket通信对象
+        private MyDataMessage _myDataMessage;               // 数据消息的对象
+        private MyConfigFileINI _myConfigFileINI;           // 配置文件的对象
+        private MyCommunicate _myCommunicate;               // 数据通信对象
         private MyRoboDKExtension _myRoboDKExtension;       // RoboDK的对象
-        private MySerialPort _mySerialPortMain;             // 串口的对象
-        private MySocketCom _mySocketCom;                   // Socket通信对象
 
         private delegate void UpdateDifferentThreadParameterEventHandler(object strParameter);      // 更新不同线程的参数的delegate变量声明，主要用于对绑定控件数据的更改 
         private UpdateDifferentThreadParameterEventHandler _dlgtUpdateDifThreadParam;               // 更新不同线程的数据
@@ -38,7 +41,9 @@ namespace SprayTeaching.ViewModel
         #endregion
 
         #region  构造函数
-        public ConnectModelVM()
+
+        // 构造函数中初始化顺序很有讲究，log必须最前面，DataMessage必须在ConfigFileINI的前面，ConfigFileINI要更新DataMessage中的数据
+        public ConnectModelVM( )
         {
             this._mainDataModel = new DataModel();                                                                              // 所有数据的对象
             this._dlgtUpdateDifThreadParam = new UpdateDifferentThreadParameterEventHandler(UpdateDifferentThreadParam);        // 用于更新不同线程的参数,目前用于更新listview的绑定的数据
@@ -46,41 +51,59 @@ namespace SprayTeaching.ViewModel
             this._myLogObject = new MyLog(this._mainDataModel.LogFilePath);                                                     // 日志更新的对象
             this._myLogObject.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                    // 日志中线程初始化的时候写日志，自己写自己，因为要将数据写到listview中，只能统一采用外部方式
 
-            this._mySerialPortMain = new MySerialPort();                                                                        // 串口的对象
-            this._mySerialPortMain.DataReceived += new DataReceivedEventHandler(DataReceiveHandler);                            // 接收数据的处理
-            this._mySerialPortMain.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);               // 串口写日志
-            this._mySerialPortMain.UpdateSerialPortIsOpened += new UpdateSerialPortIsOpenedEventHandler(UpdateSerialPortIsOpenedHandler);   // 更新串口通断状态信息
+            this._myDataMessage = new MyDataMessage();                                                                          // DataMessage的对象，存放接收数据和发送数据
+            this._myDataMessage.UpdateSampleInform += new UpdateMessageSampleInformEventHandler(UpdateMessageSampleInformHandler);
 
-            this._mySocketCom = new MySocketCom();                                                                              // socket通信的对象
-            this._mySocketCom.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                    // socket写日志
-            this._mySocketCom.DataReceived += new DataReceivedEventHandler(DataReceiveHandler);                                 // 接收数据的处理
-            this._mySocketCom.UpdateSocketIsConnected += new UpdateSocketIsConnectedEventHandler(UpdateSocketIsConnectedHandler);           // 更新socket通断的状态信息
+            this._myConfigFileINI = new MyConfigFileINI(this._mainDataModel.ConfigFileAddress);                                         // 配置文件的对象
+            this._myConfigFileINI.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                        // 配置文件写日志
+            this._myConfigFileINI.UpdateConfigParameter += new UpdateConfigFileParameterEventHandler(GetConfigParameterHandler);        // 配置文件更新参数
+
+            this._myCommunicate = new MyCommunicate();                                                                                  // 数据通信的对象
+            this._myCommunicate.DataReceived += new DataReceivedEventHandler(ReceiveDataHandler);                                       // 数据通信接收数据的处理
+            this._myCommunicate.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                          // 数据通信写日志
+            this._myCommunicate.UpdateSerialPortIsOpened += new UpdateSerialPortIsOpenedEventHandler(UpdateSerialPortIsOpenedHandler);  // 更新串口通断状态信息
+            this._myCommunicate.UpdateSocketIsConnected += new UpdateSocketIsConnectedEventHandler(UpdateSocketIsConnectedHandler);     // 更新socket通断的状态信息
+
+            //this._mySerialPortCom = new MySerialPort();                                                                                    // 串口的对象
+            //this._mySerialPortCom.DataReceived += new DataReceivedEventHandler(ReceiveDataHandler);                                        // 接收数据的处理
+            //this._mySerialPortCom.UpdateLogContent += new UpdateLogContentEventHandler(WriteLogHandler);                           // 串口写日志
+            //this._mySerialPortCom.UpdateSerialPortIsOpened += new UpdateSerialPortIsOpenedEventHandler(UpdateSerialPortIsOpenedHandler);   // 更新串口通断状态信息
+
+            //this._mySocketCom = new MySocketCom();                                                                                          // socket通信的对象
+            //this._mySocketCom.UpdateLogContent += new UpdateLogContentEventHandler(WriteLogHandler);                                // socket写日志
+            //this._mySocketCom.DataReceived += new DataReceivedEventHandler(ReceiveDataHandler);                                             // 接收数据的处理
+            //this._mySocketCom.UpdateSocketIsConnected += new UpdateSocketIsConnectedEventHandler(UpdateSocketIsConnectedHandler);           // 更新socket通断的状态信息
 
             this._myRoboDKExtension = new MyRoboDKExtension();                                                                  // RoboDK的对象
             this._myRoboDKExtension.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);              // RoboDK写日志
             this._myRoboDKExtension.UpdateRobotParameter += new UpdateRobotParameterEventHandler(UpdateRobotParameterHandler);  // 更新机器人参数
+
+
         }
 
         #endregion
 
         #region 方法
 
+        #region 数据通信部分
+
         #region 串口相关的方法
 
         /// <summary>
         /// 打开或关闭串口
         /// </summary>
-        public void OpenCloseSerialPortHandler()
+        public void OpenCloseSerialPortHandler( )
         {
             //更新串口参数
-            this._mySerialPortMain.PortName = this._mainDataModel.SerialPortName;
-            this._mySerialPortMain.BaudRate = (SerialPortBaudRates)this._mainDataModel.SerialPortBaudRate;
-            this._mySerialPortMain.ParityBit = (Parity)this._mainDataModel.SerialPortParityBit;
-            this._mySerialPortMain.StopBit = (StopBits)this._mainDataModel.SerialPortStopBit;
-            this._mySerialPortMain.DataBit = (SerialPortDataBits)this._mainDataModel.SerialPortDataBit;
+            //this._mySerialPortCom.PortName = this._mainDataModel.SerialPortName;
+            //this._mySerialPortCom.BaudRate = (SerialPortBaudRates)this._mainDataModel.SerialPortBaudRate;
+            //this._mySerialPortCom.ParityBit = (Parity)this._mainDataModel.SerialPortParityBit;
+            //this._mySerialPortCom.StopBit = (StopBits)this._mainDataModel.SerialPortStopBit;
+            //this._mySerialPortCom.DataBit = (SerialPortDataBits)this._mainDataModel.SerialPortDataBit;
 
-            bool bolSerialPortIsOpened = this._mainDataModel.SerialPortIsOpened;
-            this._mySerialPortMain.OpenCloseSerialPort(bolSerialPortIsOpened);
+            //bool bolSerialPortIsOpened = this._mainDataModel.SerialPortIsOpened;
+            //this._mySerialPortCom.OpenCloseSerialPort(bolSerialPortIsOpened);
+            this._myCommunicate.OpenCloseSerialPort(this._mainDataModel);
         }
 
         /// <summary>
@@ -104,20 +127,14 @@ namespace SprayTeaching.ViewModel
         /// <summary>
         /// 打开或者关闭socket事件处理
         /// </summary>
-        public void OpenCloseSocketHandler()
+        public void OpenCloseSocketHandler( )
         {
-            this._mySocketCom.SocketIPAddress = this._mainDataModel.SocketIPAddress;
-            this._mySocketCom.SocketPortNum = this._mainDataModel.SocketPortNum;
+            //this._mySocketCom.SocketIPAddress = this._mainDataModel.SocketIPAddress;
+            //this._mySocketCom.SocketPortNum = this._mainDataModel.SocketPortNum;
 
             //bool bolSocketIsConnected = this._mainDataModel.SocketIsConnected;
-            //string strSocketIsConnectedImage = this._mainDataModel.SocketIsConnectedImage;
-            //this._mySocketCom.OpenCloseSocketHandler(ref bolSocketIsConnected, ref strSocketIsConnectedImage);
-
-            //this._mainDataModel.SocketIsConnected = bolSocketIsConnected;
-            //this._mainDataModel.SocketIsConnectedImage = strSocketIsConnectedImage;
-
-            bool bolSocketIsConnected = this._mainDataModel.SocketIsConnected;
-            this._mySocketCom.OpenCloseSocket(bolSocketIsConnected);
+            //this._mySocketCom.OpenCloseSocket(bolSocketIsConnected);
+            this._myCommunicate.OpenCloseSocket(this._mainDataModel);
         }
 
         /// <summary>
@@ -137,9 +154,20 @@ namespace SprayTeaching.ViewModel
         /// <summary>
         /// socket发送数据事件处理
         /// </summary>
-        public void SocketSendDataHandler()
+        public void SocketSendDataHandler( )
         {
-            this._mySocketCom.SendDataHandler();
+            //this._mySocketCom.SendDataHandler();
+        }
+
+        /// <summary>
+        /// 发送数据处理部分
+        /// </summary>
+        /// <param name="obj">发送什么数据的命令</param>
+        public void SendDataHandler(object obj)
+        {
+            string strCommand = (string)obj;
+            byte[] byteData = this._myDataMessage.SendDataMessage(strCommand,this._mainDataModel);
+            this._myCommunicate.SendDataHandler(byteData);
         }
 
         #endregion
@@ -149,11 +177,35 @@ namespace SprayTeaching.ViewModel
         /// <summary>
         /// 对串口中接收的数据进行处理
         /// </summary>
-        /// <param name="strDataReceive">接收的数据</param>
-        private void DataReceiveHandler(string strDataReceive)
+        /// <param name="byteDataReceiveMessage">接收的数据</param>
+        private void ReceiveDataHandler(byte[] byteDataReceiveMessage)
         {
-            this._mainDataModel.SerialPortDataReceived += strDataReceive + "\r\n";
+            this._myDataMessage.ReceiveDataMessage(byteDataReceiveMessage);             // 将接收的数据传入DataMessage对象中
+            string readString = BitConverter.ToString(byteDataReceiveMessage);          // 将字节型数组转换为字符串型
+            this._mainDataModel.SerialPortDataReceived += readString + "\r\n";
         }
+        #endregion
+
+        #region 通信方式选择
+        public void SelectCommunicateWayHandler(object obj)
+        {
+            //string strWay = obj as string;
+            //switch(strWay)
+            //{
+            //    case "SerialPortWay":
+            //        if (this._mainDataModel.SocketIsConnected)
+            //            this._mySocketCom.CloseSocket();
+            //        this.UpdateLogContentHandler("选择串口方式通信.");
+            //        break;
+            //    case "WifiWay":
+            //        if (this._mainDataModel.SerialPortIsOpened)
+            //            this._mySerialPortCom.ClosePort();
+            //        this.UpdateLogContentHandler("选择Wifi方式通信.");
+            //        break;
+            //}
+            this._myCommunicate.SelectCommunicateWayHandler(obj, this._mainDataModel);
+        }
+        #endregion
 
         #endregion
 
@@ -166,7 +218,7 @@ namespace SprayTeaching.ViewModel
         /// <param name="dblJoints">6个关节角度</param>
         private void UpdateRobotParameterHandler(Dictionary<string, object> dicData)
         {
-            this.UpdateRobotJoints(dicData["RobotJoint1"], dicData["RobotJoint2"], dicData["RobotJoint3"], dicData["RobotJoint4"], dicData["RobotJoint5"],dicData["RobotJoint6"]);
+            this.UpdateRobotJoints(dicData["RobotJoint1"], dicData["RobotJoint2"], dicData["RobotJoint3"], dicData["RobotJoint4"], dicData["RobotJoint5"], dicData["RobotJoint6"]);
             this.UpdateRobotPoses(dicData["RobotPoseX"], dicData["RobotPoseY"], dicData["RobotPoseZ"], dicData["RobotPoseU"], dicData["RobotPoseV"], dicData["RobotPoseW"]);
             this.UpdateRobotMoveSpeed(dicData["RobotMoveSpeed"]);
         }
@@ -251,7 +303,7 @@ namespace SprayTeaching.ViewModel
         /// <param name="strMessage">日志消息</param>
         private void UpdateLogContentHandler(string strMessage)
         {
-            string strTime = this._myLogObject.AddLogMessage(strMessage);
+            string strTime = this._myLogObject.AddLogMessage(strMessage);                                   // 在日志中添加消息
             MyLogMessage myLogMessage = new MyLogMessage() { LogTime = strTime, LogMessage = strMessage };
             App.Current.Dispatcher.BeginInvoke(this._dlgtUpdateDifThreadParam, myLogMessage);               // 使用调度者dispatcher来异步处理多线程，目前用于更新listview绑定的数据
         }
@@ -272,34 +324,63 @@ namespace SprayTeaching.ViewModel
         /// <summary>
         /// 关闭所有资源
         /// </summary>
-        public void CloseAllResourceHandler()
+        public void CloseAllResourceHandler( )
         {
             this._myLogObject.Close();              // 关闭日志相关的资源
-            this._mySerialPortMain.Close();         // 关闭与串口相关的资源 
-            this._mySocketCom.Close();              // 关闭与socket相关的资源
+            //this._mySerialPortCom.Close();         // 关闭与串口相关的资源 
+            //this._mySocketCom.Close();              // 关闭与socket相关的资源
+            this._myCommunicate.Close();
             this._myRoboDKExtension.Close();        // 关闭与RoboDK相关的资源
+            this._myDataMessage.Close();            // 关闭与数据消息相关的资源
         }
         #endregion
 
-        #region 通信方式选择
-        public void SelectCommunicateWayHandler(object obj)
+
+
+        #region 配置文件相关的方法
+
+        /// <summary>
+        /// 获取配置文件中的参数
+        /// </summary>
+        /// <param name="obj">传入的参数</param>
+        private void GetConfigParameterHandler(object obj)
         {
-            string strWay = obj as string;
-            switch(strWay)
-            {
-                case "SerialPortWay":
-                    if (this._mainDataModel.SocketIsConnected)
-                        this._mySocketCom.CloseSocket();
-                    this.UpdateLogContentHandler("选择串口方式通信.");
-                    break;
-                case "WifiWay":
-                    if (this._mainDataModel.SerialPortIsOpened)
-                        this._mySerialPortMain.ClosePort();
-                    this.UpdateLogContentHandler("选择Wifi方式通信.");
-                    break;
-            }
+            object[] objPar = (object[])obj;
+            double[] dblCalibrateAngles = (double[])objPar[0];
+            double[] dblCalibrateDirectioins = (double[])objPar[1];
+
+            // 更新DataMessage对象中的标定角度
+            this._myDataMessage.CalibrateAngles = dblCalibrateAngles;
+            this._myDataMessage.CalibrateDirections = dblCalibrateDirectioins;
+
+            // 更新数据区中的标定关节角度
+            this._mainDataModel.RobotCalibrateAngle1 = dblCalibrateAngles[0];
+            this._mainDataModel.RobotCalibrateAngle2 = dblCalibrateAngles[1];
+            this._mainDataModel.RobotCalibrateAngle3 = dblCalibrateAngles[2];
+            this._mainDataModel.RobotCalibrateAngle4 = dblCalibrateAngles[3];
+            this._mainDataModel.RobotCalibrateAngle5 = dblCalibrateAngles[4];
+            this._mainDataModel.RobotCalibrateAngle6 = dblCalibrateAngles[5];
+
+            // 更新数据区中的标定关节方向
+            this._mainDataModel.RobotCalibrateDirection1 = dblCalibrateDirectioins[0];
+            this._mainDataModel.RobotCalibrateDirection2 = dblCalibrateDirectioins[1];
+            this._mainDataModel.RobotCalibrateDirection3 = dblCalibrateDirectioins[2];
+            this._mainDataModel.RobotCalibrateDirection4 = dblCalibrateDirectioins[3];
+            this._mainDataModel.RobotCalibrateDirection5 = dblCalibrateDirectioins[4];
+            this._mainDataModel.RobotCalibrateDirection6 = dblCalibrateDirectioins[5];
         }
+
         #endregion
+
+        #region  DataMessage数据处理部分
+        private void UpdateMessageSampleInformHandler(int intSampleFrequent, int intSampleCycle)
+        {
+            this._mainDataModel.CurrentSampleFrequent = intSampleFrequent;
+            this._mainDataModel.CurrentSampleCycle = intSampleCycle;
+        }
+
+        #endregion
+
 
         #endregion
     }

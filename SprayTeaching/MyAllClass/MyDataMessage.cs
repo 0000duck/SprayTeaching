@@ -4,16 +4,40 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using SprayTeaching.BaseClassLib;
+using SprayTeaching.Model;
 
 namespace SprayTeaching.MyAllClass
 {
     public class MyDataMessage
     {
         private Queue<byte[]> _queueReceiveDataMessage = new Queue<byte[]>();       // 临时存放日志消息的队列 
-
         private Thread _thrdDataMessageHandler;                                     // 数据消息处理的线程
         private bool _bolIsThreadAlive = true;                                      // 控制线程活着，true为活着，false为死亡
         private AutoResetEvent _autoEvent = new AutoResetEvent(false);              // 控制数据消息处理的线程，控制它的睡眠和唤醒
+
+        #region 属性
+        /// <summary>
+        /// 标定的关节方向
+        /// </summary>
+        private double[] _dblCalibrateDirections = null;
+
+        public double[] CalibrateDirections
+        {
+            get { return _dblCalibrateDirections; }
+            set { _dblCalibrateDirections = value; }
+        }
+
+        /// <summary>
+        /// 标定的关节角度
+        /// </summary>
+        private double[] _dblCalibrateAngles = null;
+
+        public double[] CalibrateAngles
+        {
+            get { return _dblCalibrateAngles; }
+            set { _dblCalibrateAngles = value; }
+        }
+        #endregion
 
         public event UpdateMessageStateInformEventHandler UpdateMcuIsConnected;                     // 下位机发送上来的连接响应
         public event UpdateMessageStateInformEventHandler UpdateMcuIsReady;                         // 下位机发送上来的准备就绪是否可以开始采集数据
@@ -30,7 +54,9 @@ namespace SprayTeaching.MyAllClass
         public event UpdateMessageAxisModifiedIsSuccessEventHandler UpdateAxisModifiedIsSuccess;    // 下位机发送上来的轴地址修改是否成功
         public event UpdateMessageSetFrequentIsSuccessed UpdateSetFrequentIsSuccess;                // 下位机发送上来的频率设置是否成功
 
-        public MyDataMessage()
+        //public event DataReceivedEventHandler DataReceived;
+
+        public MyDataMessage( )
         {
             this._thrdDataMessageHandler = new Thread(ThreadDataMessageHandler);            // 初始化将数据消息处理事件的线程
             this._thrdDataMessageHandler.IsBackground = true;                               // 设置成后台线程，在前台线程结束时，所有剩余的后台线程都会停止且不会完成    
@@ -42,7 +68,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 关闭MyLog的所有资源,先关闭线程，再使变量无效
         /// </summary>
-        public void Close()
+        public void Close( )
         {
             this.CloseThreadDataMessageHandler();
             this.CloseAllVariable();
@@ -51,7 +77,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 关闭所有变量，使它们都invalidition
         /// </summary>
-        private void CloseAllVariable()
+        private void CloseAllVariable( )
         {
             this._thrdDataMessageHandler = null;
             this._bolIsThreadAlive = false;
@@ -60,7 +86,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 关闭写日志到文件的线程
         /// </summary>
-        private void CloseThreadDataMessageHandler()
+        private void CloseThreadDataMessageHandler( )
         {
             if (this._thrdDataMessageHandler != null)
             {
@@ -72,11 +98,11 @@ namespace SprayTeaching.MyAllClass
         }
         #endregion
 
-        #region 数据消息处理部分
+        #region 接收数据消息处理部分
         /// <summary>
         /// 处理数据消息的线程
         /// </summary>
-        private void ThreadDataMessageHandler()
+        private void ThreadDataMessageHandler( )
         {
             while (this._bolIsThreadAlive)
             {
@@ -95,7 +121,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 处理数据消息
         /// </summary>
-        private void DataMessageHandler()
+        private void DataMessageHandler( )
         {
             if (this._queueReceiveDataMessage.Count == 0)
                 return;
@@ -110,51 +136,52 @@ namespace SprayTeaching.MyAllClass
         /// <param name="byteDataMessage">传进来的数据</param>
         private void DataRecognition(byte[] byteDataMessage)
         {
-            byte byteTmp = byteDataMessage[0];
+            byte[] byteDataMessageTmp = byteDataMessage.Skip(2).Take(13).ToArray();
+            byte byteTmp = byteDataMessageTmp[0];
             switch (byteTmp)
             {
                 case 0xC0:  // 下位机发送上来的采样频率和采样周期
-                    this.UpdateSampleInformHandler(byteDataMessage);
+                    this.UpdateSampleInformHandler(byteDataMessageTmp);
                     break;
                 case 0xE0:  // 下位机发送上来的哪个轴没有响应
-                    this.UpdateAxisErrorHandler(byteDataMessage);
+                    this.UpdateAxisErrorHandler(byteDataMessageTmp);
                     break;
                 case 0xF0:  // 下位机发送上来的连接响应
-                    this.UpdateMcuIsConnectedHandler(byteDataMessage);
+                    this.UpdateMcuIsConnectedHandler(byteDataMessageTmp);
                     break;
                 case 0xF1:  // 下位机发送上来的准备就绪是否可以开始采集数据
-                    this.UpdateMcuIsReadyHandler(byteDataMessage);
+                    this.UpdateMcuIsReadyHandler(byteDataMessageTmp);
                     break;
                 case 0xF2:  // 下位机发送上来的SD卡是否读取完毕
-                    this.UpdateSDIsReadedHandler(byteDataMessage);
+                    this.UpdateSDIsReadedHandler(byteDataMessageTmp);
                     break;
                 case 0xF3:  // 下位机发送上来的频率设置成功
                 case 0xFE:  // 下位机发送上来的频率设置失败
-                    this.UpdateSetFrequentIsSuccessHandler(byteDataMessage);
+                    this.UpdateSetFrequentIsSuccessHandler(byteDataMessageTmp);
                     break;
                 case 0xF4:  // 下位机发送上来的采集数据是否停止
-                    this.UpdateSampleIsStoppedHandler(byteDataMessage);
+                    this.UpdateSampleIsStoppedHandler(byteDataMessageTmp);
                     break;
                 case 0xF5:  // 下位机发送上来的喷枪1打开
                 case 0xF6:  // 下位机发送上来的喷枪1关闭
-                    this.UpdateLance1IsOpenedHandler(byteDataMessage);
+                    this.UpdateLance1IsOpenedHandler(byteDataMessageTmp);
                     break;
                 case 0xF7:  // 下位机发送上来的电机是否开转
-                    this.UpdateMotorIsRanHandler(byteDataMessage);
+                    this.UpdateMotorIsRanHandler(byteDataMessageTmp);
                     break;
                 case 0xF8:  // 下位机发送上来的喷枪2打开
                 case 0xF9:  // 下位机发送上来的喷枪2关闭
-                    this.UpdateLance2IsOpenedHandler(byteDataMessage);
+                    this.UpdateLance2IsOpenedHandler(byteDataMessageTmp);
                     break;
                 case 0xFA:  // 下位机发送上来的各个轴地址
-                    this.UpdateAxisAddressHandler(byteDataMessage);
+                    this.UpdateAxisAddressHandler(byteDataMessageTmp);
                     break;
                 case 0xFB:  // 下位机发送上来的轴地址修改成功
                 case 0xFC:  // 下位机发送上来的轴地址修改失败
-                    this.UpdateAxisModifiedIsSuccessHandler(byteDataMessage);
+                    this.UpdateAxisModifiedIsSuccessHandler(byteDataMessageTmp);
                     break;
                 case 0xFD:  // 下位机发送上来的各个轴的数据
-                    this.UpdateAxisDataHandler(byteDataMessage);
+                    this.UpdateAxisDataHandler(byteDataMessageTmp);
                     break;
             }
         }
@@ -182,7 +209,7 @@ namespace SprayTeaching.MyAllClass
         {
             bool bolIsReady = false;
 
-            if (byteDataMessage[1] == 0xF1)
+            if (byteDataMessage[0] == 0xF1)
                 bolIsReady = true;
 
             if (this.UpdateMcuIsReady != null)
@@ -274,14 +301,17 @@ namespace SprayTeaching.MyAllClass
         /// <param name="byteDataMessage">数据消息</param>
         private void UpdateSampleInformHandler(byte[] byteDataMessage)
         {
-            double dblSampleFrequent = 0.0;
-            double dblSampleTime = 0.0;
+            int intSampleFrequent = 0;
+            int intSampleCycle = 0;
 
-            dblSampleFrequent = byteDataMessage[1];
-            dblSampleTime = byteDataMessage[2];
+            if (byteDataMessage[0] != 0xC0)
+                return;
+
+            intSampleFrequent = byteDataMessage[1];
+            intSampleCycle = byteDataMessage[2];
 
             if (this.UpdateSampleInform != null)
-                this.UpdateSampleInform(dblSampleFrequent, dblSampleTime);
+                this.UpdateSampleInform(intSampleFrequent, intSampleCycle);
         }
 
         /// <summary>
@@ -291,6 +321,9 @@ namespace SprayTeaching.MyAllClass
         private void UpdateAxisErrorHandler(byte[] byteDataMessage)
         {
             int intAxisID = 0;
+
+            if (byteDataMessage[0] != 0xE0)
+                return;
 
             intAxisID = byteDataMessage[1];
 
@@ -304,17 +337,20 @@ namespace SprayTeaching.MyAllClass
         /// <param name="byteDataMessage">数据消息</param>
         private void UpdateAxisAddressHandler(byte[] byteDataMessage)
         {
-            double[] dblAxisAddress = new double[] { };
+            string[] strAxisAddress = new string[6];
 
-            dblAxisAddress[0] = BitConverter.ToDouble(new byte[] { byteDataMessage[1], byteDataMessage[2] }, 0);
-            dblAxisAddress[1] = BitConverter.ToDouble(new byte[] { byteDataMessage[3], byteDataMessage[4] }, 0);
-            dblAxisAddress[2] = BitConverter.ToDouble(new byte[] { byteDataMessage[5], byteDataMessage[6] }, 0);
-            dblAxisAddress[3] = BitConverter.ToDouble(new byte[] { byteDataMessage[7], byteDataMessage[8] }, 0);
-            dblAxisAddress[4] = BitConverter.ToDouble(new byte[] { byteDataMessage[9], byteDataMessage[10] }, 0);
-            dblAxisAddress[5] = BitConverter.ToDouble(new byte[] { byteDataMessage[11], byteDataMessage[12] }, 0);
+            if (byteDataMessage[0] != 0xFA)
+                return;
+
+            strAxisAddress[0] = byteDataMessage[1].ToString("X2");
+            strAxisAddress[1] = byteDataMessage[2].ToString("X2");
+            strAxisAddress[2] = byteDataMessage[3].ToString("X2");
+            strAxisAddress[3] = byteDataMessage[4].ToString("X2");
+            strAxisAddress[4] = byteDataMessage[5].ToString("X2");
+            strAxisAddress[5] = byteDataMessage[6].ToString("X2");
 
             if (this.UpdateAxisAddress != null)
-                this.UpdateAxisAddress(dblAxisAddress);
+                this.UpdateAxisAddress(strAxisAddress);
         }
 
         /// <summary>
@@ -323,9 +359,49 @@ namespace SprayTeaching.MyAllClass
         /// <param name="byteDataMessage">数据消息</param>
         private void UpdateAxisDataHandler(byte[] byteDataMessage)
         {
-            double[] dblAxisData = new double[] { };
+            double[] dblAxisAngle = new double[] { };
+
+            if (byteDataMessage[0] != 0xFD)
+                return;
+
+            dblAxisAngle = TransferAxisData2Angle(byteDataMessage);
+
+            string strTmp = string.Format("{0},{1},{2},{3},{4},{5}", dblAxisAngle[0], dblAxisAngle[1], dblAxisAngle[2], dblAxisAngle[3], dblAxisAngle[4], dblAxisAngle[5]);
+            System.Windows.MessageBox.Show(strTmp);
+
             if (this.UpdateAxisData != null)
-                this.UpdateAxisData(dblAxisData);
+                this.UpdateAxisData(dblAxisAngle);
+        }
+
+        /// <summary>
+        /// 将接收每个轴数据转换为实际的角度值
+        /// </summary>
+        /// <param name="byteDataMessage">接收的数据</param>
+        /// <returns>角度值</returns>
+        private double[] TransferAxisData2Angle(byte[] byteDataMessage)
+        {
+            double[] dblAngle = new double[6];
+            double dblScaleRate = 0.0219726525;           // 编码器中的值转换到实际角度值的比例关系，360/2^14=360/16384=0.0219726525
+            double dblMaxAngle = 360;
+
+            for (int i = 0; i < 6; i++)
+            {
+                double dblTmpAngle = (byteDataMessage[i * 2 + 1] * 256 + byteDataMessage[(i + 1) * 2]) * dblScaleRate;      // 计算出编码器转换成角度的理论值
+
+                // 判别计算出的理论角度值是否大于标定角度值
+                if (dblTmpAngle >= this._dblCalibrateAngles[i])
+                    dblTmpAngle = dblTmpAngle - this._dblCalibrateAngles[i];
+                else
+                    dblTmpAngle = dblTmpAngle + dblMaxAngle - this._dblCalibrateAngles[i];
+
+                if (dblTmpAngle > dblMaxAngle / 2)
+                    dblTmpAngle = (dblTmpAngle - dblMaxAngle) * this._dblCalibrateDirections[i];
+                else
+                    dblTmpAngle = dblTmpAngle * this._dblCalibrateDirections[i];
+                dblAngle[i] = Math.Round(dblTmpAngle, 3);
+            }
+
+            return dblAngle;
         }
 
         /// <summary>
@@ -334,9 +410,23 @@ namespace SprayTeaching.MyAllClass
         /// <param name="byteDataMessage">数据消息</param>
         private void UpdateAxisModifiedIsSuccessHandler(byte[] byteDataMessage)
         {
-            int intAxisNum = 0;
+            int intAxisNum = -1;
+            bool bolIsSuccess = false;
+            string strAxisAddress = string.Empty;
+
+            if (byteDataMessage[0] == 0xFB)
+            {
+                bolIsSuccess = true;
+                intAxisNum = byteDataMessage[1];
+                strAxisAddress = byteDataMessage[2].ToString("X2");
+            }
+            else
+            {
+                bolIsSuccess = false;
+            }
+
             if (this.UpdateAxisModifiedIsSuccess != null)
-                this.UpdateAxisModifiedIsSuccess(intAxisNum);
+                this.UpdateAxisModifiedIsSuccess(bolIsSuccess, intAxisNum, strAxisAddress);
         }
 
         /// <summary>
@@ -345,10 +435,18 @@ namespace SprayTeaching.MyAllClass
         /// <param name="byteDataMessage">数据消息</param>
         private void UpdateSetFrequentIsSuccessHandler(byte[] byteDataMessage)
         {
-            double dblFrequent = 0.0;
+            int intFrequent = -1;
             bool bolIsSuccess = false;
+
+            if (byteDataMessage[0] == 0xF3)
+                bolIsSuccess = true;
+            else
+                bolIsSuccess = false;
+
+            intFrequent = byteDataMessage[1];
+
             if (this.UpdateSetFrequentIsSuccess != null)
-                this.UpdateSetFrequentIsSuccess(bolIsSuccess, dblFrequent);
+                this.UpdateSetFrequentIsSuccess(bolIsSuccess, intFrequent);
         }
 
         #endregion
@@ -357,15 +455,155 @@ namespace SprayTeaching.MyAllClass
         /// 接收数据
         /// </summary>
         /// <param name="byteDataMessage">传进来的数据</param>
-        private void ReceiveDataMessage(byte[] byteDataMessage)
+        public void ReceiveDataMessage(byte[] byteDataMessage)
         {
             this._queueReceiveDataMessage.Enqueue(byteDataMessage);
             this._autoEvent.Set();                                      // 将事件状态设置为终止状态，允许一个或多个等待线程继续
         }
 
-        private void SendDataMessage()
+        /// <summary>
+        /// 发送的数据message
+        /// </summary>
+        /// <param name="strCommand">传入的命令</param>
+        /// <returns>待发送的message</returns>
+        public byte[] SendDataMessage(string strCommand, DataModel dm = null)
         {
-
+            byte[] byteSendBuffer = RecognizeCommand(strCommand,dm);
+            return byteSendBuffer;
         }
+
+        #region  发送消息的处理部分
+
+        /// <summary>
+        /// 识别指令
+        /// </summary>
+        /// <param name="strCommand"></param>
+        /// <returns></returns>
+        private byte[] RecognizeCommand(string strCommand,DataModel dm = null)
+        {
+            byte[] byteSendBuffer = null;
+            switch (strCommand)
+            {
+                case "QuerySampleFrequent":
+                    byteSendBuffer = SendMessageQuerySampleFrequentHandler();
+                    break;
+            }
+            return byteSendBuffer;
+        }
+
+        /// <summary>
+        /// 设置采样频率指令
+        /// </summary>
+        /// <param name="intFrequent">采样频率</param>
+        /// <returns>发送的指令</returns>
+        private byte[] SendMessageSetSampleRateHandler(int intFrequent)
+        {
+            byte[] byteSendBuffer = new byte[] { 0xFA, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xEF };
+            byteSendBuffer[1] = 0xF0;
+            byteSendBuffer[2] = (byte)intFrequent;
+            return byteSendBuffer;
+        }
+
+        /// <summary>
+        /// 从SD卡中读取数据指令
+        /// </summary>
+        /// <returns>发送的指令</returns>
+        private byte[] SendMessageReadDataFromSDHandler( )
+        {
+            byte[] byteSendBuffer = new byte[] { 0xFA, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xEF };
+            byteSendBuffer[1] = 0xF1;
+            return byteSendBuffer;
+        }
+
+        /// <summary>
+        /// 开始采集数据指令
+        /// </summary>
+        /// <returns>发送的指令</returns>
+        private byte[] SendMessageStartSampleHandler( )
+        {
+            byte[] byteSendBuffer = new byte[] { 0xFA, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xEF };
+            byteSendBuffer[1] = 0xF2;
+            return byteSendBuffer;
+        }
+
+        /// <summary>
+        /// 停止采集数据指令
+        /// </summary>
+        /// <returns>发送的指令</returns>
+        private byte[] SendMessageStopSampleHandler( )
+        {
+            byte[] byteSendBuffer = new byte[] { 0xFA, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xEF };
+            byteSendBuffer[1] = 0xF3;
+            return byteSendBuffer;
+        }
+
+        /// <summary>
+        /// 查询设备存在与否指令
+        /// </summary>
+        /// <returns>发送的指令</returns>
+        private byte[] SendMessageCheckWorkDeviceHandler( )
+        {
+            byte[] byteSendBuffer = new byte[] { 0xFA, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xEF };
+            byteSendBuffer[1] = 0xF4;
+            return byteSendBuffer;
+        }
+
+        /// <summary>
+        /// 查询采样频率的指令
+        /// </summary>
+        /// <returns>发送的指令</returns>
+        private byte[] SendMessageQuerySampleFrequentHandler( )
+        {
+            byte[] byteSendBuffer = new byte[] { 0xFA, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xEF };
+            byteSendBuffer[1] = 0xF5;
+            return byteSendBuffer;
+        }
+
+        /// <summary>
+        /// 允许测试喷枪及电机
+        /// </summary>
+        /// <returns>发送的指令</returns>
+        private byte[] SendMessageEnableTestLanceMotorHandler( )
+        {
+            byte[] byteSendBuffer = new byte[] { 0xFA, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xEF };
+            byteSendBuffer[1] = 0xF6;
+            return byteSendBuffer;
+        }
+
+        /// <summary>
+        /// 修改编码器地址
+        /// </summary>
+        /// <returns>发送的指令</returns>
+        private byte[] SendMessageModifyEncoderAddressHandler( )
+        {
+            byte[] byteSendBuffer = new byte[] { 0xFA, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xEF };
+            byteSendBuffer[1] = 0xF7;
+            return byteSendBuffer;
+        }
+
+        /// <summary>
+        /// 要求返回各个轴的地址
+        /// </summary>
+        /// <returns>发送的指令</returns>
+        private byte[] SendMessageReturnAxisAddressHandler( )
+        {
+            byte[] byteSendBuffer = new byte[] { 0xFA, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xEF };
+            byteSendBuffer[1] = 0xF8;
+            return byteSendBuffer;
+        }
+
+        /// <summary>
+        /// 开启直通模式
+        /// </summary>
+        /// <returns>发送的指令</returns>
+        private byte[] SendMessageStartRouterModeHandler( )
+        {
+            byte[] byteSendBuffer = new byte[] { 0xFA, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xEF };
+            byteSendBuffer[1] = 0xF9;
+            return byteSendBuffer;
+        }
+
+        #endregion
+
     }
 }

@@ -302,7 +302,7 @@ namespace SprayTeaching.MyAllClass
             }
             else
             {
-                //this.WriteLog("没有机器人可以选取.");
+                //this.WriteLogHandler("没有机器人可以选取.");
                 return false;
             }
         }

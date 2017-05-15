@@ -10,7 +10,7 @@ namespace SprayTeaching.ViewModel
     public class ConnectViewVM : BaseNotifyPropertyChanged
     {
         #region  构造函数
-        public ConnectViewVM()
+        public ConnectViewVM( )
         {
             this._modelViewModel = new ConnectModelVM();
         }
@@ -123,6 +123,36 @@ namespace SprayTeaching.ViewModel
             }
         }
 
+
+        /// <summary>
+        /// 查询采样频率
+        /// </summary>
+        private MyCommand _querySampleFrequentCommand;
+
+        public MyCommand QuerySampleFrequentCommand
+        {
+            get
+            {
+                if (this._querySampleFrequentCommand == null)
+                    this._querySampleFrequentCommand = new MyCommand(this.ExecuteQuerySampleFrequent);
+                return _querySampleFrequentCommand;
+            }
+        }
+
+        private MyCommand _setSampleFrequentCommand;
+
+        public MyCommand SetSampleFrequentCommand
+        {
+            get 
+            {
+                if (this._setSampleFrequentCommand == null)
+                    this._setSampleFrequentCommand = new MyCommand(this.ExecuteSetSampleFrequent);
+                return _setSampleFrequentCommand; 
+            }
+        }
+
+
+
         #endregion
 
         #region  具体命令的执行事件
@@ -179,6 +209,20 @@ namespace SprayTeaching.ViewModel
         private void ExecuteSelectRobotModel(object objParameter = null)
         {
             this._modelViewModel.SelectRobotModelHandler(objParameter);
+        }
+
+        /// <summary>
+        /// 查询采样频率
+        /// </summary>
+        /// <param name="objParameter">查询采样频率的命令字符串</param>
+        private void ExecuteQuerySampleFrequent(object objParameter = null)
+        {
+            this._modelViewModel.SendDataHandler(objParameter);
+        }
+
+        private void ExecuteSetSampleFrequent(object objParameter = null)
+        {
+            this._modelViewModel.SendDataHandler(objParameter);
         }
 
         #endregion

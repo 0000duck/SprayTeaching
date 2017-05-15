@@ -46,4 +46,5 @@ namespace SprayTeaching.MyAllClass
         BaudRate_230400 = 230400,
         BaudRate_256000 = 256000
     }
+
 }

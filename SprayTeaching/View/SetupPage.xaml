@@ -21,8 +21,19 @@
                         <TextBox MinWidth="70" Text="0" VerticalAlignment="Center" Margin="5" Padding="2"></TextBox>
                     </StackPanel>
                     <StackPanel Grid.Row="2" >
-                        <Button Content="设置" VerticalAlignment="Center" Margin="5" HorizontalAlignment="Left" MinWidth="50" Padding="2"></Button>
-                        <Button Grid.Row="3" Content="查询" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5" MinWidth="50" Padding="2"></Button>
+                        <Button Content="设置" VerticalAlignment="Center" Margin="5" HorizontalAlignment="Left" MinWidth="50" Padding="2"/>
+                        <Button  Content="查询" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5" MinWidth="50" Padding="2"
+                                 Command="{Binding QuerySampleFrequentCommand}" CommandParameter="QuerySampleFrequent"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="当前频率：" Margin="5" Padding="2"/>
+                            <TextBlock Text="{Binding ModelViewModel.MainDataModel.CurrentSampleFrequent,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="2"/>
+                            <TextBlock Text="Hz" Margin="5" Padding="2"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="当前周期：" Margin="5" Padding="2"/>
+                            <TextBlock Text="{Binding ModelViewModel.MainDataModel.CurrentSampleCycle,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="2"/>
+                            <TextBlock Text="ms" Margin="5" Padding="2"/>
+                        </StackPanel>
                     </StackPanel>
                     
                 </Grid>

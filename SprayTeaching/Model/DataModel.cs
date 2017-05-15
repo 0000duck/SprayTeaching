@@ -178,9 +178,9 @@ namespace SprayTeaching.Model
         }
 
         /// <summary>
-        /// 串口的波特率，默认是9600
+        /// 串口的波特率，默认是115200
         /// </summary>
-        private int _brSerialPortBaudRate = (int)SerialPortBaudRates.BaudRate_9600;
+        private int _brSerialPortBaudRate = (int)SerialPortBaudRates.BaudRate_115200;
 
         public int SerialPortBaudRate
         {
@@ -373,6 +373,180 @@ namespace SprayTeaching.Model
         {
             get { return _strSocketIsConnectedImage; }
             set { _strSocketIsConnectedImage = value; RaisePropertyChanged("SocketIsConnectedImage"); }
+        }
+
+        #endregion
+
+        #region 配置文件的相关数据
+
+        /// <summary>
+        /// 机器人标定的关节角度1
+        /// </summary>
+        private double _dblRobotCalibrateAngle1 = 0.0;
+
+        public double RobotCalibrateAngle1
+        {
+            get { return _dblRobotCalibrateAngle1; }
+            set { _dblRobotCalibrateAngle1 = value; RaisePropertyChanged("RobotCalibrateAngle1"); }
+        }
+
+        /// <summary>
+        /// 机器人标定的关节角度2
+        /// </summary>
+        private double _dblRobotCalibrateAngle2 = 0.0;
+
+        public double RobotCalibrateAngle2
+        {
+            get { return _dblRobotCalibrateAngle2; }
+            set { _dblRobotCalibrateAngle2 = value; RaisePropertyChanged("RobotCalibrateAngle2"); }
+        }
+
+        /// <summary>
+        /// 机器人标定的关节角度3
+        /// </summary>
+        private double _dblRobotCalibrateAngle3 = 0.0;
+
+        public double RobotCalibrateAngle3
+        {
+            get { return _dblRobotCalibrateAngle3; }
+            set { _dblRobotCalibrateAngle3 = value; RaisePropertyChanged("RobotCalibrateAngle3"); }
+        }
+
+        /// <summary>
+        /// 机器人标定的关节角度4
+        /// </summary>
+        private double _dblRobotCalibrateAngle4 = 0.0;
+
+        public double RobotCalibrateAngle4
+        {
+            get { return _dblRobotCalibrateAngle4; }
+            set { _dblRobotCalibrateAngle4 = value; RaisePropertyChanged("RobotCalibrateAngle4"); }
+        }
+
+        /// <summary>
+        /// 机器人标定的关节角度5
+        /// </summary>
+        private double _dblRobotCalibrateAngle5 = 0.0;
+
+        public double RobotCalibrateAngle5
+        {
+            get { return _dblRobotCalibrateAngle5; }
+            set { _dblRobotCalibrateAngle5 = value; RaisePropertyChanged("RobotCalibrateAngle5"); }
+        }
+
+        /// <summary>
+        /// 机器人标定的关节角度6
+        /// </summary>
+        private double _dblRobotCalibrateAngle6 = 0.0;
+
+        public double RobotCalibrateAngle6
+        {
+            get { return _dblRobotCalibrateAngle6; }
+            set { _dblRobotCalibrateAngle6 = value; RaisePropertyChanged("RobotCalibrateAngle6"); }
+        }
+
+        /// <summary>
+        /// 配置文件的路径
+        /// </summary>
+        private string _strConfigFileAddress = "./RobotConfig.ini";
+
+        public string ConfigFileAddress
+        {
+            get { return _strConfigFileAddress; }
+            set { _strConfigFileAddress = value; RaisePropertyChanged("ConfigFileAddress"); }
+        }
+
+        /// <summary>
+        /// 机器人标定关节1方向
+        /// </summary>
+        private double _dblRobotCalibrateDirection1 = 0.0;
+
+        public double RobotCalibrateDirection1
+        {
+            get { return _dblRobotCalibrateDirection1; }
+            set { _dblRobotCalibrateDirection1 = value; RaisePropertyChanged("RobotCalibrateDirection1"); }
+        }
+
+        /// <summary>
+        /// 机器人标定关节2方向
+        /// </summary>
+        private double _dblRobotCalibrateDirection2 = 0.0;
+
+        public double RobotCalibrateDirection2
+        {
+            get { return _dblRobotCalibrateDirection2; }
+            set { _dblRobotCalibrateDirection2 = value; RaisePropertyChanged("RobotCalibrateDirection2"); }
+        }
+
+        /// <summary>
+        /// 机器人标定关节3方向
+        /// </summary>
+        private double _dblRobotCalibrateDirection3 = 0.0;
+
+        public double RobotCalibrateDirection3
+        {
+            get { return _dblRobotCalibrateDirection3; }
+            set { _dblRobotCalibrateDirection3 = value; RaisePropertyChanged("RobotCalibrateDirection3"); }
+        }
+
+        /// <summary>
+        /// 机器人标定关节4方向
+        /// </summary>
+        private double _dblRobotCalibrateDirection4 = 0.0;
+
+        public double RobotCalibrateDirection4
+        {
+            get { return _dblRobotCalibrateDirection4; }
+            set { _dblRobotCalibrateDirection4 = value; RaisePropertyChanged("RobotCalibrateDirection4"); }
+        }
+
+        /// <summary>
+        /// 机器人标定关节5方向
+        /// </summary>
+        private double _dblRobotCalibrateDirection5 = 0.0;
+
+        public double RobotCalibrateDirection5
+        {
+            get { return _dblRobotCalibrateDirection5; }
+            set { _dblRobotCalibrateDirection5 = value; RaisePropertyChanged("RobotCalibrateDirection5"); }
+        }
+
+        /// <summary>
+        /// 机器人标定关节6方向
+        /// </summary>
+        private double _dblRobotCalibrateDirection6 = 0.0;
+
+        public double RobotCalibrateDirection6
+        {
+            get { return _dblRobotCalibrateDirection6; }
+            set { _dblRobotCalibrateDirection6 = value; RaisePropertyChanged("RobotCalibrateDirection6"); }
+        }
+
+        #endregion
+
+        #region 数据参数
+
+        /// <summary>
+        /// 当前的采样频率
+        /// </summary>
+        private int _strCurrentSampleFrequent = 5;
+
+        public int CurrentSampleFrequent
+        {
+            get { return _strCurrentSampleFrequent; }
+            set { _strCurrentSampleFrequent = value; RaisePropertyChanged("CurrentSampleFrequent"); }
+        }
+
+
+        /// <summary>
+        /// 当前的采样周期
+        /// </summary>
+        private int _strCurrentSampleCycle = 200;
+
+        public int CurrentSampleCycle
+        {
+            get { return _strCurrentSampleCycle; }
+            set { _strCurrentSampleCycle = value; RaisePropertyChanged("CurrentSampleCycle"); }
         }
 
         #endregion
