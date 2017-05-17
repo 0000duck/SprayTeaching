@@ -7,7 +7,7 @@ namespace SprayTeaching.BaseClassLib
 {
     // 公共委托事件
     public delegate void DataReceivedEventHandler(byte[] byteDataReceive);                              // 对接收的数据进行处理
-    public delegate void UpdateLogContentEventHandler(string strParameter);                             // 更新日志内容的delegate变量声明    
+    public delegate void UpdateLogContentEventHandler(string strParameter, int intParameter);           // 更新日志内容的delegate变量声明    
     public delegate void UpdateRobotParameterEventHandler(Dictionary<string, object> dblParameter);     // 更新机器人参数的delegate变量声明  
     public delegate void UpdateSocketIsConnectedEventHandler(bool bolParameter);                        // 更新socket通信是否连接
     public delegate void UpdateSerialPortIsOpenedEventHandler(bool bolParameter);                       // 更新串口是否打开
@@ -15,7 +15,7 @@ namespace SprayTeaching.BaseClassLib
 
     public delegate void UpdateMessageStateInformEventHandler(bool bolParameter);                       // 更新下位机发送上来的状态信息
     public delegate void UpdateMessageAxisErrorEventHandler(int intParameter);                          // 更新下位机发送上来的哪个轴没有响应
-    public delegate void UpdateMessageAxisAddressEventHandler(string[]  dblParameter);                  // 更新下位机发送上来的轴地址
+    public delegate void UpdateMessageAxisAddressEventHandler(byte[]  dblParameter);                    // 更新下位机发送上来的轴地址
     public delegate void UpdateMessageAxisDataEventHandler(double[] dblParameter);                      // 更新下位机发送上来的各个轴数据
     public delegate void UpdateMessageAxisModifiedIsSuccessEventHandler(bool bolPar1,int intParameter2,string strPar3);          // 更新下位机发送上来的修改轴地址成功
     public delegate void UpdateMessageSampleInformEventHandler(int intPar1,int intPar2);                // 更新下位机发送上来的采样频率和采样周期

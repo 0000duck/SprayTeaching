@@ -54,7 +54,7 @@ namespace SprayTeaching.MyAllClass
         public event UpdateMessageAxisModifiedIsSuccessEventHandler UpdateAxisModifiedIsSuccess;    // 下位机发送上来的轴地址修改是否成功
         public event UpdateMessageSetFrequentIsSuccessed UpdateSetFrequentIsSuccess;                // 下位机发送上来的频率设置是否成功
 
-        //public event DataReceivedEventHandler DataReceived;
+        public event UpdateLogContentEventHandler UpdateLogContent;                                 // 更新日志文件 
 
         public MyDataMessage( )
         {
@@ -81,6 +81,8 @@ namespace SprayTeaching.MyAllClass
         {
             this._thrdDataMessageHandler = null;
             this._bolIsThreadAlive = false;
+            this._autoEvent = null;
+            this._queueReceiveDataMessage = null;
         }
 
         /// <summary>
@@ -98,12 +100,27 @@ namespace SprayTeaching.MyAllClass
         }
         #endregion
 
+        #region 写入日志
+        /// <summary>
+        /// 将消息写入日志
+        /// </summary>
+        /// <param name="strMessage">消息内容</param>
+        private void WriteLogHandler(string strMessage, int intType = 0)
+        {
+            if (this.UpdateLogContent != null)
+            {
+                this.UpdateLogContent(strMessage, intType);
+            }
+        }
+        #endregion
+
         #region 接收数据消息处理部分
         /// <summary>
         /// 处理数据消息的线程
         /// </summary>
         private void ThreadDataMessageHandler( )
         {
+            Thread.Sleep(1);        // 延迟启动，为避免初始化时候出现问题
             while (this._bolIsThreadAlive)
             {
                 if (this._queueReceiveDataMessage.Count != 0)
@@ -337,20 +354,20 @@ namespace SprayTeaching.MyAllClass
         /// <param name="byteDataMessage">数据消息</param>
         private void UpdateAxisAddressHandler(byte[] byteDataMessage)
         {
-            string[] strAxisAddress = new string[6];
+            byte[] byteAxisAddress = new byte[6];
 
             if (byteDataMessage[0] != 0xFA)
                 return;
 
-            strAxisAddress[0] = byteDataMessage[1].ToString("X2");
-            strAxisAddress[1] = byteDataMessage[2].ToString("X2");
-            strAxisAddress[2] = byteDataMessage[3].ToString("X2");
-            strAxisAddress[3] = byteDataMessage[4].ToString("X2");
-            strAxisAddress[4] = byteDataMessage[5].ToString("X2");
-            strAxisAddress[5] = byteDataMessage[6].ToString("X2");
+            byteAxisAddress[0] = byteDataMessage[1];
+            byteAxisAddress[1] = byteDataMessage[2];
+            byteAxisAddress[2] = byteDataMessage[3];
+            byteAxisAddress[3] = byteDataMessage[4];
+            byteAxisAddress[4] = byteDataMessage[5];
+            byteAxisAddress[5] = byteDataMessage[6];
 
             if (this.UpdateAxisAddress != null)
-                this.UpdateAxisAddress(strAxisAddress);
+                this.UpdateAxisAddress(byteAxisAddress);
         }
 
         /// <summary>
@@ -366,8 +383,8 @@ namespace SprayTeaching.MyAllClass
 
             dblAxisAngle = TransferAxisData2Angle(byteDataMessage);
 
-            string strTmp = string.Format("{0},{1},{2},{3},{4},{5}", dblAxisAngle[0], dblAxisAngle[1], dblAxisAngle[2], dblAxisAngle[3], dblAxisAngle[4], dblAxisAngle[5]);
-            System.Windows.MessageBox.Show(strTmp);
+            //string strTmp = string.Format("{0},{1},{2},{3},{4},{5}", dblAxisAngles[0], dblAxisAngles[1], dblAxisAngles[2], dblAxisAngles[3], dblAxisAngles[4], dblAxisAngles[5]);
+            //System.Windows.MessageBox.Show(strTmp);
 
             if (this.UpdateAxisData != null)
                 this.UpdateAxisData(dblAxisAngle);
@@ -468,7 +485,7 @@ namespace SprayTeaching.MyAllClass
         /// <returns>待发送的message</returns>
         public byte[] SendDataMessage(string strCommand, DataModel dm = null)
         {
-            byte[] byteSendBuffer = RecognizeCommand(strCommand,dm);
+            byte[] byteSendBuffer = RecognizeCommand(strCommand, dm);
             return byteSendBuffer;
         }
 
@@ -479,13 +496,62 @@ namespace SprayTeaching.MyAllClass
         /// </summary>
         /// <param name="strCommand"></param>
         /// <returns></returns>
-        private byte[] RecognizeCommand(string strCommand,DataModel dm = null)
+        private byte[] RecognizeCommand(string strCommand, DataModel dm = null)
         {
             byte[] byteSendBuffer = null;
             switch (strCommand)
             {
-                case "QuerySampleFrequent":
-                    byteSendBuffer = SendMessageQuerySampleFrequentHandler();
+                case "QuerySampleFrequent":     // 查询采样频率
+                    byteSendBuffer = this.SendMessageQuerySampleFrequentHandler();
+                    this.WriteLogHandler("执行查询采样频率操作.");
+                    break;
+                case "SetSampleFrequent":       // 设定采样频率
+                    byteSendBuffer = this.SendMessageSetSampleRateHandler(dm.SetSampleFrequent);
+                    this.WriteLogHandler("执行设定采样频率操作.");
+                    break;
+                case "ReadAllAxisAddress":      // 读取所有轴地址
+                    byteSendBuffer = this.SendMessageReturnAxisAddressHandler();
+                    this.WriteLogHandler("执行读取所有地址操作.");
+                    break;
+                case "ModifyAxis1Address":      // 修改1轴地址
+                    byteSendBuffer = this.SendMessageModifyEncoderAddressHandler(0x01, dm.SetAxis1Address);
+                    this.WriteLogHandler("执行修改1轴地址操作.");
+                    break;
+                case "ModifyAxis2Address":      // 修改2轴地址
+                    byteSendBuffer = this.SendMessageModifyEncoderAddressHandler(0x02, dm.SetAxis2Address);
+                    this.WriteLogHandler("执行修改2轴地址操作.");
+                    break;
+                case "ModifyAxis3Address":      // 修改3轴地址
+                    byteSendBuffer = this.SendMessageModifyEncoderAddressHandler(0x03, dm.SetAxis3Address);
+                    this.WriteLogHandler("执行修改3轴地址操作.");
+                    break;
+                case "ModifyAxis4Address":      // 修改4轴地址
+                    byteSendBuffer = this.SendMessageModifyEncoderAddressHandler(0x04, dm.SetAxis4Address);
+                    this.WriteLogHandler("执行修改4轴地址操作.");
+                    break;
+                case "ModifyAxis5Address":      // 修改5轴地址
+                    byteSendBuffer = this.SendMessageModifyEncoderAddressHandler(0x05, dm.SetAxis5Address);
+                    this.WriteLogHandler("执行修改5轴地址操作.");
+                    break;
+                case "ModifyAxis6Address":      // 修改6轴地址
+                    byteSendBuffer = this.SendMessageModifyEncoderAddressHandler(0x06, dm.SetAxis6Address);
+                    this.WriteLogHandler("执行修改6轴地址操作.");
+                    break;
+                case "QueryDeviceConnect":      // 查询设备连接状态
+                    byteSendBuffer = this.SendMessageQueryDeviceConnectHandler();
+                    this.WriteLogHandler("执行查询设备连接操作.");
+                    break;
+                case "QueryDeviceSampleReady":  // 查询设备采样是否准备就绪
+                    byteSendBuffer = this.SendMessageReadDataFromSDHandler();
+                    this.WriteLogHandler("执行查询设备数据采样装备就绪操作.");
+                    break;
+                case "StartSampleData":         // 开始采样数据
+                    byteSendBuffer = this.SendMessageStartSampleHandler();
+                    this.WriteLogHandler("执行开始采样数据操作.");
+                    break;
+                case "StopSampleData":          // 停止采样数据
+                    byteSendBuffer = this.SendMessageStopSampleHandler();
+                    this.WriteLogHandler("执行停止采样数据操作.");
                     break;
             }
             return byteSendBuffer;
@@ -538,10 +604,10 @@ namespace SprayTeaching.MyAllClass
         }
 
         /// <summary>
-        /// 查询设备存在与否指令
+        /// 查询设备存在与否指令,设备是否连接
         /// </summary>
         /// <returns>发送的指令</returns>
-        private byte[] SendMessageCheckWorkDeviceHandler( )
+        private byte[] SendMessageQueryDeviceConnectHandler( )
         {
             byte[] byteSendBuffer = new byte[] { 0xFA, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xEF };
             byteSendBuffer[1] = 0xF4;
@@ -574,10 +640,13 @@ namespace SprayTeaching.MyAllClass
         /// 修改编码器地址
         /// </summary>
         /// <returns>发送的指令</returns>
-        private byte[] SendMessageModifyEncoderAddressHandler( )
+        private byte[] SendMessageModifyEncoderAddressHandler(byte byteAxisNum, byte byteAxisAddress)
         {
             byte[] byteSendBuffer = new byte[] { 0xFA, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xEF };
             byteSendBuffer[1] = 0xF7;
+            byteSendBuffer[2] = byteAxisNum;
+            byteSendBuffer[3] = byteAxisAddress;
+            byteSendBuffer[4] = (byte)(byteAxisNum ^ byteAxisAddress);      // 轴信息和地址信息进行异或
             return byteSendBuffer;
         }
 

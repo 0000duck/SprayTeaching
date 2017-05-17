@@ -18,12 +18,14 @@
                     <TextBlock Grid.Row="0" Text="频率设置:" Margin="5" FontSize="15" FontWeight="Bold"/>
                     <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Top">
                         <TextBlock Text="设置频率4Hz~20Hz:" VerticalAlignment="Center" Margin="5" Padding="2"></TextBlock>
-                        <TextBox MinWidth="70" Text="0" VerticalAlignment="Center" Margin="5" Padding="2"></TextBox>
+                        <TextBox MinWidth="70" Text="{Binding ModelViewModel.MainDataModel.SetSampleFrequent,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                 VerticalAlignment="Center" Margin="5" Padding="2"/>
                     </StackPanel>
                     <StackPanel Grid.Row="2" >
-                        <Button Content="设置" VerticalAlignment="Center" Margin="5" HorizontalAlignment="Left" MinWidth="50" Padding="2"/>
+                        <Button Content="设置" VerticalAlignment="Center" Margin="5" HorizontalAlignment="Left" MinWidth="50" Padding="2"
+                                Command="{Binding SendDataCommunicateCommand}" CommandParameter="SetSampleFrequent"/>
                         <Button  Content="查询" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5" MinWidth="50" Padding="2"
-                                 Command="{Binding QuerySampleFrequentCommand}" CommandParameter="QuerySampleFrequent"/>
+                                 Command="{Binding SendDataCommunicateCommand}" CommandParameter="QuerySampleFrequent"/>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="当前频率：" Margin="5" Padding="2"/>
                             <TextBlock Text="{Binding ModelViewModel.MainDataModel.CurrentSampleFrequent,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="2"/>
@@ -41,6 +43,7 @@
             <TabItem Header="轴&#13;&#10;地&#13;&#10;址" Padding="6">
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
                         <RowDefinition Height="Auto"></RowDefinition>
                         <RowDefinition Height="Auto"></RowDefinition>
                         <RowDefinition Height="Auto"></RowDefinition>
@@ -77,46 +80,103 @@
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="轴地址读写:" Margin="5" FontSize="15" FontWeight="Bold"/>
+                        <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Vertical">
+                            <TextBlock Grid.Row="0" Grid.Column="0"  Text="轴地址修改（十进制）:" Margin="5" FontSize="15" FontWeight="Bold"/>
+                            <CheckBox Grid.Row="0" Grid.Column="1" x:Name="chkCanModified" Content="是否允许修改" IsChecked="False" 
+                                      Margin="5" Padding="5,1,5,1" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </StackPanel>                        
                         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
                             <TextBlock Text="1轴" Margin="2,1,2,1" VerticalAlignment="Center"/>
-                            <TextBox Margin="2,1,2,1" MinWidth="60" VerticalAlignment="Center"/>
-                            <Button Margin="2,1,2,1" Content="写入"/>
+                            <TextBox Text="{Binding ModelViewModel.MainDataModel.SetAxis1Address,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                     Margin="2,1,2,1" MinWidth="60" VerticalAlignment="Center" IsEnabled="{Binding ElementName=chkCanModified,Path=IsChecked}"/>
+                            <Button Margin="2,1,2,1" Content="写入" IsEnabled="{Binding ElementName=chkCanModified,Path=IsChecked}"
+                                    Command="{Binding SendDataCommunicateCommand}" CommandParameter="ModifyAxis1Address"/>
                         </StackPanel>
                         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="5,0,0,0">
                             <TextBlock Text="4轴" Margin="2,1,2,1" VerticalAlignment="Center"/>
-                            <TextBox Margin="2,1,2,1" MinWidth="60" VerticalAlignment="Center"/>
-                            <Button Margin="2,1,2,1" Content="写入"/>
+                            <TextBox Text="{Binding ModelViewModel.MainDataModel.SetAxis4Address,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                     Margin="2,1,2,1" MinWidth="60" VerticalAlignment="Center" IsEnabled="{Binding ElementName=chkCanModified,Path=IsChecked}"/>
+                            <Button Margin="2,1,2,1" Content="写入" IsEnabled="{Binding ElementName=chkCanModified,Path=IsChecked}"
+                                    Command="{Binding SendDataCommunicateCommand}" CommandParameter="ModifyAxis4Address"/>
                         </StackPanel>
                         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
                             <TextBlock Text="2轴" Margin="2,1,2,1" VerticalAlignment="Center"/>
-                            <TextBox Margin="2,1,2,1" MinWidth="60" VerticalAlignment="Center"/>
-                            <Button Margin="2,1,2,1" Content="写入"/>
+                            <TextBox Text="{Binding ModelViewModel.MainDataModel.SetAxis2Address,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                     Margin="2,1,2,1" MinWidth="60" VerticalAlignment="Center" IsEnabled="{Binding ElementName=chkCanModified,Path=IsChecked}"/>
+                            <Button Margin="2,1,2,1" Content="写入" IsEnabled="{Binding ElementName=chkCanModified,Path=IsChecked}"
+                                    Command="{Binding SendDataCommunicateCommand}" CommandParameter="ModifyAxis2Address"/>
                         </StackPanel>
                         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="5,0,0,0">
                             <TextBlock Text="5轴" Margin="2,1,2,1" VerticalAlignment="Center"/>
-                            <TextBox Margin="2,1,2,1" MinWidth="60" VerticalAlignment="Center"/>
-                            <Button Margin="2,1,2,1" Content="写入"/>
+                            <TextBox Text="{Binding ModelViewModel.MainDataModel.SetAxis5Address,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                     Margin="2,1,2,1" MinWidth="60" VerticalAlignment="Center" IsEnabled="{Binding ElementName=chkCanModified,Path=IsChecked}"/>
+                            <Button Margin="2,1,2,1" Content="写入" IsEnabled="{Binding ElementName=chkCanModified,Path=IsChecked}"
+                                    Command="{Binding SendDataCommunicateCommand}" CommandParameter="ModifyAxis5Address"/>
                         </StackPanel>
                         <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
                             <TextBlock Text="3轴" Margin="2,1,2,1" VerticalAlignment="Center"/>
-                            <TextBox Margin="2,1,2,1" MinWidth="60" VerticalAlignment="Center"/>
-                            <Button Margin="2,1,2,1" Content="写入"/>
+                            <TextBox Text="{Binding ModelViewModel.MainDataModel.SetAxis3Address,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                     Margin="2,1,2,1" MinWidth="60" VerticalAlignment="Center" IsEnabled="{Binding ElementName=chkCanModified,Path=IsChecked}"/>
+                            <Button Margin="2,1,2,1" Content="写入" IsEnabled="{Binding ElementName=chkCanModified,Path=IsChecked}"
+                                    Command="{Binding SendDataCommunicateCommand}" CommandParameter="ModifyAxis3Address"/>
                         </StackPanel>
                         <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="5,0,0,0">
                             <TextBlock Text="6轴" Margin="2,1,2,1" VerticalAlignment="Center"/>
-                            <TextBox Margin="2,1,2,1" MinWidth="60" VerticalAlignment="Center"/>
-                            <Button Margin="2,1,2,1" Content="写入"/>
-                        </StackPanel>
-                        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
-                            <Button Content="读取地址" Margin="5" Padding="5,1,5,1" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                            <Button Content="清零" Margin="5" Padding="5,1,5,1" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                        </StackPanel>
+                            <TextBox Text="{Binding ModelViewModel.MainDataModel.SetAxis6Address,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                     Margin="2,1,2,1" MinWidth="60" VerticalAlignment="Center" IsEnabled="{Binding ElementName=chkCanModified,Path=IsChecked}"/>
+                            <Button Margin="2,1,2,1" Content="写入" IsEnabled="{Binding ElementName=chkCanModified,Path=IsChecked}"
+                                    Command="{Binding SendDataCommunicateCommand}" CommandParameter="ModifyAxis6Address"/>
+                        </StackPanel>                        
                     </Grid>
-                    <Rectangle Grid.Row="3" Stroke="Black" Height="0.6" Margin="5"/>                                 
-                    <StackPanel Grid.Row="4" Margin="5" Orientation="Horizontal">
-                        <TextBlock  Text="状态:" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5"/>
-                        <TextBlock  Text="就绪" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5"/>
+                    <Rectangle Grid.Row="3" Stroke="Black" Height="0.6" Margin="5"/>
+                    <StackPanel Grid.Row="4" Orientation="Horizontal">
+                        <Button Content="读取地址" Margin="5" Padding="5,1,5,1" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                Command="{Binding SendDataCommunicateCommand}" CommandParameter="ReadAllAxisAddress"/>
+                        <Button Content="清零" Margin="5" Padding="5,1,5,1" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                Command="{Binding ClearAllAxisAddressCommand}" />                        
+                    </StackPanel>
+                    <StackPanel Grid.Row="5" Margin="5" Orientation="Horizontal">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"></RowDefinition>
+                                <RowDefinition Height="Auto"></RowDefinition>
+                                <RowDefinition Height="Auto"></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="5,0,15,0">
+                                <TextBlock Text="1轴地址：" Margin="2,1,2,1" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding ModelViewModel.MainDataModel.CurrentAxis1Address,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                           Margin="2,1,2,1" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="5,0,15,0">
+                                <TextBlock Text="2轴地址：" Margin="2,1,2,1" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding ModelViewModel.MainDataModel.CurrentAxis2Address,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                           Margin="2,1,2,1" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Margin="5,0,15,0">
+                                <TextBlock Text="3轴地址：" Margin="2,1,2,1" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding ModelViewModel.MainDataModel.CurrentAxis3Address,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                           Margin="2,1,2,1" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="15,0,0,0">
+                                <TextBlock Text="4轴地址：" Margin="2,1,2,1" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding ModelViewModel.MainDataModel.CurrentAxis4Address,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                           Margin="2,1,2,1" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="15,0,0,0">
+                                <TextBlock Text="5轴地址：" Margin="2,1,2,1" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding ModelViewModel.MainDataModel.CurrentAxis5Address,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                           Margin="2,1,2,1" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="15,0,0,0">
+                                <TextBlock Text="6轴地址：" Margin="2,1,2,1" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding ModelViewModel.MainDataModel.CurrentAxis6Address,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                           Margin="2,1,2,1" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                 </Grid>
             </TabItem>

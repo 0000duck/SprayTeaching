@@ -529,7 +529,7 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 当前的采样频率
         /// </summary>
-        private int _strCurrentSampleFrequent = 5;
+        private int _strCurrentSampleFrequent = 0;
 
         public int CurrentSampleFrequent
         {
@@ -541,13 +541,206 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 当前的采样周期
         /// </summary>
-        private int _strCurrentSampleCycle = 200;
+        private int _strCurrentSampleCycle = 0;
 
         public int CurrentSampleCycle
         {
             get { return _strCurrentSampleCycle; }
             set { _strCurrentSampleCycle = value; RaisePropertyChanged("CurrentSampleCycle"); }
         }
+
+
+        /// <summary>
+        /// 要设置采样频率的参数
+        /// </summary>
+        private int _intSetSampleFrequent = 0;
+
+        public int SetSampleFrequent
+        {
+            get { return _intSetSampleFrequent; }
+            set { _intSetSampleFrequent = value; RaisePropertyChanged("SetSampleFrequent"); }
+        }
+
+        /// <summary>
+        /// 要设置1轴地址的参数
+        /// </summary>
+        private byte _byteSetAxis1Address = 0x00;
+
+        public byte SetAxis1Address
+        {
+            get { return _byteSetAxis1Address; }
+            set { _byteSetAxis1Address = value; RaisePropertyChanged("SetAxis1Address"); }
+        }
+
+        /// <summary>
+        /// 要设置2轴地址的参数
+        /// </summary>
+        private byte _byteSetAxis2Address = 0x00;
+
+        public byte SetAxis2Address
+        {
+            get { return _byteSetAxis2Address; }
+            set { _byteSetAxis2Address = value; RaisePropertyChanged("SetAxis2Address"); }
+        }
+
+        /// <summary>
+        /// 要设置3轴地址的参数
+        /// </summary>
+        private byte _byteSetAxis3Address = 0x00;
+
+        public byte SetAxis3Address
+        {
+            get { return _byteSetAxis3Address; }
+            set { _byteSetAxis3Address = value; RaisePropertyChanged("SetAxis3Address"); }
+        }
+
+        /// <summary>
+        /// 要设置4轴地址的参数
+        /// </summary>
+        private byte _byteSetAxis4Address = 0x00;
+
+        public byte SetAxis4Address
+        {
+            get { return _byteSetAxis4Address; }
+            set { _byteSetAxis4Address = value; RaisePropertyChanged("SetAxis4Address"); }
+        }
+
+        /// <summary>
+        /// 要设置5轴地址的参数
+        /// </summary>
+        private byte _byteSetAxis5Address = 0x00;
+
+        public byte SetAxis5Address
+        {
+            get { return _byteSetAxis5Address; }
+            set { _byteSetAxis5Address = value; RaisePropertyChanged("SetAxis5Address"); }
+        }
+
+        /// <summary>
+        /// 要设置6轴地址的参数
+        /// </summary>
+        private byte _byteSetAxis6Address = 0x00;
+
+        public byte SetAxis6Address
+        {
+            get { return _byteSetAxis6Address; }
+            set { _byteSetAxis6Address = value; RaisePropertyChanged("SetAxis6Address"); }
+        }
+
+        /// <summary>
+        /// 当前1轴地址的参数
+        /// </summary>
+        private byte _byteCurrentAxis1Address = 0x00;
+
+        public byte CurrentAxis1Address
+        {
+            get { return _byteCurrentAxis1Address; }
+            set { _byteCurrentAxis1Address = value; RaisePropertyChanged("CurrentAxis1Address"); }
+        }
+
+        /// <summary>
+        /// 当前2轴地址的参数
+        /// </summary>
+        private byte _byteCurrentAxis2Address = 0x00;
+
+        public byte CurrentAxis2Address
+        {
+            get { return _byteCurrentAxis2Address; }
+            set { _byteCurrentAxis2Address = value; RaisePropertyChanged("CurrentAxis2Address"); }
+        }
+
+        /// <summary>
+        /// 当前3轴地址的参数
+        /// </summary>
+        private byte _byteCurrentAxis3Address = 0x00;
+
+        public byte CurrentAxis3Address
+        {
+            get { return _byteCurrentAxis3Address; }
+            set { _byteCurrentAxis3Address = value; RaisePropertyChanged("CurrentAxis3Address"); }
+        }
+
+        /// <summary>
+        /// 当前4轴地址的参数
+        /// </summary>
+        private byte _byteCurrentAxis4Address = 0x00;
+
+        public byte CurrentAxis4Address
+        {
+            get { return _byteCurrentAxis4Address; }
+            set { _byteCurrentAxis4Address = value; RaisePropertyChanged("CurrentAxis4Address"); }
+        }
+
+        /// <summary>
+        /// 当前5轴地址的参数
+        /// </summary>
+        private byte _byteCurrentAxis5Address = 0x00;
+
+        public byte CurrentAxis5Address
+        {
+            get { return _byteCurrentAxis5Address; }
+            set { _byteCurrentAxis5Address = value; RaisePropertyChanged("CurrentAxis5Address"); }
+        }
+
+        /// <summary>
+        /// 当前6轴地址的参数
+        /// </summary>
+        private byte _byteCurrentAxis6Address = 0x00;
+
+        public byte CurrentAxis6Address
+        {
+            get { return _byteCurrentAxis6Address; }
+            set { _byteCurrentAxis6Address = value; RaisePropertyChanged("CurrentAxis6Address"); }
+        }
+
+        private bool _bolDeviceIsConnected = false;
+
+        /// <summary>
+        /// 设备是否连接
+        /// </summary>
+        public bool DeviceIsConnected
+        {
+            get { return _bolDeviceIsConnected; }
+            set { _bolDeviceIsConnected = value; RaisePropertyChanged("DeviceIsConnected"); }
+        }
+
+        /// <summary>
+        /// 设备数据采样是否准备就绪
+        /// </summary>
+        private bool _bolDeviceSampleIsReady = false;
+
+        public bool DeviceSampleIsReady
+        {
+            get { return _bolDeviceSampleIsReady; }
+            set { _bolDeviceSampleIsReady = value; RaisePropertyChanged("DeviceSampleIsReady"); }
+        }
+
+        /// <summary>
+        /// 采样是否正在运行标识符，正在运行为true，没有运行为false
+        /// </summary>
+        private bool _bolIsSampleDataRunning = false;
+
+        public bool IsSampleDataRunning
+        {
+            get { return _bolIsSampleDataRunning; }
+            set { _bolIsSampleDataRunning = value; RaisePropertyChanged("IsSampleDataRunning"); }
+        }
+
+        #endregion
+
+        #region 界面状态显示
+
+        /// <summary>
+        /// 错误操作信息提示
+        /// </summary>
+        private string _strErrorOperateMessage = "xingshuang";
+
+        public string ErrorOperateMessage
+        {
+            get { return _strErrorOperateMessage; }
+            set { _strErrorOperateMessage = value; RaisePropertyChanged("ErrorOperateMessage"); }
+        }
+
 
         #endregion
     }

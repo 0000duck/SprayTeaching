@@ -20,7 +20,7 @@ namespace SprayTeaching.MyAllClass
         private static extern int GetPrivateProfileString(string section, string key, string def, System.Text.StringBuilder retVal, int size, string filePath);
         #endregion
 
-        private string _strConfigFileAddress = string.Empty;       
+        private string _strConfigFileAddress = string.Empty;
 
         public event UpdateLogContentEventHandler UpdateLogContent;                 // 更新日志文件  
         public event UpdateConfigFileParameterEventHandler UpdateConfigParameter;   // 更新配置文件的参数
@@ -38,12 +38,28 @@ namespace SprayTeaching.MyAllClass
             thrd.Start();                                           // 启动线程
         }
 
-        private void ThrdInitConfigFileParameter()
+        private void ThrdInitConfigFileParameter( )
         {
             //Thread.Sleep(100);                      // 保证对象已经创建完成后再初始化参数
             this.CheckConfigFile();                 // 初始化的时候检查有无配置文件
             this.ReadFileParameter();               // 初始化的时候获取配置文件中的参数
-            this.WriteLog("已获取配置文件中的机器人角度标定参数.");
+            this.WriteLogHandler("已获取配置文件中的机器人角度标定参数.");
+        }
+
+        /// <summary>
+        /// 关闭资源
+        /// </summary>
+        public void Close( )
+        {
+            this.CloseAllVariable();
+        }
+
+        /// <summary>
+        /// 关闭所有变量，使它们都invalidition
+        /// </summary>
+        private void CloseAllVariable( )
+        {
+            this._strConfigFileAddress = null;
         }
 
         #region 读写INI的方法
@@ -122,7 +138,7 @@ namespace SprayTeaching.MyAllClass
         /// 获取标定角度的参数
         /// </summary>
         /// <returns>double类型的标定角度</returns>
-        private double[] GetCalibrateAngleParameter()
+        private double[] GetCalibrateAngleParameter( )
         {
             string[] strAngles = new string[6];
             double[] dblAngles = new double[6];
@@ -147,7 +163,7 @@ namespace SprayTeaching.MyAllClass
         /// 获取标定的方向参数
         /// </summary>
         /// <returns>double类型的标定方向</returns>
-        private double[] GetCalibrateDirectionParameter()
+        private double[] GetCalibrateDirectionParameter( )
         {
             string[] strDirections = new string[6];
             double[] dblDirections = new double[6];
@@ -196,11 +212,11 @@ namespace SprayTeaching.MyAllClass
         /// 将消息写入日志
         /// </summary>
         /// <param name="strMessage">消息内容</param>
-        private void WriteLog(string strMessage)
+        private void WriteLogHandler(string strMessage, int intType = 0)
         {
             if (this.UpdateLogContent != null)
             {
-                this.UpdateLogContent(strMessage);
+                this.UpdateLogContent(strMessage, intType);
             }
         }
         #endregion

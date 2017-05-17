@@ -18,6 +18,7 @@ namespace SprayTeaching.MyAllClass
         public event UpdateLogContentEventHandler UpdateLogContent;
         public event UpdateSerialPortIsOpenedEventHandler UpdateSerialPortIsOpened;
         public event UpdateSocketIsConnectedEventHandler UpdateSocketIsConnected;
+
         public MyCommunicate( )
         {
             this._mySerialPortCom = new MySerialPort();                                                                                    // 串口的对象
@@ -31,10 +32,24 @@ namespace SprayTeaching.MyAllClass
             this._mySocketCom.UpdateSocketIsConnected += new UpdateSocketIsConnectedEventHandler(UpdateSocketIsConnectedHandler);           // 更新socket通断的状态信息
         }
 
+        /// <summary>
+        /// 关闭通信部分的所有资源
+        /// </summary>
         public void Close( )
         {
-            this._mySerialPortCom.Close();         // 关闭与串口相关的资源 
+            this._mySerialPortCom.Close();          // 关闭与串口相关的资源 
             this._mySocketCom.Close();              // 关闭与socket相关的资源
+            this.CloseAllVariable();
+        }
+
+        /// <summary>
+        /// 关闭所有变量，使它们都invalidition
+        /// </summary>
+        private void CloseAllVariable( )
+        {
+            this._mySerialPortCom = null;
+            this._mySocketCom = null;
+            this._bolFlagCommunicateWay = false;
         }
 
 
@@ -57,10 +72,10 @@ namespace SprayTeaching.MyAllClass
         /// 更新日志
         /// </summary>
         /// <param name="strMessage">日志消息</param>
-        private void WriteLogHandler(string strMessage)
+        private void WriteLogHandler(string strMessage, int intType = 0)
         {
             if (this.UpdateLogContent != null)
-                this.UpdateLogContent(strMessage);
+                this.UpdateLogContent(strMessage, intType);
         }
 
         #endregion
@@ -142,13 +157,15 @@ namespace SprayTeaching.MyAllClass
         /// 数据发送处理
         /// </summary>
         /// <param name="btData">具体数据</param>
-        public void SendDataHandler(byte[] btData)
+        public bool SendDataHandler(byte[] btData)
         {
+            bool bolIsSuccess = false;
             // ture为Wifi方式发送数据，false为串口方式发送数据
             if (this._bolFlagCommunicateWay)
-                this._mySocketCom.SendDataHandler(btData);
+                bolIsSuccess = this._mySocketCom.SendDataHandler(btData);
             else
-                this._mySerialPortCom.SendDataHandler(btData);
+                bolIsSuccess = this._mySerialPortCom.SendDataHandler(btData);
+            return bolIsSuccess;
         }
     }
 }

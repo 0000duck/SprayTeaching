@@ -41,7 +41,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 在初始化的时候清空日志文件
         /// </summary>
-        private void InitDeleteLogFileContent()
+        private void InitDeleteLogFileContent( )
         {
             //判断文件路径是否为空，为空则不添加
             if (string.IsNullOrEmpty(this._strFilePath))
@@ -59,7 +59,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 关闭MyLog的所有资源,先关闭线程，再使变量无效
         /// </summary>
-        public void Close()
+        public void Close( )
         {
             this.CloseThreadWriteLogIntoText();
             this.CloseAllVariable();
@@ -68,7 +68,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 
         /// </summary>
-        private void CloseAllVariable()
+        private void CloseAllVariable( )
         {
             this._thrdWriteLogIntoText = null;
             this._autoEvent = null;
@@ -80,7 +80,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 关闭写日志到文件的线程
         /// </summary>
-        private void CloseThreadWriteLogIntoText()
+        private void CloseThreadWriteLogIntoText( )
         {
             if (this._thrdWriteLogIntoText != null)
             {
@@ -92,9 +92,9 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 写日志的线程
         /// </summary>
-        private void ThreadWriteLogIntoTextHandler()
+        private void ThreadWriteLogIntoTextHandler( )
         {
-            this.WriteLog("已开启日志更新线程.");
+            this.WriteLogHandler("已开启日志更新线程.");
             while (Thread.CurrentThread.IsAlive)
             {
                 if (this._queueTempStoreLogMessage.Count != 0)
@@ -108,7 +108,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 写文件，将日志写入文件
         /// </summary>
-        private void WriteFile()
+        private void WriteFile( )
         {
             string strMessage = string.Empty;           // 用于临时存放从队列中取出的log消息
 
@@ -154,17 +154,17 @@ namespace SprayTeaching.MyAllClass
             this._autoEvent.Set();                                  // 将事件状态设置为终止状态，允许一个或多个等待线程继续
 
             return strDataTime;
-        }       
+        }
 
         /// <summary>
         /// 将消息写入日志
         /// </summary>
         /// <param name="strMessage">消息内容</param>
-        private void WriteLog(string strMessage)
+        private void WriteLogHandler(string strMessage, int intType = 0)
         {
             if (this.UpdateLogContent != null)
             {
-                this.UpdateLogContent(strMessage);
+                this.UpdateLogContent(strMessage, intType);
             }
         }
 

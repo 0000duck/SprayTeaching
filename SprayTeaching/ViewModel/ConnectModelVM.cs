@@ -10,6 +10,7 @@ using System.IO.Ports;
 using SprayTeaching.Model;
 using SprayTeaching.BaseClassLib;
 using SprayTeaching.MyAllClass;
+using System.Threading;
 
 namespace SprayTeaching.ViewModel
 {
@@ -22,12 +23,11 @@ namespace SprayTeaching.ViewModel
         /// </summary>
         private DataModel _mainDataModel;                   // 所有数据的对象        
         private MyLog _myLogObject;                         // 日志文件的对象        
-        //private MySerialPort _mySerialPortCom;             // 串口的对象
-        //private MySocketCom _mySocketCom;                   // Socket通信对象
         private MyDataMessage _myDataMessage;               // 数据消息的对象
         private MyConfigFileINI _myConfigFileINI;           // 配置文件的对象
         private MyCommunicate _myCommunicate;               // 数据通信对象
         private MyRoboDKExtension _myRoboDKExtension;       // RoboDK的对象
+        private MyErrorOperate _myErrorOperate;             // 错误操作消息
 
         private delegate void UpdateDifferentThreadParameterEventHandler(object strParameter);      // 更新不同线程的参数的delegate变量声明，主要用于对绑定控件数据的更改 
         private UpdateDifferentThreadParameterEventHandler _dlgtUpdateDifThreadParam;               // 更新不同线程的数据
@@ -42,17 +42,29 @@ namespace SprayTeaching.ViewModel
 
         #region  构造函数
 
-        // 构造函数中初始化顺序很有讲究，log必须最前面，DataMessage必须在ConfigFileINI的前面，ConfigFileINI要更新DataMessage中的数据
+        /// <summary>
+        /// 构造函数中初始化顺序很有讲究，log必须最前面，DataMessage必须在ConfigFileINI的前面，ConfigFileINI要更新DataMessage中的数据
+        /// _myErrorOperate和_myLogObject之间存在嵌套，已经采用条件判断来避免初始化出现问题，嵌套地点为UpdateLogContentHandler()
+        /// </summary>
         public ConnectModelVM( )
         {
             this._mainDataModel = new DataModel();                                                                              // 所有数据的对象
-            this._dlgtUpdateDifThreadParam = new UpdateDifferentThreadParameterEventHandler(UpdateDifferentThreadParam);        // 用于更新不同线程的参数,目前用于更新listview的绑定的数据
+            this._dlgtUpdateDifThreadParam = new UpdateDifferentThreadParameterEventHandler(UpdateDifferentThreadParam);        // 用于更新不同线程的参数,目前用于更新listview的绑定的数据                      
 
             this._myLogObject = new MyLog(this._mainDataModel.LogFilePath);                                                     // 日志更新的对象
             this._myLogObject.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                    // 日志中线程初始化的时候写日志，自己写自己，因为要将数据写到listview中，只能统一采用外部方式
 
+            this._myErrorOperate = new MyErrorOperate();
+            this._myErrorOperate.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);
+            this._myErrorOperate.UpdateErrorOperateMessage += new Action<object>(UpdateErrorOperateMessageHandler);
+
             this._myDataMessage = new MyDataMessage();                                                                          // DataMessage的对象，存放接收数据和发送数据
-            this._myDataMessage.UpdateSampleInform += new UpdateMessageSampleInformEventHandler(UpdateMessageSampleInformHandler);
+            this._myDataMessage.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);
+            this._myDataMessage.UpdateSampleInform += new UpdateMessageSampleInformEventHandler(UpdateMessageSampleInformHandler);      // 接收采样频率和周期的处理
+            this._myDataMessage.UpdateAxisAddress += new UpdateMessageAxisAddressEventHandler(UpdateMessageAxisAddressHandler);         // 接收查询所有轴地址的处理
+            this._myDataMessage.UpdateMcuIsConnected += new UpdateMessageStateInformEventHandler(UpdateMessageMcuIsConnectedHandler);   // 接收查询设备是否连接的处理
+            this._myDataMessage.UpdateMcuIsReady += new UpdateMessageStateInformEventHandler(UpdateMessageMcuSampleIsReadyHandler);     // 接收查询设备采样是否准备就绪的处理
+            this._myDataMessage.UpdateAxisData += new UpdateMessageAxisDataEventHandler(UpdateMessageAxisDataHandler);                  // 接收采集的数据
 
             this._myConfigFileINI = new MyConfigFileINI(this._mainDataModel.ConfigFileAddress);                                         // 配置文件的对象
             this._myConfigFileINI.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                        // 配置文件写日志
@@ -63,16 +75,6 @@ namespace SprayTeaching.ViewModel
             this._myCommunicate.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                          // 数据通信写日志
             this._myCommunicate.UpdateSerialPortIsOpened += new UpdateSerialPortIsOpenedEventHandler(UpdateSerialPortIsOpenedHandler);  // 更新串口通断状态信息
             this._myCommunicate.UpdateSocketIsConnected += new UpdateSocketIsConnectedEventHandler(UpdateSocketIsConnectedHandler);     // 更新socket通断的状态信息
-
-            //this._mySerialPortCom = new MySerialPort();                                                                                    // 串口的对象
-            //this._mySerialPortCom.DataReceived += new DataReceivedEventHandler(ReceiveDataHandler);                                        // 接收数据的处理
-            //this._mySerialPortCom.UpdateLogContent += new UpdateLogContentEventHandler(WriteLogHandler);                           // 串口写日志
-            //this._mySerialPortCom.UpdateSerialPortIsOpened += new UpdateSerialPortIsOpenedEventHandler(UpdateSerialPortIsOpenedHandler);   // 更新串口通断状态信息
-
-            //this._mySocketCom = new MySocketCom();                                                                                          // socket通信的对象
-            //this._mySocketCom.UpdateLogContent += new UpdateLogContentEventHandler(WriteLogHandler);                                // socket写日志
-            //this._mySocketCom.DataReceived += new DataReceivedEventHandler(ReceiveDataHandler);                                             // 接收数据的处理
-            //this._mySocketCom.UpdateSocketIsConnected += new UpdateSocketIsConnectedEventHandler(UpdateSocketIsConnectedHandler);           // 更新socket通断的状态信息
 
             this._myRoboDKExtension = new MyRoboDKExtension();                                                                  // RoboDK的对象
             this._myRoboDKExtension.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);              // RoboDK写日志
@@ -95,14 +97,6 @@ namespace SprayTeaching.ViewModel
         public void OpenCloseSerialPortHandler( )
         {
             //更新串口参数
-            //this._mySerialPortCom.PortName = this._mainDataModel.SerialPortName;
-            //this._mySerialPortCom.BaudRate = (SerialPortBaudRates)this._mainDataModel.SerialPortBaudRate;
-            //this._mySerialPortCom.ParityBit = (Parity)this._mainDataModel.SerialPortParityBit;
-            //this._mySerialPortCom.StopBit = (StopBits)this._mainDataModel.SerialPortStopBit;
-            //this._mySerialPortCom.DataBit = (SerialPortDataBits)this._mainDataModel.SerialPortDataBit;
-
-            //bool bolSerialPortIsOpened = this._mainDataModel.SerialPortIsOpened;
-            //this._mySerialPortCom.OpenCloseSerialPort(bolSerialPortIsOpened);
             this._myCommunicate.OpenCloseSerialPort(this._mainDataModel);
         }
 
@@ -129,11 +123,6 @@ namespace SprayTeaching.ViewModel
         /// </summary>
         public void OpenCloseSocketHandler( )
         {
-            //this._mySocketCom.SocketIPAddress = this._mainDataModel.SocketIPAddress;
-            //this._mySocketCom.SocketPortNum = this._mainDataModel.SocketPortNum;
-
-            //bool bolSocketIsConnected = this._mainDataModel.SocketIsConnected;
-            //this._mySocketCom.OpenCloseSocket(bolSocketIsConnected);
             this._myCommunicate.OpenCloseSocket(this._mainDataModel);
         }
 
@@ -158,21 +147,174 @@ namespace SprayTeaching.ViewModel
         {
             //this._mySocketCom.SendDataHandler();
         }
+        #endregion
 
+        #region 数据发送部分
         /// <summary>
         /// 发送数据处理部分
         /// </summary>
         /// <param name="obj">发送什么数据的命令</param>
         public void SendDataHandler(object obj)
         {
+            Thread thrd = new Thread(ThrdSendDataHandler);          // 采用简单的线程来发送数据，首先判断是否有设备
+            thrd.IsBackground = true;                               // 设置成后台线程，在前台线程结束时，所有剩余的后台线程都会停止且不会完成    
+            thrd.Name = "CommunicateSendData";                      // 设置线程的名字
+            thrd.Start(obj);
+        }
+
+        /// <summary>
+        /// 发送数据的线程
+        /// </summary>
+        /// <param name="obj">命令参数</param>
+        private void ThrdSendDataHandler(object obj)
+        {
             string strCommand = (string)obj;
-            byte[] byteData = this._myDataMessage.SendDataMessage(strCommand,this._mainDataModel);
+
+            // 查询硬件设备是否连接
+            if (!this._mainDataModel.DeviceIsConnected)
+                if (!this.QueryDeviceIsConnected())
+                    return;
+
+            // 如果是开始采样数据，则需要检查设备采样是否准备就绪
+            if (strCommand == "StartSampleData" && !this._mainDataModel.DeviceSampleIsReady)
+                if (!this.QueryDeviceSampleIsReady())
+                    return;
+
+            // 发送实际的命令            
+            byte[] byteData = this._myDataMessage.SendDataMessage(strCommand, this._mainDataModel);
             this._myCommunicate.SendDataHandler(byteData);
+        }
+
+        /// <summary>
+        /// 查询硬件设备是否连接
+        /// </summary>
+        /// <returns>连接状态，true为连接，false为断开</returns>
+        private bool QueryDeviceIsConnected( )
+        {
+            bool bolIsConnected = this._mainDataModel.DeviceIsConnected;
+            int intCount = 0;
+
+            // 检查硬件设备是否连接，检查时间为1s            
+            while (!bolIsConnected)
+            {
+                if (intCount >= 10)
+                    break;
+
+                // 查询命令只发送一次
+                if (intCount == 0)
+                {
+                    byte[] byteData = this._myDataMessage.SendDataMessage("QueryDeviceConnect", this._mainDataModel);
+                    if (!this._myCommunicate.SendDataHandler(byteData))
+                        return false;
+                }
+                Thread.Sleep(100);
+                bolIsConnected = this._mainDataModel.DeviceIsConnected;
+                intCount++;
+            }
+
+            if (!bolIsConnected)
+                UpdateLogContentHandler("外部设备无法连接，请检查.", 1);
+
+            return bolIsConnected;
+        }
+
+        /// <summary>
+        /// 查询设备采样是否准备就绪
+        /// </summary>
+        /// <returns>状态，true为准备就绪，false为没有准备好</returns>
+        private bool QueryDeviceSampleIsReady( )
+        {
+            bool bolIsReady = this._mainDataModel.DeviceSampleIsReady;
+            int intCount = 0;
+
+            // 检查数据采样是否准备就绪，检查时间为1s            
+            while (!bolIsReady)
+            {
+                if (intCount >= 10)
+                    break;
+
+                // 查询命令只发送一次
+                if (intCount == 0)
+                {
+                    byte[] byteData = this._myDataMessage.SendDataMessage("QueryDeviceSampleReady", this._mainDataModel);
+                    this._myCommunicate.SendDataHandler(byteData);
+                }
+                Thread.Sleep(100);
+                bolIsReady = this._mainDataModel.DeviceSampleIsReady;
+                intCount++;
+            }
+
+            if (!bolIsReady)
+                UpdateLogContentHandler("外部设备数据采集还未准备好.", 1);
+
+            return bolIsReady;
+        }
+
+
+        #region 轴地址清零
+
+        /// <summary>
+        /// 将轴地址清零
+        /// </summary>
+        public void ClearAllAxisAddressHandler( )
+        {
+            Thread thrd = new Thread(ThrdClearAllAxisAddressHandler);           // 采用简单的线程,将轴地址清零
+            thrd.IsBackground = true;                                           // 设置成后台线程，在前台线程结束时，所有剩余的后台线程都会停止且不会完成    
+            thrd.Name = "ClearAllAxisAddress";                                  // 设置线程的名字
+            thrd.Start();
+        }
+
+        /// <summary>
+        /// 将轴地址清零的线程
+        /// </summary>
+        private void ThrdClearAllAxisAddressHandler( )
+        {
+            // 查询硬件设备是否连接
+            if (!this.QueryDeviceIsConnected())
+                return;
+            System.Windows.MessageBoxResult dr = System.Windows.MessageBox.Show("是否期望将所有地址清零？", "提示",
+                System.Windows.MessageBoxButton.OKCancel, System.Windows.MessageBoxImage.Question);
+            if (dr == System.Windows.MessageBoxResult.Cancel)
+                return;
+
+            this._mainDataModel.SetAxis1Address = 0x00;
+            this._mainDataModel.SetAxis2Address = 0x00;
+            this._mainDataModel.SetAxis3Address = 0x00;
+            this._mainDataModel.SetAxis4Address = 0x00;
+            this._mainDataModel.SetAxis5Address = 0x00;
+            this._mainDataModel.SetAxis6Address = 0x00;
+
+            for (int i = 0; i < 6; i++)
+            {
+                // 发送实际的命令            
+                byte[] byteData = this._myDataMessage.SendDataMessage("ModifyAxis" + (i + 1).ToString() + "Address", this._mainDataModel);
+                this._myCommunicate.SendDataHandler(byteData);
+                Thread.Sleep(100);
+            }
         }
 
         #endregion
 
-        #region 数据接收
+        /// <summary>
+        /// 开始进行数据采样
+        /// </summary>
+        public void StartSampleDataHandler( )
+        {
+            this.SendDataHandler("StartSampleData");
+        }
+
+        /// <summary>
+        /// 停止数据采样
+        /// </summary>
+        public void StopSampleDataHandler( )
+        {
+            this._mainDataModel.IsSampleDataRunning = false;            // 更新是否正在运行数据采样
+            this.SendDataHandler("StopSampleData");
+        }
+
+        #endregion
+
+        #region 数据接收部分
 
         /// <summary>
         /// 对串口中接收的数据进行处理
@@ -182,27 +324,13 @@ namespace SprayTeaching.ViewModel
         {
             this._myDataMessage.ReceiveDataMessage(byteDataReceiveMessage);             // 将接收的数据传入DataMessage对象中
             string readString = BitConverter.ToString(byteDataReceiveMessage);          // 将字节型数组转换为字符串型
-            this._mainDataModel.SerialPortDataReceived += readString + "\r\n";
+            this._mainDataModel.SerialPortDataReceived = readString + "\r\n";
         }
         #endregion
 
         #region 通信方式选择
         public void SelectCommunicateWayHandler(object obj)
         {
-            //string strWay = obj as string;
-            //switch(strWay)
-            //{
-            //    case "SerialPortWay":
-            //        if (this._mainDataModel.SocketIsConnected)
-            //            this._mySocketCom.CloseSocket();
-            //        this.UpdateLogContentHandler("选择串口方式通信.");
-            //        break;
-            //    case "WifiWay":
-            //        if (this._mainDataModel.SerialPortIsOpened)
-            //            this._mySerialPortCom.ClosePort();
-            //        this.UpdateLogContentHandler("选择Wifi方式通信.");
-            //        break;
-            //}
             this._myCommunicate.SelectCommunicateWayHandler(obj, this._mainDataModel);
         }
         #endregion
@@ -301,8 +429,12 @@ namespace SprayTeaching.ViewModel
         /// 更新日志
         /// </summary>
         /// <param name="strMessage">日志消息</param>
-        private void UpdateLogContentHandler(string strMessage)
+        private void UpdateLogContentHandler(string strMessage, int intType = -1)
         {
+            // 由于_myErrorOperate和_myLogObject之间存在嵌套，为避免初始化的时候出现文件，用条件判断_myErrorOperate是否被初始化来避免
+            if (this._myErrorOperate != null && intType == 1)
+                this._myErrorOperate.AddErrorOperateMessage(strMessage);                                    // 识别错误操作的消息，并进行另外处理
+
             string strTime = this._myLogObject.AddLogMessage(strMessage);                                   // 在日志中添加消息
             MyLogMessage myLogMessage = new MyLogMessage() { LogTime = strTime, LogMessage = strMessage };
             App.Current.Dispatcher.BeginInvoke(this._dlgtUpdateDifThreadParam, myLogMessage);               // 使用调度者dispatcher来异步处理多线程，目前用于更新listview绑定的数据
@@ -327,15 +459,13 @@ namespace SprayTeaching.ViewModel
         public void CloseAllResourceHandler( )
         {
             this._myLogObject.Close();              // 关闭日志相关的资源
-            //this._mySerialPortCom.Close();         // 关闭与串口相关的资源 
-            //this._mySocketCom.Close();              // 关闭与socket相关的资源
-            this._myCommunicate.Close();
+            this._myCommunicate.Close();            // 关闭通信的资源
             this._myRoboDKExtension.Close();        // 关闭与RoboDK相关的资源
             this._myDataMessage.Close();            // 关闭与数据消息相关的资源
+            this._myConfigFileINI.Close();          // 关闭配置文件的资源
+            this._myErrorOperate.Close();           // 关闭错误操作的资源
         }
         #endregion
-
-
 
         #region 配置文件相关的方法
 
@@ -373,10 +503,69 @@ namespace SprayTeaching.ViewModel
         #endregion
 
         #region  DataMessage数据处理部分
+
+        /// <summary>
+        /// 更新采样的信息，采样频率和采样周期
+        /// </summary>
+        /// <param name="intSampleFrequent">采样频率</param>
+        /// <param name="intSampleCycle">采样周期</param>
         private void UpdateMessageSampleInformHandler(int intSampleFrequent, int intSampleCycle)
         {
             this._mainDataModel.CurrentSampleFrequent = intSampleFrequent;
             this._mainDataModel.CurrentSampleCycle = intSampleCycle;
+        }
+
+        /// <summary>
+        /// 更新轴地址信息
+        /// </summary>
+        /// <param name="byteAxisAddress">轴地址</param>
+        private void UpdateMessageAxisAddressHandler(byte[] byteAxisAddress)
+        {
+            this._mainDataModel.CurrentAxis1Address = byteAxisAddress[0];
+            this._mainDataModel.CurrentAxis2Address = byteAxisAddress[1];
+            this._mainDataModel.CurrentAxis3Address = byteAxisAddress[2];
+            this._mainDataModel.CurrentAxis4Address = byteAxisAddress[3];
+            this._mainDataModel.CurrentAxis5Address = byteAxisAddress[4];
+            this._mainDataModel.CurrentAxis6Address = byteAxisAddress[5];
+        }
+
+        /// <summary>
+        /// 查询设备是否存在，设备是否连接
+        /// </summary>
+        /// <param name="bolIsConnected"></param>
+        private void UpdateMessageMcuIsConnectedHandler(bool bolIsConnected)
+        {
+            this._mainDataModel.DeviceIsConnected = bolIsConnected;
+        }
+
+        /// <summary>
+        /// 查询设备数据采样是否准备就绪
+        /// </summary>
+        /// <param name="bolIsReady"></param>
+        private void UpdateMessageMcuSampleIsReadyHandler(bool bolIsReady)
+        {
+            this._mainDataModel.DeviceSampleIsReady = bolIsReady;
+        }
+
+        private void UpdateMessageAxisDataHandler(double[] dblAxisAngles)
+        {
+            //string strTmp = string.Format("{0},{1},{2},{3},{4},{5}", dblAxisAngles[0], dblAxisAngles[1], dblAxisAngles[2], dblAxisAngles[3], dblAxisAngles[4], dblAxisAngles[5]);
+            //System.Windows.MessageBox.Show(strTmp);
+            this._mainDataModel.IsSampleDataRunning = true;                 // 更新是否正在运行数据采样
+            this._myRoboDKExtension.AddRobotMoveMessage(dblAxisAngles);
+        }
+
+        #endregion
+
+        #region 错误操作消息
+
+        /// <summary>
+        /// 更新错误操作消息
+        /// </summary>
+        /// <param name="obj">错误消息</param>
+        private void UpdateErrorOperateMessageHandler(object obj)
+        {
+            this._mainDataModel.ErrorOperateMessage = (string)obj;
         }
 
         #endregion

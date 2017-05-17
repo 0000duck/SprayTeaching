@@ -8,7 +8,7 @@ using System.Threading;
 using SprayTeaching.BaseClassLib;
 
 
-namespace SprayTeaching.MyAllClass
+namespace SprayTeaching.BaseClassLib
 {
     public class MySocketCom
     {
@@ -173,11 +173,11 @@ namespace SprayTeaching.MyAllClass
             try
             {
                 this.Connect();
-                this.WriteLog(string.Format("Wifi连接成功,主机为{0}:{1}.", this._strSocketIPAddress, this._intSocketPortNum));
+                this.WriteLogHandler(string.Format("Wifi连接成功,主机为{0}:{1}.", this._strSocketIPAddress, this._intSocketPortNum));
             }
             catch (Exception e)
             {
-                this.WriteLog(e.Message);
+                this.WriteLogHandler(e.Message, 1);
             }
             finally
             {
@@ -196,7 +196,7 @@ namespace SprayTeaching.MyAllClass
                 this._sktCommunicate = null;
             }
             this.UpdateSocketIsConnected(this.IsSocketConnected());
-            this.WriteLog("Wifi已关闭.");
+            this.WriteLogHandler("Wifi已关闭.");
         }
 
         #endregion
@@ -260,7 +260,7 @@ namespace SprayTeaching.MyAllClass
             {
                 // 问题：在远程服务器断开的情况下，客户端无法及时判断出socket已经断开，因此设定当接收的数据个数为0时，和服务器的连接已经断开
                 ts.Close();
-                this.WriteLog("远程服务器已断开,Wifi已关闭.");
+                this.WriteLogHandler("远程服务器已断开,Wifi已关闭.",1);
                 this.UpdateConnectState(false);         //通知连接断开
                 return;
             }
@@ -389,27 +389,28 @@ namespace SprayTeaching.MyAllClass
         #endregion
 
         #region 发送数据并处理的相关方法
-        public void SendDataHandler(byte[] btData = null)
+        public bool SendDataHandler(byte[] btData = null)
         {
             if (this._sktCommunicate == null)
             {
-                this.WriteLog("数据发送失败，Wifi连接已断开.");
-                return;
+                this.WriteLogHandler("数据发送失败，Wifi连接已断开.", 1);
+                return false;
             }
             if (!this.IsSocketConnected())
             {
-                this.WriteLog("Wifi连接断开.");
-                return;
+                this.WriteLogHandler("Wifi连接断开.", 1);
+                return false;
             }
             if (btData.Length == 0)
             {
-                this.WriteLog("数据有误，为空.");
-                return;
+                this.WriteLogHandler("数据有误，为空.", 1);
+                return false;
             }
-                
+
             //string strData = "xingshuang\r\n";
             //byte[] bytBuffer = System.Text.Encoding.Default.GetBytes(strData);
             this._sktCommunicate.BeginSend(btData, 0, btData.Length, SocketFlags.None, new AsyncCallback(SendDataCallbackHandler), this._sktCommunicate);
+            return true;
         }
 
         /// <summary>
@@ -422,11 +423,11 @@ namespace SprayTeaching.MyAllClass
             try
             {
                 ts.EndSend(result);
-                this.WriteLog("发送成功.");
+                this.WriteLogHandler("发送成功.");
             }
             catch
             {
-                this.WriteLog("发送失败.");
+                this.WriteLogHandler("发送失败.", 1);
             }
         }
 
@@ -459,10 +460,10 @@ namespace SprayTeaching.MyAllClass
         /// 将消息写入日志
         /// </summary>
         /// <param name="strMessage">消息内容</param>
-        private void WriteLog(string strMessage)
+        private void WriteLogHandler(string strMessage, int intType = 0)
         {
             if (this.UpdateLogContent != null)
-                this.UpdateLogContent(strMessage);
+                this.UpdateLogContent(strMessage, intType);
         }
         #endregion
 

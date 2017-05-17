@@ -64,10 +64,11 @@
     <Compile Include="BaseClassLib\MyConverter.cs" />
     <Compile Include="MyAllClass\MyCommunicate.cs" />
     <Compile Include="MyAllClass\MyDataMessage.cs" />
+    <Compile Include="MyAllClass\MyErrorOperate.cs" />
     <Compile Include="MyAllClass\MyLog.cs" />
     <Compile Include="MyAllClass\MyRoboDKExtension.cs" />
     <Compile Include="BaseClassLib\RoboDK.cs" />
-    <Compile Include="MyAllClass\MySocketCom.cs" />
+    <Compile Include="BaseClassLib\MySocketCom.cs" />
     <Compile Include="View\CalibrationPage.xaml.cs">
       <DependentUpon>CalibrationPage.xaml</DependentUpon>
     </Compile>
@@ -114,7 +115,7 @@
     <Compile Include="Model\DataModel.cs" />
     <Compile Include="MyAllClass\MyConfigFileINI.cs" />
     <Compile Include="BaseClassLib\MyEnum.cs" />
-    <Compile Include="MyAllClass\MySerialPort.cs" />
+    <Compile Include="BaseClassLib\MySerialPort.cs" />
     <Compile Include="ViewModel\ConnectModelVM.cs" />
     <Compile Include="ViewModel\ConnectViewVM.cs" />
     <Compile Include="View\ConnectPage.xaml.cs">

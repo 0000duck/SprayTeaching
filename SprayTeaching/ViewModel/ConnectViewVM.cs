@@ -123,31 +123,63 @@ namespace SprayTeaching.ViewModel
             }
         }
 
-
         /// <summary>
-        /// 查询采样频率
+        /// 通信，发送数据命令
         /// </summary>
-        private MyCommand _querySampleFrequentCommand;
+        private MyCommand _sendDataCommunicateCommand;
 
-        public MyCommand QuerySampleFrequentCommand
+        public MyCommand SendDataCommunicateCommand
         {
             get
             {
-                if (this._querySampleFrequentCommand == null)
-                    this._querySampleFrequentCommand = new MyCommand(this.ExecuteQuerySampleFrequent);
-                return _querySampleFrequentCommand;
+                if (this._sendDataCommunicateCommand == null)
+                    this._sendDataCommunicateCommand = new MyCommand(this.ExecuteSendDataCommunicate);
+                return _sendDataCommunicateCommand;
             }
         }
 
-        private MyCommand _setSampleFrequentCommand;
+        /// <summary>
+        /// 将轴地址清零命令
+        /// </summary>
+        private MyCommand _clearAllAxisAddressCommand;
 
-        public MyCommand SetSampleFrequentCommand
+        public MyCommand ClearAllAxisAddressCommand
+        {
+            get
+            {
+                if (this._clearAllAxisAddressCommand == null)
+                    this._clearAllAxisAddressCommand = new MyCommand(this.ExecuteClearAllAxisAddress);
+                return _clearAllAxisAddressCommand;
+            }
+        }
+
+        /// <summary>
+        /// 开始数据采样
+        /// </summary>
+        private MyCommand _startSampleDataCommand;
+
+        public MyCommand StartSampleDataCommand
         {
             get 
             {
-                if (this._setSampleFrequentCommand == null)
-                    this._setSampleFrequentCommand = new MyCommand(this.ExecuteSetSampleFrequent);
-                return _setSampleFrequentCommand; 
+                if (this._startSampleDataCommand == null)
+                    this._startSampleDataCommand = new MyCommand(this.ExecuteStartSampleData);
+                return _startSampleDataCommand; 
+            }
+        }
+
+        /// <summary>
+        /// 停止数据采样
+        /// </summary>
+        private MyCommand _stopSampleDataCommand;
+
+        public MyCommand StopSampleDataCommand
+        {
+            get 
+            {
+                if (this._stopSampleDataCommand == null)
+                    this._stopSampleDataCommand = new MyCommand(this.ExecuteStopSampleData);
+                return _stopSampleDataCommand; 
             }
         }
 
@@ -212,17 +244,38 @@ namespace SprayTeaching.ViewModel
         }
 
         /// <summary>
-        /// 查询采样频率
+        /// 通信，发送数据命令
         /// </summary>
-        /// <param name="objParameter">查询采样频率的命令字符串</param>
-        private void ExecuteQuerySampleFrequent(object objParameter = null)
+        /// <param name="objParameter">发送的命令</param>
+        private void ExecuteSendDataCommunicate(object objParameter = null)
         {
             this._modelViewModel.SendDataHandler(objParameter);
         }
 
-        private void ExecuteSetSampleFrequent(object objParameter = null)
+        /// <summary>
+        /// 将轴地址清零
+        /// </summary>
+        private void ExecuteClearAllAxisAddress(object objParameter = null)
         {
-            this._modelViewModel.SendDataHandler(objParameter);
+            this._modelViewModel.ClearAllAxisAddressHandler();
+        }
+
+        /// <summary>
+        /// 开始数据采样
+        /// </summary>
+        /// <param name="objParameter"></param>
+        private void ExecuteStartSampleData(object objParameter = null)
+        {
+            this._modelViewModel.StartSampleDataHandler();
+        }
+
+        /// <summary>
+        /// 停止数据采样
+        /// </summary>
+        /// <param name="objParameter"></param>
+        private void ExecuteStopSampleData(object objParameter = null)
+        {
+            this._modelViewModel.StopSampleDataHandler();
         }
 
         #endregion

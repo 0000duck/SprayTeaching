@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SprayTeaching.MyAllClass
+namespace SprayTeaching.BaseClassLib
 {
     /// <summary>
     /// 串口数据位列表（5,6,7,8）
