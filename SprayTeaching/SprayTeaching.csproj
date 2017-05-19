@@ -193,6 +193,7 @@
     <Resource Include="MyImage\imgUpdate.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="ImportantTip.txt" />
     <Content Include="MyDllFile\System.Windows.Interactivity.dll" />
     <Resource Include="MyImage\imgWindowsIcon.ico" />
     <Resource Include="MyImage\imgSocketDisconnect.png" />

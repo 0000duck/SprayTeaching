@@ -1,0 +1,7 @@
+﻿不同电脑中运行该程序需要更改的地方：
+
+1、RoboDK.exe的文件路径需要更改；
+位置：RoboDK类文件的string APPLICATION_DIR 变量；
+
+2、需要更改机器人模型的文件路径；
+位置：MyLogMessage类文件的MyConstString类；

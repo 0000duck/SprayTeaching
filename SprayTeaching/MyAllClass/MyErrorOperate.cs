@@ -127,11 +127,11 @@ namespace SprayTeaching.MyAllClass
         public void AddErrorOperateMessage(string strMessage)
         {
             // 如果这条消息和上条消息相同，则不进行入队操作，即不进行重复显示提示
-            if (this._strCurrentErrorOperateMessage != strMessage)
-            {
+            //if (this._strCurrentErrorOperateMessage != strMessage)
+            //{
                 this._queueStoreErrorOperateMessage.Enqueue(strMessage);
                 this._autoEvent.Set();                                      // 将事件状态设置为终止状态，允许一个或多个等待线程继续
-            }
+            //}
             this._strCurrentErrorOperateMessage = strMessage;               // 更新当前传入的错误操作的消息
 
         }

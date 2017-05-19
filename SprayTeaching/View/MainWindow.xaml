@@ -169,7 +169,7 @@
                     <ListView Margin="3" BorderThickness="0" ItemsSource="{Binding ModelViewModel.MainDataModel.LogDataList,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal"  MaxWidth="270">
+                                <StackPanel Orientation="Horizontal"  MaxWidth="280">
                                     <TextBlock Text="{Binding LogTime,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Margin="1" Padding="1" VerticalAlignment="Top"/>
                                     <TextBlock Text="{Binding LogMessage,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" MaxWidth="220" Margin="1" Padding="1" VerticalAlignment="Center"/>
                                 </StackPanel>
