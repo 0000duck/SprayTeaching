@@ -2435,7 +2435,7 @@ public class RoboDK
         /// </summary>
         /// <param name="lower_limits"></param>
         /// <param name="upper_limits"></param>
-        public void JointLimits(ref double[] lower_limits, ref double[] upper_limits)
+        public void JointLimits(double[] lower_limits, double[] upper_limits)
         {
             link.check_connection();
             string command = "G_RobLimits";

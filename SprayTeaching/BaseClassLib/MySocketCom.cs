@@ -139,7 +139,6 @@ namespace SprayTeaching.BaseClassLib
             IPEndPoint ipe = new IPEndPoint(ip, this._intSocketPortNum);
 
             this._sktCommunicate = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
-            //this._sktCommunicate = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             this._sktCommunicate.ReceiveTimeout = 500;
             this._sktCommunicate.SendTimeout = 500;
             try

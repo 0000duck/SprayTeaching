@@ -55,7 +55,6 @@ namespace SprayTeaching.MyAllClass
         public event UpdateMessageSetFrequentIsSuccessed UpdateSetFrequentIsSuccess;                // 下位机发送上来的频率设置是否成功
 
         public event UpdateLogContentEventHandler UpdateLogContent;                                 // 更新日志文件 
-        public event Action<object> UpdateAbsoluteAxisAngle;                                        // 更新轴角度的绝对值
 
         public MyDataMessage( )
         {
@@ -127,7 +126,7 @@ namespace SprayTeaching.MyAllClass
                 if (this._queueReceiveDataMessage.Count != 0)
                 {
                     DataMessageHandler();
-                    Thread.Sleep(10);
+                    Thread.Sleep(100);
                 }
                 else
                 {
@@ -151,7 +150,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 对数据进行识别
         /// </summary>
-        /// <param name="byteDataMessages">传进来的数据</param>
+        /// <param name="byteDataMessage">传进来的数据</param>
         private void DataRecognition(byte[] byteDataMessage)
         {
             byte[] byteDataMessageTmp = byteDataMessage.Skip(2).Take(13).ToArray();
@@ -207,7 +206,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 下位机发送上来的连接响应
         /// </summary>
-        /// <param name="byteDataMessages">数据消息</param>
+        /// <param name="byteDataMessage">数据消息</param>
         private void UpdateMcuIsConnectedHandler(byte[] byteDataMessage)
         {
             bool bolIsConnected = false;
@@ -222,7 +221,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 下位机发送上来的准备就绪是否可以开始采集数据
         /// </summary>
-        /// <param name="byteDataMessages">数据消息</param>
+        /// <param name="byteDataMessage">数据消息</param>
         private void UpdateMcuIsReadyHandler(byte[] byteDataMessage)
         {
             bool bolIsReady = false;
@@ -237,7 +236,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 下位机发送上来的SD卡是否读取完毕
         /// </summary>
-        /// <param name="byteDataMessages">数据消息</param>
+        /// <param name="byteDataMessage">数据消息</param>
         private void UpdateSDIsReadedHandler(byte[] byteDataMessage)
         {
             bool bolIsReaded = false;
@@ -252,7 +251,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 下位机发送上来的采集数据是否停止
         /// </summary>
-        /// <param name="byteDataMessages">数据消息</param>
+        /// <param name="byteDataMessage">数据消息</param>
         private void UpdateSampleIsStoppedHandler(byte[] byteDataMessage)
         {
             bool bolIsStopped = false;
@@ -267,7 +266,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 下位机发送上来的喷枪1是否打开
         /// </summary>
-        /// <param name="byteDataMessages">数据消息</param>
+        /// <param name="byteDataMessage">数据消息</param>
         private void UpdateLance1IsOpenedHandler(byte[] byteDataMessage)
         {
             bool bolIsOpened = false;
@@ -284,7 +283,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 下位机发送上来的电机是否开转
         /// </summary>
-        /// <param name="byteDataMessages">数据消息</param>
+        /// <param name="byteDataMessage">数据消息</param>
         private void UpdateMotorIsRanHandler(byte[] byteDataMessage)
         {
             bool bolIsRan = false;
@@ -299,7 +298,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 下位机发送上来的喷枪2是否打开
         /// </summary>
-        /// <param name="byteDataMessages">数据消息</param>
+        /// <param name="byteDataMessage">数据消息</param>
         private void UpdateLance2IsOpenedHandler(byte[] byteDataMessage)
         {
             bool bolIsOpened = false;
@@ -316,7 +315,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 下位机发送上来的采样频率和采样周期
         /// </summary>
-        /// <param name="byteDataMessages">数据消息</param>
+        /// <param name="byteDataMessage">数据消息</param>
         private void UpdateSampleInformHandler(byte[] byteDataMessage)
         {
             int intSampleFrequent = 0;
@@ -335,7 +334,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 下位机发送上来的哪个轴没有响应
         /// </summary>
-        /// <param name="byteDataMessages">数据消息</param>
+        /// <param name="byteDataMessage">数据消息</param>
         private void UpdateAxisErrorHandler(byte[] byteDataMessage)
         {
             int intAxisID = 0;
@@ -352,7 +351,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 下位机发送上来的各个轴地址
         /// </summary>
-        /// <param name="byteDataMessages">数据消息</param>
+        /// <param name="byteDataMessage">数据消息</param>
         private void UpdateAxisAddressHandler(byte[] byteDataMessage)
         {
             byte[] byteAxisAddress = new byte[6];
@@ -374,39 +373,37 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 下位机发送上来的各个轴的数据
         /// </summary>
-        /// <param name="byteDataMessages">数据消息</param>
-        private void UpdateAxisDataHandler(byte[] byteDataMessages)
+        /// <param name="byteDataMessage">数据消息</param>
+        private void UpdateAxisDataHandler(byte[] byteDataMessage)
         {
-            double[] dblRelativeAxisAngles = new double[6];
-            double[] dblAbsoluteAxisAngles = new double[6];
+            double[] dblAxisAngle = new double[] { };
 
-            if (byteDataMessages[0] != 0xFD)
+            if (byteDataMessage[0] != 0xFD)
                 return;
 
-            TransferAxisData2Angle(byteDataMessages, ref dblRelativeAxisAngles, ref dblAbsoluteAxisAngles);         // 将轴数据转换为轴的角度
+            dblAxisAngle = TransferAxisData2Angle(byteDataMessage);
+
+            //string strTmp = string.Format("{0},{1},{2},{3},{4},{5}", dblAxisAngles[0], dblAxisAngles[1], dblAxisAngles[2], dblAxisAngles[3], dblAxisAngles[4], dblAxisAngles[5]);
+            //System.Windows.MessageBox.Show(strTmp);
 
             if (this.UpdateAxisData != null)
-                this.UpdateAxisData(dblRelativeAxisAngles);
-
-            if (this.UpdateAbsoluteAxisAngle != null)
-                this.UpdateAbsoluteAxisAngle(dblAbsoluteAxisAngles);
+                this.UpdateAxisData(dblAxisAngle);
         }
 
         /// <summary>
         /// 将接收每个轴数据转换为实际的角度值
         /// </summary>
-        /// <param name="byteDataMessages">接收的数据</param>
+        /// <param name="byteDataMessage">接收的数据</param>
         /// <returns>角度值</returns>
-        private void TransferAxisData2Angle(byte[] byteDataMessages, ref double[] dblRelativeAngles, ref double[] dblAbsoluteAngles)
+        private double[] TransferAxisData2Angle(byte[] byteDataMessage)
         {
-            //double[] dblRelativeAngles = new double[6];
+            double[] dblAngle = new double[6];
             double dblScaleRate = 0.0219726525;           // 编码器中的值转换到实际角度值的比例关系，360/2^14=360/16384=0.0219726525
             double dblMaxAngle = 360;
 
             for (int i = 0; i < 6; i++)
             {
-                double dblTmpAngle = (byteDataMessages[i * 2 + 1] * 256 + byteDataMessages[(i + 1) * 2]) * dblScaleRate;      // 计算出编码器转换成角度的理论值
-                dblAbsoluteAngles[i] = Math.Round(dblTmpAngle, 3);
+                double dblTmpAngle = (byteDataMessage[i * 2 + 1] * 256 + byteDataMessage[(i + 1) * 2]) * dblScaleRate;      // 计算出编码器转换成角度的理论值
 
                 // 判别计算出的理论角度值是否大于标定角度值
                 if (dblTmpAngle >= this._dblCalibrateAngles[i])
@@ -418,16 +415,16 @@ namespace SprayTeaching.MyAllClass
                     dblTmpAngle = (dblTmpAngle - dblMaxAngle) * this._dblCalibrateDirections[i];
                 else
                     dblTmpAngle = dblTmpAngle * this._dblCalibrateDirections[i];
-                dblRelativeAngles[i] = Math.Round(dblTmpAngle, 3);
+                dblAngle[i] = Math.Round(dblTmpAngle, 3);
             }
 
-            //return dblRelativeAngles;
+            return dblAngle;
         }
 
         /// <summary>
         /// 下位机发送上来的轴地址修改是否成功
         /// </summary>
-        /// <param name="byteDataMessages">数据消息</param>
+        /// <param name="byteDataMessage">数据消息</param>
         private void UpdateAxisModifiedIsSuccessHandler(byte[] byteDataMessage)
         {
             int intAxisNum = -1;
@@ -452,7 +449,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 下位机发送上来的频率设置是否成功
         /// </summary>
-        /// <param name="byteDataMessages">数据消息</param>
+        /// <param name="byteDataMessage">数据消息</param>
         private void UpdateSetFrequentIsSuccessHandler(byte[] byteDataMessage)
         {
             int intFrequent = -1;
@@ -474,7 +471,7 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 接收数据
         /// </summary>
-        /// <param name="byteDataMessages">传进来的数据</param>
+        /// <param name="byteDataMessage">传进来的数据</param>
         public void ReceiveDataMessage(byte[] byteDataMessage)
         {
             this._queueReceiveDataMessage.Enqueue(byteDataMessage);

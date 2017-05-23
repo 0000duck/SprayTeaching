@@ -30,9 +30,6 @@ namespace SprayTeaching.MyAllClass
         private AutoResetEvent _autoEvent;                                      // 控制数据消息处理的线程，控制它的睡眠和唤醒
         private Object _objLockRobotMove = new object();                        // 用于锁定修改部分的数据
 
-        private double[] _dblRobotUpperLimits = new double[6];
-        private double[] _dblRobotLowerLimits = new double[6];
-
         #endregion
 
         #region 外部事件
@@ -123,10 +120,10 @@ namespace SprayTeaching.MyAllClass
             this._thrdUpdateRobotParameter = null;
             this._thisLock = null;
 
-            this._thrdDriveRobotMoveHandler = null;
-            this._queueRobotMoveMessage = null;
-            this._bolIsDriveRbtMoveThrdAlive = false;
-            this._autoEvent = null;
+            this._thrdDriveRobotMoveHandler = null;                        
+            this._queueRobotMoveMessage = null;                          
+            this._bolIsDriveRbtMoveThrdAlive = false;                   
+            this._autoEvent = null;                                      
 
             this._bolIsUpdateRbtParThrdAlive = false;
             this._bolIsThreadSuspend = false;
@@ -177,12 +174,9 @@ namespace SprayTeaching.MyAllClass
                 // 检查是否连接，是否选中机器人
                 if (this.CheckRobot())
                 {
-                    lock (this._objLockRobotMove)
-                    {
-                        // 打开了RoboDK和选中了机器人
-                        this.GetRobotParameters();
-                        this.DriveRobotMove();
-                    }
+                    // 打开了RoboDK和选中了机器人
+                    this.GetRobotParameters();
+                    this.DriveRobotMove();
                     Thread.Sleep(10);
                 }
                 else
@@ -237,8 +231,6 @@ namespace SprayTeaching.MyAllClass
 
                 // RoboDK中机器人的运动速度
                 double dblRobotMoveSpeed = this._rdkPlatform.SimulationSpeed();
-
-                this._rdkItemRobot.JointLimits(ref this._dblRobotLowerLimits, ref this._dblRobotUpperLimits);
 
                 // 机器人参数整合在字典中，一起传出去
                 Dictionary<string, object> dicData = RobotParametersIntegrity(dblJoints, dblPoses, dblRobotMoveSpeed);
@@ -567,61 +559,43 @@ namespace SprayTeaching.MyAllClass
             while (this._bolIsDriveRbtMoveThrdAlive)
             {
                 if (this._queueRobotMoveMessage.Count != 0)
+                {
                     DriveRobotMoveHandler();
-                else
-                    this._autoEvent.WaitOne();                      // 阻止当前线程，直到当前 WaitHandle 收到信号为止
+                }
+                this._autoEvent.WaitOne();                      // 阻止当前线程，直到当前 WaitHandle 收到信号为止
             }
         }
 
         public void DriveRobotMoveHandler( )
         {
-            double[] dblJoints = this._queueRobotMoveMessage.Dequeue();
-            lock (this._objLockRobotMove)
+            while (this._queueRobotMoveMessage.Count != 0)
             {
-                //this.SuspendThreadUpdateRobotParameter();
-                this._rdkItemRobot.MoveJ(dblJoints, BLOCKING_MOVE);
-                //this.ResumeThreadUpdateRobotParameter();
+                double[] dblJoints = this._queueRobotMoveMessage.Dequeue();                
+                lock (this._objLockRobotMove)
+                {                    
+                    this._rdkItemRobot.MoveJ(dblJoints, BLOCKING_MOVE);
+                }
+                Thread.Sleep(100);           // 防止数据发送太快导致roboDK出问题
             }
-            Thread.Sleep(10);           // 防止数据发送太快导致roboDK出问题
         }
 
         public void AddRobotMoveMessage(double[] dblAngles)
         {
             this._queueRobotMoveMessage.Enqueue(dblAngles);
-
-            // 使整个队列的大小保持在20个
             if (this._queueRobotMoveMessage.Count > 20)
                 this._queueRobotMoveMessage.Dequeue();
             //this._autoEvent.Set();                                  // 将事件状态设置为终止状态，允许一个或多个等待线程继续
         }
 
-        private void DriveRobotMove( )
+        private void DriveRobotMove()
         {
             if (this._queueRobotMoveMessage.Count != 0)
             {
                 double[] dblJoints = this._queueRobotMoveMessage.Dequeue();
-
-                // 检查关节角度值是否在限定范围内，若不是，则使其在限定范围内
-                for (int i = 0; i < 6; i++)
-                {
-                    if (dblJoints[i] > this._dblRobotUpperLimits[i])
-                        dblJoints[i] = this._dblRobotUpperLimits[i];
-                    if (dblJoints[i] < this._dblRobotLowerLimits[i])
-                        dblJoints[i] = this._dblRobotLowerLimits[i];
-                }
                 lock (this._objLockRobotMove)
                 {
-                    try
-                    {
-                        this._rdkPlatform.setSimulationSpeed(1000);      //控制机器人的运动速度
-                        this._rdkItemRobot.MoveJ(dblJoints, BLOCKING_MOVE);
-                    }
-                    catch
-                    {
-                        this._rdkItemRobot = null; // 一旦在传输的过程中出现问题，都需要重新选择机器人模型，都将机器人对象置为null
-                        this.WriteLogHandler("选中的机器人模型无效或者不存在，请重新选择.", 1);
-                    }
-
+                    this._rdkPlatform.setSimulationSpeed(1000);      //控制机器人的运动速度
+                    this._rdkItemRobot.MoveJ(dblJoints, BLOCKING_MOVE);
                 }
             }
         }
