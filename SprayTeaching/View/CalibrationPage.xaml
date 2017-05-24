@@ -34,27 +34,33 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
                             <TextBlock Text="关节角度1:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
-                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center" IsReadOnly="True"
+                                     Text="{Binding ModelViewModel.MainDataModel.SetAbsoluteAngle1,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
                         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
                             <TextBlock Text="关节角度2:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
-                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center" IsReadOnly="True"
+                                     Text="{Binding ModelViewModel.MainDataModel.SetAbsoluteAngle2,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
                         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
                             <TextBlock Text="关节角度3:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
-                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center" IsReadOnly="True"
+                                     Text="{Binding ModelViewModel.MainDataModel.SetAbsoluteAngle3,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
                         <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
                             <TextBlock Text="关节角度4:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
-                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center" IsReadOnly="True"
+                                     Text="{Binding ModelViewModel.MainDataModel.SetAbsoluteAngle4,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
                         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
                             <TextBlock Text="关节角度5:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
-                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center" IsReadOnly="True"
+                                     Text="{Binding ModelViewModel.MainDataModel.SetAbsoluteAngle5,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
                         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
                             <TextBlock Text="关节角度6:" Margin="3" Padding="2" VerticalAlignment="Center"></TextBlock>
-                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center"></TextBox>
+                            <TextBox Width="60" Margin="3" Padding="0" VerticalAlignment="Center" IsReadOnly="True"
+                                     Text="{Binding ModelViewModel.MainDataModel.SetAbsoluteAngle6,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
                     </Grid>
                     <Grid Grid.Row="1">
@@ -71,21 +77,74 @@
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Row="0" Grid.Column="0" Content="1轴归原点" Margin="5" Padding="2"/>
-                        <Button Grid.Row="0" Grid.Column="1" Content="正向" Margin="5" Padding="2"/>
-                        <Button Grid.Row="1" Grid.Column="0" Content="2轴归原点" Margin="5" Padding="2"/>
-                        <Button Grid.Row="1" Grid.Column="1" Content="反向" Margin="5" Padding="2"/>
-                        <Button Grid.Row="2" Grid.Column="0" Content="3轴归原点" Margin="5" Padding="2"/>
-                        <Button Grid.Row="2" Grid.Column="1" Content="正向" Margin="5" Padding="2"/>
-                        <Button Grid.Row="3" Grid.Column="0" Content="4轴归原点" Margin="5" Padding="2"/>
-                        <Button Grid.Row="3" Grid.Column="1" Content="正向" Margin="5" Padding="2"/>
-                        <Button Grid.Row="4" Grid.Column="0" Content="5轴归原点" Margin="5" Padding="2"/>
-                        <Button Grid.Row="4" Grid.Column="1" Content="反向" Margin="5" Padding="2"/>
-                        <Button Grid.Row="5" Grid.Column="0" Content="6轴归原点" Margin="5" Padding="2"/>
-                        <Button Grid.Row="5" Grid.Column="1" Content="正向" Margin="5" Padding="2"/>   
+                        <Button Grid.Row="0" Grid.Column="0" Content="1轴归原点" Margin="5" Padding="2"
+                                Command="{Binding PreCalibrateOriginAngleCommand}" CommandParameter="Calibration1AxisOriginAngle"/>
+                        <Button Grid.Row="0" Grid.Column="1" Content="正向" Margin="5" Padding="2" 
+                                Command="{Binding PreCalibrateOriginDirectionCommand}" CommandParameter="Calibration1AxisDirectoinP"
+                                IsEnabled="{Binding ModelViewModel.MainDataModel.SetCalibrateAxis1Direction,Converter={StaticResource NegativeConverter},
+                            Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Grid.Row="0" Grid.Column="2" Content="反向" Margin="5" Padding="2"
+                                Command="{Binding PreCalibrateOriginDirectionCommand}" CommandParameter="Calibration1AxisDirectoinN"
+                                IsEnabled="{Binding ModelViewModel.MainDataModel.SetCalibrateAxis1Direction,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Grid.Row="1" Grid.Column="0" Content="2轴归原点" Margin="5" Padding="2"
+                                Command="{Binding PreCalibrateOriginAngleCommand}" CommandParameter="Calibration2AxisOriginAngle"/>
+                        <Button Grid.Row="1" Grid.Column="1" Content="正向" Margin="5" Padding="2"
+                                Command="{Binding PreCalibrateOriginDirectionCommand}" CommandParameter="Calibration2AxisDirectoinP"
+                                IsEnabled="{Binding ModelViewModel.MainDataModel.SetCalibrateAxis2Direction,Converter={StaticResource NegativeConverter},
+                            Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Grid.Row="1" Grid.Column="2" Content="反向" Margin="5" Padding="2"
+                                Command="{Binding PreCalibrateOriginDirectionCommand}" CommandParameter="Calibration2AxisDirectoinN"
+                                IsEnabled="{Binding ModelViewModel.MainDataModel.SetCalibrateAxis2Direction,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Grid.Row="2" Grid.Column="0" Content="3轴归原点" Margin="5" Padding="2"
+                                Command="{Binding PreCalibrateOriginAngleCommand}" CommandParameter="Calibration3AxisOriginAngle"/>
+                        <Button Grid.Row="2" Grid.Column="1" Content="正向" Margin="5" Padding="2"
+                                Command="{Binding PreCalibrateOriginDirectionCommand}" CommandParameter="Calibration3AxisDirectoinP"
+                                IsEnabled="{Binding ModelViewModel.MainDataModel.SetCalibrateAxis3Direction,Converter={StaticResource NegativeConverter},
+                            Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Grid.Row="2" Grid.Column="2" Content="反向" Margin="5" Padding="2"
+                                Command="{Binding PreCalibrateOriginDirectionCommand}" CommandParameter="Calibration3AxisDirectoinN"
+                                IsEnabled="{Binding ModelViewModel.MainDataModel.SetCalibrateAxis3Direction,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Grid.Row="3" Grid.Column="0" Content="4轴归原点" Margin="5" Padding="2"
+                                Command="{Binding PreCalibrateOriginAngleCommand}" CommandParameter="Calibration4AxisOriginAngle"/>
+                        <Button Grid.Row="3" Grid.Column="1" Content="正向" Margin="5" Padding="2"
+                                Command="{Binding PreCalibrateOriginDirectionCommand}" CommandParameter="Calibration4AxisDirectoinP"
+                                IsEnabled="{Binding ModelViewModel.MainDataModel.SetCalibrateAxis4Direction,Converter={StaticResource NegativeConverter},
+                            Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Grid.Row="3" Grid.Column="2" Content="反向" Margin="5" Padding="2"
+                                Command="{Binding PreCalibrateOriginDirectionCommand}" CommandParameter="Calibration4AxisDirectoinN"
+                                IsEnabled="{Binding ModelViewModel.MainDataModel.SetCalibrateAxis4Direction,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Grid.Row="4" Grid.Column="0" Content="5轴归原点" Margin="5" Padding="2"
+                                Command="{Binding PreCalibrateOriginAngleCommand}" CommandParameter="Calibration5AxisOriginAngle"/>
+                        <Button Grid.Row="4" Grid.Column="1" Content="正向" Margin="5" Padding="2"
+                                Command="{Binding PreCalibrateOriginDirectionCommand}" CommandParameter="Calibration5AxisDirectoinP"
+                                IsEnabled="{Binding ModelViewModel.MainDataModel.SetCalibrateAxis5Direction,Converter={StaticResource NegativeConverter},
+                            Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Grid.Row="4" Grid.Column="2" Content="反向" Margin="5" Padding="2"
+                                Command="{Binding PreCalibrateOriginDirectionCommand}" CommandParameter="Calibration5AxisDirectoinN"
+                                IsEnabled="{Binding ModelViewModel.MainDataModel.SetCalibrateAxis5Direction,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Grid.Row="5" Grid.Column="0" Content="6轴归原点" Margin="5" Padding="2"
+                                Command="{Binding PreCalibrateOriginAngleCommand}" CommandParameter="Calibration6AxisOriginAngle"/>
+                        <Button Grid.Row="5" Grid.Column="1" Content="正向" Margin="5" Padding="2"
+                                Command="{Binding PreCalibrateOriginDirectionCommand}" CommandParameter="Calibration6AxisDirectoinP"
+                                IsEnabled="{Binding ModelViewModel.MainDataModel.SetCalibrateAxis6Direction,Converter={StaticResource NegativeConverter},
+                            Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Grid.Row="5" Grid.Column="2" Content="反向" Margin="5" Padding="2"
+                                Command="{Binding PreCalibrateOriginDirectionCommand}" CommandParameter="Calibration6AxisDirectoinN"
+                                IsEnabled="{Binding ModelViewModel.MainDataModel.SetCalibrateAxis6Direction,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
                     </Grid>
                     <Grid Grid.Row="3" Grid.Column="0" >
-                        <Button VerticalAlignment="Top" HorizontalAlignment="Left" Content="标定" Margin="5" Padding="2"/>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <Button VerticalAlignment="Top" HorizontalAlignment="Left" Content="标定角度" Margin="5" Padding="2" MinWidth="60"
+                                        Command="{Binding CalibrateRobotAngleCommand}"
+                                        IsEnabled="{Binding ModelViewModel.MainDataModel.IsSampleDataRunning,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                                <Button VerticalAlignment="Top" HorizontalAlignment="Left" Content="标定方向" Margin="5" Padding="2" MinWidth="60"
+                                        Command="{Binding CalibrateRobotDirectionCommand}"
+                                        IsEnabled="{Binding ModelViewModel.MainDataModel.IsSampleDataRunning,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>                            
+                            <TextBlock Text="提示1：哪个按钮灰了，方向就是朝哪边" Margin="5" Padding="2"/>
+                            <TextBlock Text="提示2：只有在采集数据的时候才能进行标定" Margin="5" Padding="2"/>
+                        </StackPanel>                        
                     </Grid>
                 </Grid>
             </TabItem>
@@ -144,8 +203,8 @@
                     </Grid>
                     <Grid Grid.Row="2" >
                         <Button Content="标定" Margin="5" Padding="2" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                    </Grid>                    
-                </Grid>                
+                    </Grid>
+                </Grid>
             </TabItem>
         </TabControl>
     </Grid>

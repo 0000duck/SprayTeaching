@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using SprayTeaching.BaseClassLib;
 using System.Threading;
+using SprayTeaching.Model;
 
 namespace SprayTeaching.MyAllClass
 {
@@ -20,7 +21,29 @@ namespace SprayTeaching.MyAllClass
         private static extern int GetPrivateProfileString(string section, string key, string def, System.Text.StringBuilder retVal, int size, string filePath);
         #endregion
 
-        private string _strConfigFileAddress = string.Empty;
+        private string _strConfigFileAddress = string.Empty;        // 配置文件的地址
+
+        /// <summary>
+        /// 标定轴的角度值
+        /// </summary>
+        private double[] _dblCalibrateAxisAngles = new double[6];
+
+        public double[] CalibrateAxisAngles
+        {
+            get { return _dblCalibrateAxisAngles; }
+            set { _dblCalibrateAxisAngles = value; }
+        }
+
+        /// <summary>
+        /// 标定轴的方向值
+        /// </summary>
+        private double[] _dblCalibrateAxisDirections = new double[6];
+
+        public double[] CalibrateAxisDirections
+        {
+            get { return _dblCalibrateAxisDirections; }
+            set { _dblCalibrateAxisDirections = value; }
+        }
 
         public event UpdateLogContentEventHandler UpdateLogContent;                 // 更新日志文件  
         public event UpdateConfigFileParameterEventHandler UpdateConfigParameter;   // 更新配置文件的参数
@@ -40,17 +63,19 @@ namespace SprayTeaching.MyAllClass
 
         private void ThrdInitConfigFileParameter( )
         {
-            //Thread.Sleep(100);                      // 保证对象已经创建完成后再初始化参数
-            this.CheckConfigFile();                 // 初始化的时候检查有无配置文件
-            this.ReadFileParameter();               // 初始化的时候获取配置文件中的参数
-            this.WriteLogHandler("已获取配置文件中的机器人角度标定参数.");
+            //Thread.Sleep(100);                        // 保证对象已经创建完成后再初始化参数
+            this.CheckConfigFile();                     // 初始化的时候检查有无配置文件
+            this.ReadFileParameter();                   // 初始化的时候获取配置文件中的参数
+            this.WriteLogHandler("已获取配置文件中机器人标定参数.");
         }
 
+        #region 关闭资源
         /// <summary>
         /// 关闭资源
         /// </summary>
-        public void Close( )
+        public void Close( DataModel dm=null)
         {
+            //this.WirteFileParameter(dm);
             this.CloseAllVariable();
         }
 
@@ -60,7 +85,10 @@ namespace SprayTeaching.MyAllClass
         private void CloseAllVariable( )
         {
             this._strConfigFileAddress = null;
+            this._dblCalibrateAxisAngles = null;
+            this._dblCalibrateAxisDirections = null;
         }
+        #endregion
 
         #region 读写INI的方法
         /// <summary>
@@ -115,14 +143,15 @@ namespace SprayTeaching.MyAllClass
                 this.INIWrite("CalibrateAngles", "Angle6", "339.719", this._strConfigFileAddress);
 
                 this.INIWrite("CalibrateDirection", "Direction1", "1", this._strConfigFileAddress);
-                this.INIWrite("CalibrateDirection", "Direction2", "1", this._strConfigFileAddress);
-                this.INIWrite("CalibrateDirection", "Direction3", "1", this._strConfigFileAddress);
+                this.INIWrite("CalibrateDirection", "Direction2", "-1", this._strConfigFileAddress);
+                this.INIWrite("CalibrateDirection", "Direction3", "-1", this._strConfigFileAddress);
                 this.INIWrite("CalibrateDirection", "Direction4", "1", this._strConfigFileAddress);
-                this.INIWrite("CalibrateDirection", "Direction5", "-1", this._strConfigFileAddress);
+                this.INIWrite("CalibrateDirection", "Direction5", "1", this._strConfigFileAddress);
                 this.INIWrite("CalibrateDirection", "Direction6", "1", this._strConfigFileAddress);
             }
         }
 
+        #region  读取配置文件的数据
         /// <summary>
         /// 读取配置文件中的数据
         /// </summary>
@@ -130,6 +159,10 @@ namespace SprayTeaching.MyAllClass
         {
             double[] dblAngles = this.GetCalibrateAngleParameter();
             double[] dblDirections = this.GetCalibrateDirectionParameter();
+
+            this.CalibrateAxisAngles = dblAngles;
+            this.CalibrateAxisDirections = dblDirections;
+
             object[] objParameter = new object[] { dblAngles, dblDirections };
             this.GetConfigParameterHandler(objParameter);
         }
@@ -184,17 +217,91 @@ namespace SprayTeaching.MyAllClass
             return dblDirections;
         }
 
+        #endregion
+
+
+        #region  写配置文件的数据
 
         /// <summary>
         /// 将数据写入配置文件中
         /// </summary>
-        /// <param name="strSection">配置节</param>
-        /// <param name="strKey">键名</param>
-        /// <param name="strValue">路径</param>
-        public void WirteFileParameter(string strSection, string strKey, string strValue)
+        private void WirteFileParameter(DataModel dm)
         {
-            this.INIWrite(strSection, strKey, strValue, this._strConfigFileAddress);
+            string strFileAddress = this._strConfigFileAddress;
+            double[] dblCalibrateAngles = new double[6];
+            double[] dblCalibrateDirections = new double[6];
+
+            dblCalibrateAngles[0] = dm.RobotCalibrateAngle1;
+            dblCalibrateAngles[1] = dm.RobotCalibrateAngle2;
+            dblCalibrateAngles[2] = dm.RobotCalibrateAngle3;
+            dblCalibrateAngles[3] = dm.RobotCalibrateAngle4;
+            dblCalibrateAngles[4] = dm.RobotCalibrateAngle5;
+            dblCalibrateAngles[5] = dm.RobotCalibrateAngle6;
+
+            dblCalibrateDirections[0] = dm.RobotCalibrateDirection1;
+            dblCalibrateDirections[1] = dm.RobotCalibrateDirection2;
+            dblCalibrateDirections[2] = dm.RobotCalibrateDirection3;
+            dblCalibrateDirections[3] = dm.RobotCalibrateDirection4;
+            dblCalibrateDirections[4] = dm.RobotCalibrateDirection5;
+            dblCalibrateDirections[5] = dm.RobotCalibrateDirection6;
+
+            // 写入标定的角度值
+            this.INIWrite("CalibrateAngles", "Angle1", dblCalibrateAngles[0].ToString(), strFileAddress);
+            this.INIWrite("CalibrateAngles", "Angle2", dblCalibrateAngles[1].ToString(), strFileAddress);
+            this.INIWrite("CalibrateAngles", "Angle3", dblCalibrateAngles[2].ToString(), strFileAddress);
+            this.INIWrite("CalibrateAngles", "Angle4", dblCalibrateAngles[3].ToString(), strFileAddress);
+            this.INIWrite("CalibrateAngles", "Angle5", dblCalibrateAngles[4].ToString(), strFileAddress);
+            this.INIWrite("CalibrateAngles", "Angle6", dblCalibrateAngles[5].ToString(), strFileAddress);
+
+            // 写入标定的方向值
+            this.INIWrite("CalibrateDirection", "Direction1", dblCalibrateDirections[0].ToString(), strFileAddress);
+            this.INIWrite("CalibrateDirection", "Direction2", dblCalibrateDirections[1].ToString(), strFileAddress);
+            this.INIWrite("CalibrateDirection", "Direction3", dblCalibrateDirections[2].ToString(), strFileAddress);
+            this.INIWrite("CalibrateDirection", "Direction4", dblCalibrateDirections[3].ToString(), strFileAddress);
+            this.INIWrite("CalibrateDirection", "Direction5", dblCalibrateDirections[4].ToString(), strFileAddress);
+            this.INIWrite("CalibrateDirection", "Direction6", dblCalibrateDirections[5].ToString(), strFileAddress);
         }
+
+        /// <summary>
+        /// 写入标定的角度值
+        /// </summary>
+        /// <param name="obj"></param>
+        public void WriteFileCalibrateAngles(object obj)
+        {
+            string strFileAddress = this._strConfigFileAddress;
+            double[] dblCalibrateAngles = (double[])obj;
+
+            // 写入标定的角度值
+            this.INIWrite("CalibrateAngles", "Angle1", dblCalibrateAngles[0].ToString(), strFileAddress);
+            this.INIWrite("CalibrateAngles", "Angle2", dblCalibrateAngles[1].ToString(), strFileAddress);
+            this.INIWrite("CalibrateAngles", "Angle3", dblCalibrateAngles[2].ToString(), strFileAddress);
+            this.INIWrite("CalibrateAngles", "Angle4", dblCalibrateAngles[3].ToString(), strFileAddress);
+            this.INIWrite("CalibrateAngles", "Angle5", dblCalibrateAngles[4].ToString(), strFileAddress);
+            this.INIWrite("CalibrateAngles", "Angle6", dblCalibrateAngles[5].ToString(), strFileAddress);
+        }
+
+        /// <summary>
+        /// 写入标定的方向值
+        /// </summary>
+        /// <param name="obj"></param>
+        public void WriteFileCalibrateDirection(object obj)
+        {
+            string strFileAddress = this._strConfigFileAddress;
+            double[] dblCalibrateDirections = (double[])obj;
+
+            // 写入标定的方向值
+            this.INIWrite("CalibrateDirection", "Direction1", dblCalibrateDirections[0].ToString(), strFileAddress);
+            this.INIWrite("CalibrateDirection", "Direction2", dblCalibrateDirections[1].ToString(), strFileAddress);
+            this.INIWrite("CalibrateDirection", "Direction3", dblCalibrateDirections[2].ToString(), strFileAddress);
+            this.INIWrite("CalibrateDirection", "Direction4", dblCalibrateDirections[3].ToString(), strFileAddress);
+            this.INIWrite("CalibrateDirection", "Direction5", dblCalibrateDirections[4].ToString(), strFileAddress);
+            this.INIWrite("CalibrateDirection", "Direction6", dblCalibrateDirections[5].ToString(), strFileAddress);
+        }
+
+        #endregion
+
+
+
 
         #region  更新配置文件的参数
         private void GetConfigParameterHandler(object obj)

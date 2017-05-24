@@ -54,9 +54,9 @@ namespace SprayTeaching.ViewModel
             this._myLogObject = new MyLog(this._mainDataModel.LogFilePath);                                                     // 日志更新的对象
             this._myLogObject.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                    // 日志中线程初始化的时候写日志，自己写自己，因为要将数据写到listview中，只能统一采用外部方式
 
-            this._myErrorOperate = new MyErrorOperate();
-            this._myErrorOperate.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);
-            this._myErrorOperate.UpdateErrorOperateMessage += new Action<object>(UpdateErrorOperateMessageHandler);
+            this._myErrorOperate = new MyErrorOperate();                                                                        // 错误操作的对象
+            this._myErrorOperate.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                 // 错误操作写日志
+            this._myErrorOperate.UpdateErrorOperateMessage += new Action<object>(UpdateErrorOperateMessageHandler);             // 错误操作消息更新
 
             this._myDataMessage = new MyDataMessage();                                                                          // DataMessage的对象，存放接收数据和发送数据
             this._myDataMessage.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);
@@ -65,6 +65,7 @@ namespace SprayTeaching.ViewModel
             this._myDataMessage.UpdateMcuIsConnected += new UpdateMessageStateInformEventHandler(UpdateMessageMcuIsConnectedHandler);   // 接收查询设备是否连接的处理
             this._myDataMessage.UpdateMcuIsReady += new UpdateMessageStateInformEventHandler(UpdateMessageMcuSampleIsReadyHandler);     // 接收查询设备采样是否准备就绪的处理
             this._myDataMessage.UpdateAxisData += new UpdateMessageAxisDataEventHandler(UpdateMessageAxisDataHandler);                  // 接收采集的数据
+            this._myDataMessage.UpdateAbsoluteAxisAngle += new Action<object>(UpdateAbsoluteAxisAngleHandler);                          // 
 
             this._myConfigFileINI = new MyConfigFileINI(this._mainDataModel.ConfigFileAddress);                                         // 配置文件的对象
             this._myConfigFileINI.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                        // 配置文件写日志
@@ -170,15 +171,13 @@ namespace SprayTeaching.ViewModel
         {
             string strCommand = (string)obj;
 
-            // 查询硬件设备是否连接
-            if (!this._mainDataModel.DeviceIsConnected)
-                if (!this.QueryDeviceIsConnected())
-                    return;
-
-            // 如果是开始采样数据，则需要检查设备采样是否准备就绪
-            if (strCommand == "StartSampleData" && !this._mainDataModel.DeviceSampleIsReady)
-                if (!this.QueryDeviceSampleIsReady())
-                    return;
+            // 任何指令在发送前先确定数据采集是否正在进行，若是，则提示要执行其他操作，先停止采样
+            // 只有停止命令才能停止数据采集
+            if (this._mainDataModel.IsSampleDataRunning && strCommand != "StopSampleData")
+            {
+                this.UpdateLogContentHandler("正在进行数据采样，若要执行其他操作，先停止数据采样", 1);
+                return;
+            }
 
             // 发送实际的命令            
             byte[] byteData = this._myDataMessage.SendDataMessage(strCommand, this._mainDataModel);
@@ -300,6 +299,11 @@ namespace SprayTeaching.ViewModel
         /// </summary>
         public void StartSampleDataHandler( )
         {
+            // 查询硬件设备是否连接,数据采样是否准备就绪，若没有，则先检查
+            if (!this._mainDataModel.DeviceIsConnected || !this._mainDataModel.DeviceSampleIsReady)
+                if (!this.QueryDeviceIsConnected())
+                    return;
+
             this.SendDataHandler("StartSampleData");
         }
 
@@ -308,8 +312,8 @@ namespace SprayTeaching.ViewModel
         /// </summary>
         public void StopSampleDataHandler( )
         {
-            this._mainDataModel.IsSampleDataRunning = false;            // 更新是否正在运行数据采样
             this.SendDataHandler("StopSampleData");
+            this._mainDataModel.IsSampleDataRunning = false;            // 更新是否正在运行数据采样
         }
 
         #endregion
@@ -429,11 +433,16 @@ namespace SprayTeaching.ViewModel
         /// 更新日志
         /// </summary>
         /// <param name="strMessage">日志消息</param>
-        private void UpdateLogContentHandler(string strMessage, int intType = -1)
+        /// <param name="intType">消息类型，默认为0，为1错误操作消息</param>
+        private void UpdateLogContentHandler(string strMessage, int intType = 0)
         {
+            // intType为1表示这条消息是一条错误操作消息
             // 由于_myErrorOperate和_myLogObject之间存在嵌套，为避免初始化的时候出现文件，用条件判断_myErrorOperate是否被初始化来避免
             if (this._myErrorOperate != null && intType == 1)
+            {
                 this._myErrorOperate.AddErrorOperateMessage(strMessage);                                    // 识别错误操作的消息，并进行另外处理
+                strMessage = "--" + strMessage ;
+            }                
 
             string strTime = this._myLogObject.AddLogMessage(strMessage);                                   // 在日志中添加消息
             MyLogMessage myLogMessage = new MyLogMessage() { LogTime = strTime, LogMessage = strMessage };
@@ -451,19 +460,33 @@ namespace SprayTeaching.ViewModel
         }
         #endregion
 
-        #region  关闭窗口所需要关闭的资源
+        #region  关闭窗口所需要的资源
 
         /// <summary>
         /// 关闭所有资源
         /// </summary>
         public void CloseAllResourceHandler( )
         {
+            this.CloseStopSampleData();             // 先关闭数据采集，避免关掉软件后，硬件设备还在发送数据
             this._myLogObject.Close();              // 关闭日志相关的资源
             this._myCommunicate.Close();            // 关闭通信的资源
             this._myRoboDKExtension.Close();        // 关闭与RoboDK相关的资源
             this._myDataMessage.Close();            // 关闭与数据消息相关的资源
             this._myConfigFileINI.Close();          // 关闭配置文件的资源
             this._myErrorOperate.Close();           // 关闭错误操作的资源
+        }
+
+        /// <summary>
+        /// 在关闭之前，先将采集数据停止掉
+        /// </summary>
+        private void CloseStopSampleData()
+        {
+            if (this._myCommunicate.IsCommunicateConnected())
+            {
+                this.StopSampleDataHandler();
+                Thread.Sleep(10);                   // 延迟10ms，避免在发送数据过程中通信通道断开了
+            }
+                
         }
         #endregion
 
@@ -483,13 +506,21 @@ namespace SprayTeaching.ViewModel
             this._myDataMessage.CalibrateAngles = dblCalibrateAngles;
             this._myDataMessage.CalibrateDirections = dblCalibrateDirectioins;
 
-            // 更新数据区中的标定关节角度
+            // 更新数据区中的标定轴角度
             this._mainDataModel.RobotCalibrateAngle1 = dblCalibrateAngles[0];
             this._mainDataModel.RobotCalibrateAngle2 = dblCalibrateAngles[1];
             this._mainDataModel.RobotCalibrateAngle3 = dblCalibrateAngles[2];
             this._mainDataModel.RobotCalibrateAngle4 = dblCalibrateAngles[3];
             this._mainDataModel.RobotCalibrateAngle5 = dblCalibrateAngles[4];
             this._mainDataModel.RobotCalibrateAngle6 = dblCalibrateAngles[5];
+
+            // 初始化待设定的标定轴角度
+            this._mainDataModel.SetAbsoluteAngle1 = dblCalibrateAngles[0];
+            this._mainDataModel.SetAbsoluteAngle2 = dblCalibrateAngles[1];
+            this._mainDataModel.SetAbsoluteAngle3 = dblCalibrateAngles[2];
+            this._mainDataModel.SetAbsoluteAngle4 = dblCalibrateAngles[3];
+            this._mainDataModel.SetAbsoluteAngle5 = dblCalibrateAngles[4];
+            this._mainDataModel.SetAbsoluteAngle6 = dblCalibrateAngles[5];
 
             // 更新数据区中的标定关节方向
             this._mainDataModel.RobotCalibrateDirection1 = dblCalibrateDirectioins[0];
@@ -498,6 +529,14 @@ namespace SprayTeaching.ViewModel
             this._mainDataModel.RobotCalibrateDirection4 = dblCalibrateDirectioins[3];
             this._mainDataModel.RobotCalibrateDirection5 = dblCalibrateDirectioins[4];
             this._mainDataModel.RobotCalibrateDirection6 = dblCalibrateDirectioins[5];
+
+            // 初始化待设定的标定轴方向
+            this._mainDataModel.SetCalibrateAxis1Direction = dblCalibrateDirectioins[0] > 0 ? true : false;
+            this._mainDataModel.SetCalibrateAxis2Direction = dblCalibrateDirectioins[1] > 0 ? true : false;
+            this._mainDataModel.SetCalibrateAxis3Direction = dblCalibrateDirectioins[2] > 0 ? true : false;
+            this._mainDataModel.SetCalibrateAxis4Direction = dblCalibrateDirectioins[3] > 0 ? true : false;
+            this._mainDataModel.SetCalibrateAxis5Direction = dblCalibrateDirectioins[4] > 0 ? true : false;
+            this._mainDataModel.SetCalibrateAxis6Direction = dblCalibrateDirectioins[5] > 0 ? true : false;
         }
 
         #endregion
@@ -547,12 +586,29 @@ namespace SprayTeaching.ViewModel
             this._mainDataModel.DeviceSampleIsReady = bolIsReady;
         }
 
+        /// <summary>
+        /// 更新各个轴的相对角度值，也是需要发送给roboDK的关节角度值
+        /// </summary>
+        /// <param name="dblAxisAngles"></param>
         private void UpdateMessageAxisDataHandler(double[] dblAxisAngles)
         {
-            //string strTmp = string.Format("{0},{1},{2},{3},{4},{5}", dblAxisAngles[0], dblAxisAngles[1], dblAxisAngles[2], dblAxisAngles[3], dblAxisAngles[4], dblAxisAngles[5]);
-            //System.Windows.MessageBox.Show(strTmp);
             this._mainDataModel.IsSampleDataRunning = true;                 // 更新是否正在运行数据采样
             this._myRoboDKExtension.AddRobotMoveMessage(dblAxisAngles);
+        }
+
+        /// <summary>
+        /// 更新各轴的绝对角度值，也是编码器采集的实际数据
+        /// </summary>
+        /// <param name="obj"></param>
+        private void UpdateAbsoluteAxisAngleHandler(object obj)
+        {
+            double[] dblAbsoluteAngles = (double[])obj;
+            this._mainDataModel.CurrentAbsoluteAngle1 = dblAbsoluteAngles[0];
+            this._mainDataModel.CurrentAbsoluteAngle2 = dblAbsoluteAngles[1];
+            this._mainDataModel.CurrentAbsoluteAngle3 = dblAbsoluteAngles[2];
+            this._mainDataModel.CurrentAbsoluteAngle4 = dblAbsoluteAngles[3];
+            this._mainDataModel.CurrentAbsoluteAngle5 = dblAbsoluteAngles[4];
+            this._mainDataModel.CurrentAbsoluteAngle6 = dblAbsoluteAngles[5];
         }
 
         #endregion
@@ -566,6 +622,146 @@ namespace SprayTeaching.ViewModel
         private void UpdateErrorOperateMessageHandler(object obj)
         {
             this._mainDataModel.ErrorOperateMessage = (string)obj;
+        }
+
+        #endregion
+
+        #region 原点标定部分
+
+        /// <summary>
+        /// 标定原点角度的预处理，但并未标定完成
+        /// </summary>
+        /// <param name="obj">指令</param>
+        public void PreCalibrateOriginAngleHandler(object obj)
+        {
+            // 将当前的绝对角度值赋值给待设定的绝对角度值
+            string strCommand = (string)obj;
+            switch(strCommand)
+            {
+                case "Calibration1AxisOriginAngle":
+                    this._mainDataModel.SetAbsoluteAngle1 = this._mainDataModel.CurrentAbsoluteAngle1;
+                    break;
+                case "Calibration2AxisOriginAngle":
+                    this._mainDataModel.SetAbsoluteAngle2 = this._mainDataModel.CurrentAbsoluteAngle2;
+                    break;
+                case "Calibration3AxisOriginAngle":
+                    this._mainDataModel.SetAbsoluteAngle3 = this._mainDataModel.CurrentAbsoluteAngle3;
+                    break;
+                case "Calibration4AxisOriginAngle":
+                    this._mainDataModel.SetAbsoluteAngle4 = this._mainDataModel.CurrentAbsoluteAngle4;
+                    break;
+                case "Calibration5AxisOriginAngle":
+                    this._mainDataModel.SetAbsoluteAngle5 = this._mainDataModel.CurrentAbsoluteAngle5;
+                    break;
+                case "Calibration6AxisOriginAngle":
+                    this._mainDataModel.SetAbsoluteAngle6 = this._mainDataModel.CurrentAbsoluteAngle6;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 标定原点方向的预处理，但并未标定完成，true为正向，false为反向
+        /// </summary>
+        /// <param name="obj"></param>
+        public void PreCalibrateOriginDirectionHandler(object obj)
+        {
+            // 修改各轴的标定方向，true为正向，false为反向
+            string strCommand = (string)obj;
+            switch(strCommand)
+            {
+                case "Calibration1AxisDirectoinP":
+                    this._mainDataModel.SetCalibrateAxis1Direction = true;
+                    break;
+                case "Calibration1AxisDirectoinN":
+                    this._mainDataModel.SetCalibrateAxis1Direction = false;
+                    break;
+                case "Calibration2AxisDirectoinP":
+                    this._mainDataModel.SetCalibrateAxis2Direction = true;
+                    break;
+                case "Calibration2AxisDirectoinN":
+                    this._mainDataModel.SetCalibrateAxis2Direction = false;
+                    break;
+                case "Calibration3AxisDirectoinP":
+                    this._mainDataModel.SetCalibrateAxis3Direction = true;
+                    break;
+                case "Calibration3AxisDirectoinN":
+                    this._mainDataModel.SetCalibrateAxis3Direction = false;
+                    break;
+                case "Calibration4AxisDirectoinP":
+                    this._mainDataModel.SetCalibrateAxis4Direction = true;
+                    break;
+                case "Calibration4AxisDirectoinN":
+                    this._mainDataModel.SetCalibrateAxis4Direction = false;
+                    break;
+                case "Calibration5AxisDirectoinP":
+                    this._mainDataModel.SetCalibrateAxis5Direction = true;
+                    break;
+                case "Calibration5AxisDirectoinN":
+                    this._mainDataModel.SetCalibrateAxis5Direction = false;
+                    break;
+                case "Calibration6AxisDirectoinP":
+                    this._mainDataModel.SetCalibrateAxis6Direction = true;
+                    break;
+                case "Calibration6AxisDirectoinN":
+                    this._mainDataModel.SetCalibrateAxis6Direction = false;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 标定机器人角度
+        /// </summary>
+        public void CalibrateRobotAngleHandler()
+        {
+            // 更新数据中的标定角度值
+            this._mainDataModel.RobotCalibrateAngle1 = this._mainDataModel.SetAbsoluteAngle1;
+            this._mainDataModel.RobotCalibrateAngle2 = this._mainDataModel.SetAbsoluteAngle2;
+            this._mainDataModel.RobotCalibrateAngle3 = this._mainDataModel.SetAbsoluteAngle3;
+            this._mainDataModel.RobotCalibrateAngle4 = this._mainDataModel.SetAbsoluteAngle4;
+            this._mainDataModel.RobotCalibrateAngle5 = this._mainDataModel.SetAbsoluteAngle5;
+            this._mainDataModel.RobotCalibrateAngle6 = this._mainDataModel.SetAbsoluteAngle6;
+
+            // 更新_myDataMessage的标定角度值
+            double[] dblAngles = new double[6];
+            dblAngles[0] = this._mainDataModel.RobotCalibrateAngle1;
+            dblAngles[1] = this._mainDataModel.RobotCalibrateAngle2;
+            dblAngles[2] = this._mainDataModel.RobotCalibrateAngle3;
+            dblAngles[3] = this._mainDataModel.RobotCalibrateAngle4;
+            dblAngles[4] = this._mainDataModel.RobotCalibrateAngle5;
+            dblAngles[5] = this._mainDataModel.RobotCalibrateAngle6;
+            this._myDataMessage.CalibrateAngles = dblAngles;
+
+            // 更新配置文件
+            this._myConfigFileINI.WriteFileCalibrateAngles(dblAngles);
+            this.UpdateLogContentHandler("机器人角度标定成功.");
+        }
+
+        /// <summary>
+        /// 标定机器人方向
+        /// </summary>
+        public void CalibrateRobotDirectionHandler()
+        {
+            // 更新数据中的标定方向值
+            this._mainDataModel.RobotCalibrateDirection1 = this._mainDataModel.SetCalibrateAxis1Direction == true ? 1.0 : -1.0;
+            this._mainDataModel.RobotCalibrateDirection2 = this._mainDataModel.SetCalibrateAxis2Direction == true ? 1.0 : -1.0;
+            this._mainDataModel.RobotCalibrateDirection3 = this._mainDataModel.SetCalibrateAxis3Direction == true ? 1.0 : -1.0;
+            this._mainDataModel.RobotCalibrateDirection4 = this._mainDataModel.SetCalibrateAxis4Direction == true ? 1.0 : -1.0;
+            this._mainDataModel.RobotCalibrateDirection5 = this._mainDataModel.SetCalibrateAxis5Direction == true ? 1.0 : -1.0;
+            this._mainDataModel.RobotCalibrateDirection6 = this._mainDataModel.SetCalibrateAxis6Direction == true ? 1.0 : -1.0;
+
+            // 更新_myDataMessage的标定方向
+            double[] dblDirections = new double[6];
+            dblDirections[0] = this._mainDataModel.RobotCalibrateDirection1;
+            dblDirections[1] = this._mainDataModel.RobotCalibrateDirection2;
+            dblDirections[2] = this._mainDataModel.RobotCalibrateDirection3;
+            dblDirections[3] = this._mainDataModel.RobotCalibrateDirection4;
+            dblDirections[4] = this._mainDataModel.RobotCalibrateDirection5;
+            dblDirections[5] = this._mainDataModel.RobotCalibrateDirection6;
+            this._myDataMessage.CalibrateDirections = dblDirections;
+
+            // 更新配置文件
+            this._myConfigFileINI.WriteFileCalibrateDirection(dblDirections);
+            this.UpdateLogContentHandler("机器人方向标定成功.");
         }
 
         #endregion

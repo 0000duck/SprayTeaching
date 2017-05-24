@@ -160,12 +160,29 @@ namespace SprayTeaching.MyAllClass
         public bool SendDataHandler(byte[] btData)
         {
             bool bolIsSuccess = false;
+
             // ture为Wifi方式发送数据，false为串口方式发送数据
             if (this._bolFlagCommunicateWay)
                 bolIsSuccess = this._mySocketCom.SendDataHandler(btData);
             else
                 bolIsSuccess = this._mySerialPortCom.SendDataHandler(btData);
             return bolIsSuccess;
+        }
+
+        /// <summary>
+        /// 通信是否连接
+        /// </summary>
+        /// <returns></returns>
+        public bool IsCommunicateConnected()
+        {
+            bool bolIsConnected = false;
+
+            // ture为Wifi方式发送数据，false为串口方式发送数据
+            if (this._bolFlagCommunicateWay)
+                bolIsConnected = this._mySocketCom.IsConnected;
+            else
+                bolIsConnected = this._mySerialPortCom.IsOpen;
+            return bolIsConnected;
         }
     }
 }

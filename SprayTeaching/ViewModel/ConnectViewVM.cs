@@ -154,7 +154,7 @@ namespace SprayTeaching.ViewModel
         }
 
         /// <summary>
-        /// 开始数据采样
+        /// 开始数据采样命令
         /// </summary>
         private MyCommand _startSampleDataCommand;
 
@@ -169,7 +169,7 @@ namespace SprayTeaching.ViewModel
         }
 
         /// <summary>
-        /// 停止数据采样
+        /// 停止数据采样命令
         /// </summary>
         private MyCommand _stopSampleDataCommand;
 
@@ -183,7 +183,65 @@ namespace SprayTeaching.ViewModel
             }
         }
 
+        /// <summary>
+        /// 标定原点的角度预处理命令
+        /// </summary>
+        private MyCommand _preCalibrateOriginAngleCommand;
 
+        public MyCommand PreCalibrateOriginAngleCommand
+        {
+            get 
+            {
+                if (this._preCalibrateOriginAngleCommand == null)
+                    this._preCalibrateOriginAngleCommand = new MyCommand(this.ExecutePreCalibrateOriginAngle);
+                return _preCalibrateOriginAngleCommand; 
+            }
+        }
+
+        /// <summary>
+        /// 标定原点的方向预处理命令
+        /// </summary>
+        private MyCommand _preCalibrateOriginDirectionCommand;
+
+        public MyCommand PreCalibrateOriginDirectionCommand
+        {
+            get 
+            {
+                if (this._preCalibrateOriginDirectionCommand == null)
+                    this._preCalibrateOriginDirectionCommand = new MyCommand(this.ExecutePreCalibrateOriginDirection);
+                return _preCalibrateOriginDirectionCommand; 
+            }
+        }
+
+        /// <summary>
+        /// 标定机器人的角度
+        /// </summary>
+        private MyCommand _calibrateRobotAngleCommand;
+
+        public MyCommand CalibrateRobotAngleCommand
+        {
+            get
+            {
+                if (this._calibrateRobotAngleCommand == null)
+                    this._calibrateRobotAngleCommand = new MyCommand(this.ExecuteCalibrateRobotAngle);
+                return _calibrateRobotAngleCommand; 
+            }
+        }
+
+        /// <summary>
+        /// 标定机器人的方向
+        /// </summary>
+        private MyCommand _calibrateRobotDirectionCommand;
+
+        public MyCommand CalibrateRobotDirectionCommand
+        {
+            get 
+            {
+                if (this._calibrateRobotDirectionCommand == null)
+                    this._calibrateRobotDirectionCommand = new MyCommand(this.ExecuteCalibrateRobotDirection);
+                return _calibrateRobotDirectionCommand; 
+            }
+        }
 
         #endregion
 
@@ -235,7 +293,7 @@ namespace SprayTeaching.ViewModel
         }
 
         /// <summary>
-        /// 选择机器人模型
+        /// 执行选择机器人模型
         /// </summary>
         /// <param name="objParameter">机器人模型编号，radio的编号：1,2,3,4,5</param>
         private void ExecuteSelectRobotModel(object objParameter = null)
@@ -244,7 +302,7 @@ namespace SprayTeaching.ViewModel
         }
 
         /// <summary>
-        /// 通信，发送数据命令
+        /// 执行通信，发送数据命令
         /// </summary>
         /// <param name="objParameter">发送的命令</param>
         private void ExecuteSendDataCommunicate(object objParameter = null)
@@ -253,7 +311,7 @@ namespace SprayTeaching.ViewModel
         }
 
         /// <summary>
-        /// 将轴地址清零
+        /// 执行将轴地址清零
         /// </summary>
         private void ExecuteClearAllAxisAddress(object objParameter = null)
         {
@@ -261,7 +319,7 @@ namespace SprayTeaching.ViewModel
         }
 
         /// <summary>
-        /// 开始数据采样
+        /// 执行开始数据采样
         /// </summary>
         /// <param name="objParameter"></param>
         private void ExecuteStartSampleData(object objParameter = null)
@@ -270,12 +328,48 @@ namespace SprayTeaching.ViewModel
         }
 
         /// <summary>
-        /// 停止数据采样
+        /// 执行停止数据采样
         /// </summary>
         /// <param name="objParameter"></param>
         private void ExecuteStopSampleData(object objParameter = null)
         {
             this._modelViewModel.StopSampleDataHandler();
+        }
+
+        /// <summary>
+        /// 执行标定原点角度预处理
+        /// </summary>
+        /// <param name="obj"></param>
+        private void ExecutePreCalibrateOriginAngle(object obj =null)
+        {
+            this._modelViewModel.PreCalibrateOriginAngleHandler(obj);
+        }
+
+        /// <summary>
+        /// 执行标定原点方向预处理
+        /// </summary>
+        /// <param name="obj"></param>
+        private void ExecutePreCalibrateOriginDirection(object obj =null)
+        {
+            this._modelViewModel.PreCalibrateOriginDirectionHandler(obj);
+        }
+
+        /// <summary>
+        /// 执行标定机器人角度
+        /// </summary>
+        /// <param name="obj"></param>
+        private void ExecuteCalibrateRobotAngle(object obj=null)
+        {
+            this._modelViewModel.CalibrateRobotAngleHandler();
+        }
+
+        /// <summary>
+        /// 执行标定机器人方向
+        /// </summary>
+        /// <param name="obj"></param>
+        private void ExecuteCalibrateRobotDirection(object obj=null)
+        {
+            this._modelViewModel.CalibrateRobotDirectionHandler();
         }
 
         #endregion
