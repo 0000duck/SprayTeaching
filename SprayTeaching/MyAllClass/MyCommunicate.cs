@@ -11,7 +11,8 @@ namespace SprayTeaching.MyAllClass
     public class MyCommunicate
     {
         private MySerialPort _mySerialPortCom;             // 串口的对象
-        private MySocketCom _mySocketCom;                   // Socket通信对象
+        //private MySocketCom _mySocketCom;                   // Socket通信对象
+        private MyUDPCom _mySocketCom;                   // Socket通信对象
         private bool _bolFlagCommunicateWay = false;        // 默认是false，false为串口方式，true为wifi方式
 
         public event DataReceivedEventHandler DataReceived;
@@ -26,7 +27,14 @@ namespace SprayTeaching.MyAllClass
             this._mySerialPortCom.UpdateLogContent += new UpdateLogContentEventHandler(WriteLogHandler);                                   // 串口写日志
             this._mySerialPortCom.UpdateSerialPortIsOpened += new UpdateSerialPortIsOpenedEventHandler(UpdateSerialPortIsOpenedHandler);   // 更新串口通断状态信息
 
-            this._mySocketCom = new MySocketCom();                                                                                          // socket通信的对象
+            /// TCP通信
+            //this._mySocketCom = new MySocketCom();                                                                                          // socket通信的对象
+            //this._mySocketCom.UpdateLogContent += new UpdateLogContentEventHandler(WriteLogHandler);                                        // socket写日志
+            //this._mySocketCom.DataReceived += new DataReceivedEventHandler(ReceiveDataHandler);                                             // 接收数据的处理
+            //this._mySocketCom.UpdateSocketIsConnected += new UpdateSocketIsConnectedEventHandler(UpdateSocketIsConnectedHandler);           // 更新socket通断的状态信息
+
+            /// UDP通信
+            this._mySocketCom = new MyUDPCom();                                                                                          // socket通信的对象
             this._mySocketCom.UpdateLogContent += new UpdateLogContentEventHandler(WriteLogHandler);                                        // socket写日志
             this._mySocketCom.DataReceived += new DataReceivedEventHandler(ReceiveDataHandler);                                             // 接收数据的处理
             this._mySocketCom.UpdateSocketIsConnected += new UpdateSocketIsConnectedEventHandler(UpdateSocketIsConnectedHandler);           // 更新socket通断的状态信息
