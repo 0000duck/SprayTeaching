@@ -526,7 +526,6 @@ namespace SprayTeaching.Model
 
         #region 数据参数
 
-        #region  采样频率相关
         /// <summary>
         /// 当前的采样频率
         /// </summary>
@@ -562,9 +561,6 @@ namespace SprayTeaching.Model
             set { _intSetSampleFrequent = value; RaisePropertyChanged("SetSampleFrequent"); }
         }
 
-        #endregion
-
-        #region 轴地址相关
         /// <summary>
         /// 要设置1轴地址的参数
         /// </summary>
@@ -696,14 +692,12 @@ namespace SprayTeaching.Model
             get { return _byteCurrentAxis6Address; }
             set { _byteCurrentAxis6Address = value; RaisePropertyChanged("CurrentAxis6Address"); }
         }
-        #endregion
 
-        #region  设备的标识信息
+        private bool _bolDeviceIsConnected = false;
+
         /// <summary>
         /// 设备是否连接
         /// </summary>
-        private bool _bolDeviceIsConnected = false;
-        
         public bool DeviceIsConnected
         {
             get { return _bolDeviceIsConnected; }
@@ -734,215 +728,12 @@ namespace SprayTeaching.Model
 
         #endregion
 
-        #region 标定设定的相关变量
-        /// <summary>
-        /// 当前轴1角度的绝度值
-        /// </summary>
-        private double _dblCurrentAbsoluteAngle1 = 0.0;
-
-        public double CurrentAbsoluteAngle1
-        {
-            get { return _dblCurrentAbsoluteAngle1; }
-            set { _dblCurrentAbsoluteAngle1 = value; RaisePropertyChanged("CurrentAbsoluteAngle1"); }
-        }
-
-        /// <summary>
-        /// 当前轴2角度的绝度值
-        /// </summary>
-        private double _dblCurrentAbsoluteAngle2 = 0.0;
-
-        public double CurrentAbsoluteAngle2
-        {
-            get { return _dblCurrentAbsoluteAngle2; }
-            set { _dblCurrentAbsoluteAngle2 = value; RaisePropertyChanged("CurrentAbsoluteAngle2"); }
-        }
-
-        /// <summary>
-        /// 当前轴3角度的绝度值
-        /// </summary>
-        private double _dblCurrentAbsoluteAngle3 = 0.0;
-
-        public double CurrentAbsoluteAngle3
-        {
-            get { return _dblCurrentAbsoluteAngle3; }
-            set { _dblCurrentAbsoluteAngle3 = value; RaisePropertyChanged("CurrentAbsoluteAngle3"); }
-        }
-
-        /// <summary>
-        /// 当前轴4角度的绝度值
-        /// </summary>
-        private double _dblCurrentAbsoluteAngle4 = 0.0;
-
-        public double CurrentAbsoluteAngle4
-        {
-            get { return _dblCurrentAbsoluteAngle4; }
-            set { _dblCurrentAbsoluteAngle4 = value; RaisePropertyChanged("CurrentAbsoluteAngle4"); }
-        }
-
-        /// <summary>
-        /// 当前轴5角度的绝度值
-        /// </summary>
-        private double _dblCurrentAbsoluteAngle5 = 0.0;
-
-        public double CurrentAbsoluteAngle5
-        {
-            get { return _dblCurrentAbsoluteAngle5; }
-            set { _dblCurrentAbsoluteAngle5 = value; RaisePropertyChanged("CurrentAbsoluteAngle5"); }
-        }
-
-        /// <summary>
-        /// 当前轴6角度的绝度值
-        /// </summary>
-        private double _dblCurrentAbsoluteAngle6 = 0.0;
-
-        public double CurrentAbsoluteAngle6
-        {
-            get { return _dblCurrentAbsoluteAngle6; }
-            set { _dblCurrentAbsoluteAngle6 = value; RaisePropertyChanged("CurrentAbsoluteAngle6"); }
-        }
-
-        /// <summary>
-        /// 设定轴1绝对的角度值
-        /// </summary>
-        private double _dblSetAbsoluteAngle1 = 1.0;
-
-        public double SetAbsoluteAngle1
-        {
-            get { return _dblSetAbsoluteAngle1; }
-            set { _dblSetAbsoluteAngle1 = value; RaisePropertyChanged("SetAbsoluteAngle1"); }
-        }
-
-        /// <summary>
-        /// 设定轴2绝对的角度值
-        /// </summary>
-        private double _dblSetAbsoluteAngle2 = 2.0;
-
-        public double SetAbsoluteAngle2
-        {
-            get { return _dblSetAbsoluteAngle2; }
-            set { _dblSetAbsoluteAngle2 = value; RaisePropertyChanged("SetAbsoluteAngle2"); }
-        }
-
-        /// <summary>
-        /// 设定轴3绝对的角度值
-        /// </summary>
-        private double _dblSetAbsoluteAngle3 = 3.0;
-
-        public double SetAbsoluteAngle3
-        {
-            get { return _dblSetAbsoluteAngle3; }
-            set { _dblSetAbsoluteAngle3 = value; RaisePropertyChanged("SetAbsoluteAngle3"); }
-        }
-
-        /// <summary>
-        /// 设定轴4绝对的角度值
-        /// </summary>
-        private double _dblSetAbsoluteAngle4 = 4.0;
-
-        public double SetAbsoluteAngle4
-        {
-            get { return _dblSetAbsoluteAngle4; }
-            set { _dblSetAbsoluteAngle4 = value; RaisePropertyChanged("SetAbsoluteAngle4"); }
-        }
-
-        /// <summary>
-        /// 设定轴5绝对的角度值
-        /// </summary>
-        private double _dblSetAbsoluteAngle5 = 5.0;
-
-        public double SetAbsoluteAngle5
-        {
-            get { return _dblSetAbsoluteAngle5; }
-            set { _dblSetAbsoluteAngle5 = value; RaisePropertyChanged("SetAbsoluteAngle5"); }
-        }
-
-        /// <summary>
-        /// 设定轴6绝对的角度值
-        /// </summary>
-        private double _dblSetAbsoluteAngle6 = 6.0;
-
-        public double SetAbsoluteAngle6
-        {
-            get { return _dblSetAbsoluteAngle6; }
-            set { _dblSetAbsoluteAngle6 = value; RaisePropertyChanged("SetAbsoluteAngle6"); }
-        }
-
-        /// <summary>
-        /// 设定标定轴1的方向,true为正向,false为反向
-        /// </summary>
-        private bool _bolSetCalibrateAxis1Direction = false;
-
-        public bool SetCalibrateAxis1Direction
-        {
-            get { return _bolSetCalibrateAxis1Direction; }
-            set { _bolSetCalibrateAxis1Direction = value; RaisePropertyChanged("SetCalibrateAxis1Direction"); }
-        }
-
-        /// <summary>
-        /// 设定标定轴2的方向,true为正向,false为反向
-        /// </summary>
-        private bool _bolSetCalibrateAxis2Direction = false;
-
-        public bool SetCalibrateAxis2Direction
-        {
-            get { return _bolSetCalibrateAxis2Direction; }
-            set { _bolSetCalibrateAxis2Direction = value; RaisePropertyChanged("SetCalibrateAxis2Direction"); }
-        }
-
-        /// <summary>
-        /// 设定标定轴3的方向,true为正向,false为反向
-        /// </summary>
-        private bool _bolSetCalibrateAxis3Direction = false;
-
-        public bool SetCalibrateAxis3Direction
-        {
-            get { return _bolSetCalibrateAxis3Direction; }
-            set { _bolSetCalibrateAxis3Direction = value; RaisePropertyChanged("SetCalibrateAxis3Direction"); }
-        }
-
-        /// <summary>
-        /// 设定标定轴4的方向,true为正向,false为反向
-        /// </summary>
-        private bool _bolSetCalibrateAxis4Direction = false;
-
-        public bool SetCalibrateAxis4Direction
-        {
-            get { return _bolSetCalibrateAxis4Direction; }
-            set { _bolSetCalibrateAxis4Direction = value; RaisePropertyChanged("SetCalibrateAxis4Direction"); }
-        }
-
-        /// <summary>
-        /// 设定标定轴5的方向,true为正向,false为反向
-        /// </summary>
-        private bool _bolSetCalibrateAxis5Direction = false;
-
-        public bool SetCalibrateAxis5Direction
-        {
-            get { return _bolSetCalibrateAxis5Direction; }
-            set { _bolSetCalibrateAxis5Direction = value; RaisePropertyChanged("SetCalibrateAxis5Direction"); }
-        }
-
-        /// <summary>
-        /// 设定标定轴6的方向,true为正向,false为反向
-        /// </summary>
-        private bool _bolSetCalibrateAxis6Direction = false;
-
-        public bool SetCalibrateAxis6Direction
-        {
-            get { return _bolSetCalibrateAxis6Direction; }
-            set { _bolSetCalibrateAxis6Direction = value; RaisePropertyChanged("SetCalibrateAxis6Direction"); }
-        }
-
-        #endregion
-
-        #endregion
-
         #region 界面状态显示
 
         /// <summary>
         /// 错误操作信息提示
         /// </summary>
-        private string _strErrorOperateMessage = "";
+        private string _strErrorOperateMessage = "xingshuang";
 
         public string ErrorOperateMessage
         {

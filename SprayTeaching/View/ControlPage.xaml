@@ -21,14 +21,11 @@
                 <StackPanel Grid.Row="0">
                     <TextBlock Text="采样操作：" Margin="5" FontSize="15" FontWeight="Bold"/>
                     <StackPanel Orientation="Horizontal">
-                        <Button Content="开始采样" Margin="5" Padding="5,4,5,4" Command="{Binding StartSampleDataCommand}"
-                                IsEnabled="{Binding ModelViewModel.MainDataModel.IsSampleDataRunning,Converter={StaticResource NegativeConverter},Mode=OneWay,
-                            UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Content="开始采样" Margin="5" Padding="5,4,5,4" Command="{Binding StartSampleDataCommand}"/>
                         <Button Content="停止采样" Margin="5" Padding="5,4,5,4" Command="{Binding StopSampleDataCommand}"
                                 IsEnabled="{Binding ModelViewModel.MainDataModel.IsSampleDataRunning,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </StackPanel>
-                <Button Grid.Row="1" Content="test" Command="{Binding SendDataCommunicateCommand}" CommandParameter="QueryDeviceConnect"/>
                 
             </Grid>
             
