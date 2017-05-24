@@ -5,19 +5,19 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using SprayTeaching.BaseClassLib;
-
 
 namespace SprayTeaching.BaseClassLib
 {
-    public class MySocketCom
+    public class MyUDPCom
     {
         #region 变量
         private string _strSocketIPAddress = "10.8.193.177";                    // socket的IP地址     
         private int _intSocketPortNum = 12000;                                  // socket的端口号
+        private bool _bolIsConnected = false;                                   // 是否连接，UDP没有连接不连接的概念，这里为了有个指示，设立一个连接标识
         private byte[] _bytReceiveBuffer;                                       // 数据接收缓存区
         private List<byte> _lstBytReceiveData = new List<byte>();
         private StringBuilder _sbReceiveDataStorage = new StringBuilder();      // 存储所有接收的数据
+        private EndPoint _epServer;                                             // 终端地址
 
         private Socket _sktCommunicate;                                         // socket的对象
         #endregion
@@ -55,21 +55,20 @@ namespace SprayTeaching.BaseClassLib
         /// </summary>
         public bool IsConnected
         {
-            get { return IsSocketConnected(); }
+            get { return this._bolIsConnected; }
         }
 
         #endregion
 
         #region 构造函数
 
-        public MySocketCom( )
+        public MyUDPCom( )
         {
             this._strSocketIPAddress = "10.8.193.177";
             this._intSocketPortNum = 12000;
-
         }
 
-        public MySocketCom(string strIPAddress, int intPortNum)
+        public MyUDPCom(string strIPAddress, int intPortNum)
         {
             this._strSocketIPAddress = strIPAddress;
             this._intSocketPortNum = intPortNum;
@@ -119,49 +118,6 @@ namespace SprayTeaching.BaseClassLib
         }
 
         /// <summary>
-        /// Socket是否已经连接
-        /// </summary>
-        /// <returns>true为连接，false为未连接</returns>
-        private bool IsSocketConnected( )
-        {
-            if (this._sktCommunicate != null)
-                return this._sktCommunicate.Connected;
-            return false;
-        }
-
-        /// <summary>
-        /// 与服务器进行连接
-        /// </summary>
-        /// <returns>是否连接成功，true为成功，false为失败</returns>
-        public bool Connect( )
-        {
-            IPAddress ip = IPAddress.Parse(this._strSocketIPAddress);
-            IPEndPoint ipe = new IPEndPoint(ip, this._intSocketPortNum);
-
-            this._sktCommunicate = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
-            //this._sktCommunicate = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            this._sktCommunicate.ReceiveTimeout = 500;
-            this._sktCommunicate.SendTimeout = 500;
-            try
-            {
-                this._sktCommunicate.Connect(ipe);          // 连接服务器
-                if (this._sktCommunicate.Connected)
-                {
-                    this._bytReceiveBuffer = new byte[1024];
-                    this._sktCommunicate.BeginReceive(this._bytReceiveBuffer, 0, this._bytReceiveBuffer.Length, SocketFlags.None,
-                        new AsyncCallback(ReceiveDataCallbackHandler), this._sktCommunicate);           // 开启异步接收
-                    return true;
-                }
-                else
-                    return false;
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-        }
-
-        /// <summary>
         /// 打开socket，若socket已经打开，则先关闭，再重新打开
         /// </summary>
         public void OpenSocket( )
@@ -175,6 +131,7 @@ namespace SprayTeaching.BaseClassLib
             {
                 this.Connect();
                 this.WriteLogHandler(string.Format("Wifi连接成功,主机为{0}:{1}.", this._strSocketIPAddress, this._intSocketPortNum));
+                this._bolIsConnected = true;                    // 在这里就说是UDP已经连接，因为UDP不存在连接不连接的概念，这里指示连接为了给操作者看的
             }
             catch (Exception e)
             {
@@ -196,11 +153,52 @@ namespace SprayTeaching.BaseClassLib
                 this._sktCommunicate.Close();
                 this._sktCommunicate = null;
             }
+            this._bolIsConnected = false;
             this.UpdateSocketIsConnected(this.IsSocketConnected());
             this.WriteLogHandler("Wifi已关闭.");
         }
 
+        /// <summary>
+        /// Socket是否已经连接
+        /// </summary>
+        /// <returns>true为连接，false为未连接</returns>
+        private bool IsSocketConnected( )
+        {
+            if (this._sktCommunicate != null)
+                return this._bolIsConnected;
+            return false;
+        }
+
+        /// <summary>
+        /// 与服务器进行连接
+        /// </summary>
+        /// <returns>是否连接成功，true为成功，false为失败</returns>
+        public bool Connect( )
+        {
+            IPAddress ip = IPAddress.Parse(this._strSocketIPAddress);
+            IPEndPoint ipe = new IPEndPoint(ip, this._intSocketPortNum);
+            this._epServer = (EndPoint)ipe;
+            this._sktCommunicate = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            try
+            {
+                // 给Udp绑定一个地址和端口号
+                IPEndPoint localEp = new IPEndPoint(IPAddress.Any, 12001);
+                this._sktCommunicate.Bind((EndPoint)localEp);                
+
+                // 开启异步接收
+                this._bytReceiveBuffer = new byte[1024];
+                this._sktCommunicate.BeginReceiveFrom(this._bytReceiveBuffer, 0, this._bytReceiveBuffer.Length, SocketFlags.None,
+                    ref this._epServer, new AsyncCallback(ReceiveDataCallbackHandler), this._sktCommunicate);           
+                return true;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }           
         #endregion
+
+        #region 关闭资源方法
 
         /// <summary>
         /// 关闭所有变量，使它们都invalidition
@@ -221,6 +219,8 @@ namespace SprayTeaching.BaseClassLib
             this.CloseVariables();
         }
 
+        #endregion
+
         #region 接收数据并处理相关方法
 
         /// <summary>
@@ -232,29 +232,31 @@ namespace SprayTeaching.BaseClassLib
             Socket ts = (Socket)result.AsyncState;      // 这里的Socket是客户端的Socket
 
             // 当连接断开时，则将接收数据线程关闭,此处主要是客户端主动断开
-            if (!this.IsSocketConnected())
+            //if (!this.IsSocketConnected())
+            //    return;
+            int intByteRead = 0;
+            try
+            {
+                intByteRead = ts.EndReceive(result);    // 接收到数据的字节数
+            }
+            catch
+            {
+                ts.Close();                
                 return;
-
-            int intByteRead = ts.EndReceive(result);    // 接收到数据的字节数
+            }
+            //int intByteRead = ts.EndReceive(result);    // 接收到数据的字节数
             if (intByteRead > 0)
             {
                 // 存储数据
                 this.SaveReceivePartData(intByteRead);
 
-                // 判断通道中还有没有数据
-                //if (ts.Available > 0)
-                //{
-                //    // 接收数据未完成，继续接收数据
-                //    ts.BeginReceive(this._bytReceiveBuffer, 0, this._bytReceiveBuffer.Length, SocketFlags.None, new AsyncCallback(ReceiveDataCallbackHandler), ts);
-                //    return;
-                //}
-                //else
-                //{
                 // 接收已完成，开始处理数据，处理完后清空缓存区
                 this.DataHandler();
-                //}
+
                 // 数据处理完成，则进入新的数据接收等待
-                ts.BeginReceive(this._bytReceiveBuffer, 0, this._bytReceiveBuffer.Length, SocketFlags.None, new AsyncCallback(ReceiveDataCallbackHandler), ts);
+                this._bytReceiveBuffer = new byte[1024];
+                this._sktCommunicate.BeginReceiveFrom(this._bytReceiveBuffer, 0, this._bytReceiveBuffer.Length, SocketFlags.None,
+                    ref this._epServer, new AsyncCallback(ReceiveDataCallbackHandler), this._sktCommunicate);           // 开启异步接收
                 return;
             }
             else
@@ -408,9 +410,8 @@ namespace SprayTeaching.BaseClassLib
                 return false;
             }
 
-            //string strData = "xingshuang\r\n";
-            //byte[] bytBuffer = System.Text.Encoding.Default.GetBytes(strData);
-            this._sktCommunicate.BeginSend(btData, 0, btData.Length, SocketFlags.None, new AsyncCallback(SendDataCallbackHandler), this._sktCommunicate);
+            this._sktCommunicate.BeginSendTo(btData, 0, btData.Length, SocketFlags.None,
+                this._epServer, new AsyncCallback(SendDataCallbackHandler), this._sktCommunicate);
             return true;
         }
 
@@ -424,11 +425,11 @@ namespace SprayTeaching.BaseClassLib
             try
             {
                 ts.EndSend(result);
-                this.WriteLogHandler("发送成功.");
+                //this.WriteLogHandler("发送成功.");
             }
             catch
             {
-                this.WriteLogHandler("发送失败.", 1);
+                //this.WriteLogHandler("发送失败.", 1);
             }
         }
 
