@@ -177,6 +177,7 @@ namespace SprayTeaching.BaseClassLib
         {
             IPAddress ip = IPAddress.Parse(this._strSocketIPAddress);
             IPEndPoint ipe = new IPEndPoint(ip, this._intSocketPortNum);
+            //IPEndPoint ipe = new IPEndPoint(ip, 0);
             this._epServer = (EndPoint)ipe;
             this._sktCommunicate = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             try

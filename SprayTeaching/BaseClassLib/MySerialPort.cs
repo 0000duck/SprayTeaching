@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using SprayTeaching.BaseClassLib;
 
@@ -11,6 +13,11 @@ namespace SprayTeaching.BaseClassLib
 
     public class MySerialPort
     {
+        //private Queue<string> _queueReceiveDataMessage = new Queue<string>();       // 临时存放日志消息的队列 
+        //private Thread _thrdDataMessageHandler;                                     // 数据消息处理的线程
+        //private bool _bolIsThreadAlive = true;                                      // 控制线程活着，true为活着，false为死亡
+        //private AutoResetEvent _autoEvent = new AutoResetEvent(false);              // 控制数据消息处理的线程，控制它的睡眠和唤醒
+
         #region 内部私有变量
         private string _portName = "COM1";                                              // 串口号，默认COM1
         private SerialPortBaudRates _baudRate = SerialPortBaudRates.BaudRate_115200;    // 波特率，默认9600
@@ -176,7 +183,38 @@ namespace SprayTeaching.BaseClassLib
 
             _comPort.DataReceived += new SerialDataReceivedEventHandler(comPort_DataReceived);
             _comPort.ErrorReceived += new SerialErrorReceivedEventHandler(comPort_ErrorReceived);
+
+            //this._thrdDataMessageHandler = new Thread(ThrdDataMessageHandler);
+            //this._thrdDataMessageHandler.IsBackground = true;
+            //this._thrdDataMessageHandler.Start();
         }
+
+        //private void ThrdDataMessageHandler( )
+        //{
+        //    while (this._bolIsThreadAlive)
+        //    {
+        //        if (this._queueReceiveDataMessage.Count != 0)
+        //        {
+        //            string readString = string.Empty;
+        //            int intLength = this._queueReceiveDataMessage.Count;
+        //            for (int i = 0; i < intLength; i++)
+        //            {
+        //                readString += this._queueReceiveDataMessage.Dequeue();
+        //            }
+        //            // 将日志写到文本中
+        //            using (StreamWriter w = new StreamWriter("./sample.txt", true, System.Text.Encoding.UTF8))
+        //            {
+        //                w.Write(readString);
+        //                w.Flush();
+        //                w.Close();
+        //            }
+        //        }
+        //        else
+        //        {
+        //            this._autoEvent.WaitOne();
+        //        }
+        //    }
+        //}
 
         #endregion
 
@@ -336,7 +374,7 @@ namespace SprayTeaching.BaseClassLib
             {
                 byteData.Clear();
             }
-            
+
 
             for (int i = 1; i < count; i++)
             {
@@ -369,6 +407,12 @@ namespace SprayTeaching.BaseClassLib
             // 若数据校验和错误，则清除所有数据
             if (!DataCheckSum(byteData))
                 byteData.Clear();
+
+            //string readString = "接收：" + BitConverter.ToString(readBuffer).TrimEnd() + "\r\n";
+            //byte[] byteBuff=byteData.ToArray<byte>();
+            //readString += "获取：" + BitConverter.ToString(byteBuff).TrimEnd() + "\r\n\r\n";
+            //this._queueReceiveDataMessage.Enqueue(readString);
+            //this._autoEvent.Set();
 
             return byteData;
         }

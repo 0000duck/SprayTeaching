@@ -8,8 +8,6 @@ using SprayTeaching.BaseClassLib;
 
 namespace SprayTeaching.MyAllClass
 {
-
-
     public class MyRoboDKExtension
     {
         #region 所有变量
@@ -83,9 +81,9 @@ namespace SprayTeaching.MyAllClass
             this._thrdUpdateRobotParameter.Name = "UpdateRobotParameterHandler";                // 设置线程的名字
             this._thrdUpdateRobotParameter.Start();                                             // 启动线程
 
-            this._thrdDriveRobotMoveHandler = new Thread(ThrdDriveRobotMoveHandler);            // 简单线程，驱动机器人运动操作
-            this._thrdDriveRobotMoveHandler.IsBackground = true;                                // 设置成后台线程，在前台线程结束时，所有剩余的后台线程都会停止且不会完成                                  
-            this._thrdDriveRobotMoveHandler.Name = "DriveRobotMove";                            // 设置线程的名字
+            //this._thrdDriveRobotMoveHandler = new Thread(ThrdDriveRobotMoveHandler);            // 简单线程，驱动机器人运动操作
+            //this._thrdDriveRobotMoveHandler.IsBackground = true;                                // 设置成后台线程，在前台线程结束时，所有剩余的后台线程都会停止且不会完成                                  
+            //this._thrdDriveRobotMoveHandler.Name = "DriveRobotMove";                            // 设置线程的名字
             //this._thrdDriveRobotMoveHandler.Start();
         }
 
@@ -560,31 +558,36 @@ namespace SprayTeaching.MyAllClass
 
         #region 机器人运动
 
-        private void ThrdDriveRobotMoveHandler(object obj)
-        {
-            Thread.Sleep(1);        // 延迟启动，为避免初始化时候出现问题
-            this.WriteLogHandler("已开启机器人运动线程并等待.");
-            while (this._bolIsDriveRbtMoveThrdAlive)
-            {
-                if (this._queueRobotMoveMessage.Count != 0)
-                    DriveRobotMoveHandler();
-                else
-                    this._autoEvent.WaitOne();                      // 阻止当前线程，直到当前 WaitHandle 收到信号为止
-            }
-        }
+        //private void ThrdDriveRobotMoveHandler(object obj)
+        //{
+        //    Thread.Sleep(1);        // 延迟启动，为避免初始化时候出现问题
+        //    this.WriteLogHandler("已开启机器人运动线程并等待.");
+        //    while (this._bolIsDriveRbtMoveThrdAlive)
+        //    {
+        //        if (this._queueRobotMoveMessage.Count != 0)
+        //            DriveRobotMoveHandler();
+        //        else
+        //            this._autoEvent.WaitOne();                      // 阻止当前线程，直到当前 WaitHandle 收到信号为止
+        //    }
+        //}
 
-        public void DriveRobotMoveHandler( )
-        {
-            double[] dblJoints = this._queueRobotMoveMessage.Dequeue();
-            lock (this._objLockRobotMove)
-            {
-                //this.SuspendThreadUpdateRobotParameter();
-                this._rdkItemRobot.MoveJ(dblJoints, BLOCKING_MOVE);
-                //this.ResumeThreadUpdateRobotParameter();
-            }
-            Thread.Sleep(10);           // 防止数据发送太快导致roboDK出问题
-        }
+        //public void DriveRobotMoveHandler( )
+        //{
+        //    double[] dblJoints = this._queueRobotMoveMessage.Dequeue();
+        //    lock (this._objLockRobotMove)
+        //    {
+        //        //this.SuspendThreadUpdateRobotParameter();
+        //        this._rdkItemRobot.MoveJ(dblJoints, BLOCKING_MOVE);
+        //        //this.ResumeThreadUpdateRobotParameter();
+        //    }
+        //    Thread.Sleep(10);           // 防止数据发送太快导致roboDK出问题
+        //}
 
+
+        /// <summary>
+        /// 添加一条机器人运动的消息
+        /// </summary>
+        /// <param name="dblAngles">角度信息消息</param>
         public void AddRobotMoveMessage(double[] dblAngles)
         {
             this._queueRobotMoveMessage.Enqueue(dblAngles);
@@ -595,6 +598,10 @@ namespace SprayTeaching.MyAllClass
             //this._autoEvent.Set();                                  // 将事件状态设置为终止状态，允许一个或多个等待线程继续
         }
 
+
+        /// <summary>
+        /// 驱动机器人运动
+        /// </summary>
         private void DriveRobotMove( )
         {
             if (this._queueRobotMoveMessage.Count != 0)

@@ -48,17 +48,17 @@ namespace SprayTeaching.ViewModel
         /// </summary>
         public ConnectModelVM( )
         {
-            this._mainDataModel = new DataModel();                                                                              // 所有数据的对象
-            this._dlgtUpdateDifThreadParam = new UpdateDifferentThreadParameterEventHandler(UpdateDifferentThreadParam);        // 用于更新不同线程的参数,目前用于更新listview的绑定的数据                      
+            this._mainDataModel = new DataModel();                                                                                      // 所有数据的对象
+            this._dlgtUpdateDifThreadParam = new UpdateDifferentThreadParameterEventHandler(UpdateDifferentThreadParam);                // 用于更新不同线程的参数,目前用于更新listview的绑定的数据                      
 
-            this._myLogObject = new MyLog(this._mainDataModel.LogFilePath);                                                     // 日志更新的对象
-            this._myLogObject.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                    // 日志中线程初始化的时候写日志，自己写自己，因为要将数据写到listview中，只能统一采用外部方式
+            this._myLogObject = new MyLog(this._mainDataModel.LogFilePath);                                                             // 日志更新的对象
+            this._myLogObject.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                            // 日志中线程初始化的时候写日志，自己写自己，因为要将数据写到listview中，只能统一采用外部方式
 
-            this._myErrorOperate = new MyErrorOperate();                                                                        // 错误操作的对象
-            this._myErrorOperate.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                 // 错误操作写日志
-            this._myErrorOperate.UpdateErrorOperateMessage += new Action<object>(UpdateErrorOperateMessageHandler);             // 错误操作消息更新
+            this._myErrorOperate = new MyErrorOperate();                                                                                // 错误操作的对象
+            this._myErrorOperate.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                         // 错误操作写日志
+            this._myErrorOperate.UpdateErrorOperateMessage += new Action<object>(UpdateErrorOperateMessageHandler);                     // 错误操作消息更新
 
-            this._myDataMessage = new MyDataMessage();                                                                          // DataMessage的对象，存放接收数据和发送数据
+            this._myDataMessage = new MyDataMessage();                                                                                  // DataMessage的对象，存放接收数据和发送数据
             this._myDataMessage.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);
             this._myDataMessage.UpdateSampleInform += new UpdateMessageSampleInformEventHandler(UpdateMessageSampleInformHandler);      // 接收采样频率和周期的处理
             this._myDataMessage.UpdateAxisAddress += new UpdateMessageAxisAddressEventHandler(UpdateMessageAxisAddressHandler);         // 接收查询所有轴地址的处理
@@ -77,9 +77,9 @@ namespace SprayTeaching.ViewModel
             this._myCommunicate.UpdateSerialPortIsOpened += new UpdateSerialPortIsOpenedEventHandler(UpdateSerialPortIsOpenedHandler);  // 更新串口通断状态信息
             this._myCommunicate.UpdateSocketIsConnected += new UpdateSocketIsConnectedEventHandler(UpdateSocketIsConnectedHandler);     // 更新socket通断的状态信息
 
-            this._myRoboDKExtension = new MyRoboDKExtension();                                                                  // RoboDK的对象
-            this._myRoboDKExtension.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);              // RoboDK写日志
-            this._myRoboDKExtension.UpdateRobotParameter += new UpdateRobotParameterEventHandler(UpdateRobotParameterHandler);  // 更新机器人参数
+            this._myRoboDKExtension = new MyRoboDKExtension();                                                                          // RoboDK的对象
+            this._myRoboDKExtension.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                      // RoboDK写日志
+            this._myRoboDKExtension.UpdateRobotParameter += new UpdateRobotParameterEventHandler(UpdateRobotParameterHandler);          // 更新机器人参数
 
 
         }
@@ -373,12 +373,12 @@ namespace SprayTeaching.ViewModel
             double dblJoint5 = (double)objJoint5;
             double dblJoint6 = (double)objJoint6;
 
-            this._mainDataModel.RobotJoint1 = Math.Round(dblJoint1, 3);
-            this._mainDataModel.RobotJoint2 = Math.Round(dblJoint2, 3);
-            this._mainDataModel.RobotJoint3 = Math.Round(dblJoint3, 3);
-            this._mainDataModel.RobotJoint4 = Math.Round(dblJoint4, 3);
-            this._mainDataModel.RobotJoint5 = Math.Round(dblJoint5, 3);
-            this._mainDataModel.RobotJoint6 = Math.Round(dblJoint6, 3);
+            this._mainDataModel.RobotJoint1 = Math.Round(dblJoint1, 2);
+            this._mainDataModel.RobotJoint2 = Math.Round(dblJoint2, 2);
+            this._mainDataModel.RobotJoint3 = Math.Round(dblJoint3, 2);
+            this._mainDataModel.RobotJoint4 = Math.Round(dblJoint4, 2);
+            this._mainDataModel.RobotJoint5 = Math.Round(dblJoint5, 2);
+            this._mainDataModel.RobotJoint6 = Math.Round(dblJoint6, 2);
         }
 
         /// <summary>
@@ -399,12 +399,12 @@ namespace SprayTeaching.ViewModel
             double dblPoseV = (double)objPoseV;
             double dblPoseW = (double)objPoseW;
 
-            this._mainDataModel.RobotRectangularX = Math.Round(dblPoseX, 3);
-            this._mainDataModel.RobotRectangularY = Math.Round(dblPoseY, 3);
-            this._mainDataModel.RobotRectangularZ = Math.Round(dblPoseZ, 3);
-            this._mainDataModel.RobotRectangularU = Math.Round(dblPoseU, 3);
-            this._mainDataModel.RobotRectangularV = Math.Round(dblPoseV, 3);
-            this._mainDataModel.RobotRectangularW = Math.Round(dblPoseW, 3);
+            this._mainDataModel.RobotRectangularX = Math.Round(dblPoseX, 2);
+            this._mainDataModel.RobotRectangularY = Math.Round(dblPoseY, 2);
+            this._mainDataModel.RobotRectangularZ = Math.Round(dblPoseZ, 2);
+            this._mainDataModel.RobotRectangularU = Math.Round(dblPoseU, 2);
+            this._mainDataModel.RobotRectangularV = Math.Round(dblPoseV, 2);
+            this._mainDataModel.RobotRectangularW = Math.Round(dblPoseW, 2);
         }
 
         /// <summary>

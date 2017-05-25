@@ -298,7 +298,7 @@ namespace SprayTeaching.Model
         /// <summary>
         /// 日志文件的路径
         /// </summary>
-        private string _strLogFilePath = "./Log.txt";
+        private string _strLogFilePath = "./SprayTeachLog.log";
 
         public string LogFilePath
         {
