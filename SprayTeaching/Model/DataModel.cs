@@ -935,6 +935,21 @@ namespace SprayTeaching.Model
 
         #endregion
 
+        #region 机器人运动轨迹文件名
+
+        /// <summary>
+        /// 机器人本地运动轨迹文件的文件名
+        /// </summary>
+        private string _strLocationRobotMoveFileName = "RobotAngle";
+
+        public string LocationRobotMoveFileName
+        {
+            get { return _strLocationRobotMoveFileName; }
+            set { _strLocationRobotMoveFileName = value; RaisePropertyChanged("LocationRobotMoveFileName"); }
+        }
+
+        #endregion
+
         #endregion
 
         #region 界面状态显示

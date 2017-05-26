@@ -70,6 +70,7 @@
     <Compile Include="MyAllClass\MyRoboDKExtension.cs" />
     <Compile Include="BaseClassLib\RoboDK.cs" />
     <Compile Include="BaseClassLib\MySocketCom.cs" />
+    <Compile Include="MyAllClass\MyRobotFile.cs" />
     <Compile Include="View\CalibrationPage.xaml.cs">
       <DependentUpon>CalibrationPage.xaml</DependentUpon>
     </Compile>

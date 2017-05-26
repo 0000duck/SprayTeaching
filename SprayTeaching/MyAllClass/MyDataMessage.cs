@@ -56,6 +56,8 @@ namespace SprayTeaching.MyAllClass
 
         public event UpdateLogContentEventHandler UpdateLogContent;                                 // 更新日志文件 
         public event Action<object> UpdateAbsoluteAxisAngle;                                        // 更新轴角度的绝对值
+        public event Action UpdateStartSampleData;
+        public event Action UpdateStopSampleData;
 
         public MyDataMessage( )
         {

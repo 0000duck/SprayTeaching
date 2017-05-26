@@ -28,8 +28,27 @@
                                 IsEnabled="{Binding ModelViewModel.MainDataModel.IsSampleDataRunning,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </StackPanel>
-                <Button Grid.Row="1" Content="test" Command="{Binding SendDataCommunicateCommand}" CommandParameter="QueryDeviceConnect"/>
-                
+                <Rectangle Grid.Row="1" Stroke="Black" Height="0.8" Margin="5"/>
+                <Grid Grid.Row="2">
+                    <StackPanel >
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="机器人运动轨迹文件名：" Margin="5" FontSize="15" FontWeight="Bold"/>                            
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox Text="{Binding ModelViewModel.MainDataModel.LocationRobotMoveFileName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                 IsReadOnly="{Binding ElementName=chkRobotMoveCanModify,Path=IsChecked,Converter={StaticResource NegativeConverter} }"
+                                 HorizontalAlignment="Left" MinWidth="200" Margin="5"
+                                 IsEnabled="{Binding ModelViewModel.MainDataModel.IsSampleDataRunning,Converter={StaticResource NegativeConverter},
+                                Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                            <CheckBox x:Name="chkRobotMoveCanModify" Content="是否修改文件名" Margin="5" HorizontalAlignment="Center"
+                                      IsEnabled="{Binding ModelViewModel.MainDataModel.IsSampleDataRunning,Converter={StaticResource NegativeConverter},
+                                Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+                <Rectangle Grid.Row="3" Stroke="Black" Height="0.8" Margin="5"/>
+
+
             </Grid>
             
         </Border>

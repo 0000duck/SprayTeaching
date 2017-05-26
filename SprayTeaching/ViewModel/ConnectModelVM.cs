@@ -27,7 +27,8 @@ namespace SprayTeaching.ViewModel
         private MyConfigFileINI _myConfigFileINI;           // 配置文件的对象
         private MyCommunicate _myCommunicate;               // 数据通信对象
         private MyRoboDKExtension _myRoboDKExtension;       // RoboDK的对象
-        private MyErrorOperate _myErrorOperate;             // 错误操作消息
+        private MyErrorOperate _myErrorOperate;             // 错误操作消息对象
+        private MyRobotFile _myRobotFile;                   // 机器人文件对象
 
         private delegate void UpdateDifferentThreadParameterEventHandler(object strParameter);      // 更新不同线程的参数的delegate变量声明，主要用于对绑定控件数据的更改 
         private UpdateDifferentThreadParameterEventHandler _dlgtUpdateDifThreadParam;               // 更新不同线程的数据
@@ -81,7 +82,8 @@ namespace SprayTeaching.ViewModel
             this._myRoboDKExtension.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                      // RoboDK写日志
             this._myRoboDKExtension.UpdateRobotParameter += new UpdateRobotParameterEventHandler(UpdateRobotParameterHandler);          // 更新机器人参数
 
-
+            this._myRobotFile = new MyRobotFile();                                                                                      // 机器人文件的对象
+            this._myRobotFile.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                            // 机器人文件写日志
         }
 
         #endregion
@@ -181,7 +183,34 @@ namespace SprayTeaching.ViewModel
 
             // 发送实际的命令            
             byte[] byteData = this._myDataMessage.SendDataMessage(strCommand, this._mainDataModel);
-            this._myCommunicate.SendDataHandler(byteData);
+            bool bolIsSuccess= this._myCommunicate.SendDataHandler(byteData);       // 返回是否发送成功
+
+            if (bolIsSuccess)
+                this.UpdateSampleState(strCommand);     // 更新采样的状态，只对开始采样和结束采样起作用
+        }
+
+        /// <summary>
+        /// 更新采样状态，只对开始采样和结束采样起作用
+        /// </summary>
+        /// <param name="strCommand">命令</param>
+        private void UpdateSampleState(string strCommand)
+        {
+            if (strCommand == "StartSampleData")
+            {
+                this._mainDataModel.IsSampleDataRunning = true;                 // 更新是否正在运行数据采样
+                // 开启添加角度信息，用于将运动轨迹写入文件
+                this._myRobotFile.StartAddAngleMessageHandler(this._mainDataModel.LocationRobotMoveFileName, this._mainDataModel.CurrentSampleFrequent);          
+                return;
+            }
+            if (strCommand == "StopSampleData")
+            {
+                this._mainDataModel.DeviceIsConnected = false;              // 每次结束采集的时候都将状态信息回复到初始状态，下次采集的时候重新检查
+                this._mainDataModel.DeviceSampleIsReady = false;            // 每次结束采集的时候都将状态信息回复到初始状态，下次采集的时候重新检查
+                this._mainDataModel.IsSampleDataRunning = false;            // 更新是否正在运行数据采样
+                // 结束添加角度信息，用于将运动轨迹写入文件
+                this._myRobotFile.StopAddAngleMessageHandler(this._mainDataModel.LocationRobotMoveFileName, this._mainDataModel.CurrentSampleFrequent);  
+                return;
+            }
         }
 
         /// <summary>
@@ -206,7 +235,7 @@ namespace SprayTeaching.ViewModel
                     if (!this._myCommunicate.SendDataHandler(byteData))
                         return false;
                 }
-                Thread.Sleep(100);
+                Thread.Sleep(10);
                 bolIsConnected = this._mainDataModel.DeviceIsConnected;
                 intCount++;
             }
@@ -304,7 +333,10 @@ namespace SprayTeaching.ViewModel
                 if (!this.QueryDeviceIsConnected())
                     return;
 
-            this.SendDataHandler("StartSampleData");
+            // 在开始采样之前先获取下采样频率
+            this.SendDataHandler("QuerySampleFrequent");
+            Thread.Sleep(100);
+            this.SendDataHandler("StartSampleData");           
         }
 
         /// <summary>
@@ -312,8 +344,7 @@ namespace SprayTeaching.ViewModel
         /// </summary>
         public void StopSampleDataHandler( )
         {
-            this.SendDataHandler("StopSampleData");
-            this._mainDataModel.IsSampleDataRunning = false;            // 更新是否正在运行数据采样
+            this.SendDataHandler("StopSampleData");        
         }
 
         #endregion
@@ -441,8 +472,8 @@ namespace SprayTeaching.ViewModel
             if (this._myErrorOperate != null && intType == 1)
             {
                 this._myErrorOperate.AddErrorOperateMessage(strMessage);                                    // 识别错误操作的消息，并进行另外处理
-                strMessage = "--" + strMessage ;
-            }                
+                strMessage = "--" + strMessage;
+            }
 
             string strTime = this._myLogObject.AddLogMessage(strMessage);                                   // 在日志中添加消息
             MyLogMessage myLogMessage = new MyLogMessage() { LogTime = strTime, LogMessage = strMessage };
@@ -479,14 +510,14 @@ namespace SprayTeaching.ViewModel
         /// <summary>
         /// 在关闭之前，先将采集数据停止掉
         /// </summary>
-        private void CloseStopSampleData()
+        private void CloseStopSampleData( )
         {
             if (this._myCommunicate.IsCommunicateConnected())
             {
                 this.StopSampleDataHandler();
                 Thread.Sleep(10);                   // 延迟10ms，避免在发送数据过程中通信通道断开了
             }
-                
+
         }
         #endregion
 
@@ -587,13 +618,14 @@ namespace SprayTeaching.ViewModel
         }
 
         /// <summary>
-        /// 更新各个轴的相对角度值，也是需要发送给roboDK的关节角度值
+        /// 更新各个轴的相对角度值，也是需要发送给roboDK的关节角度值，同时将这些角度值保存并写入文件中
         /// </summary>
         /// <param name="dblAxisAngles"></param>
         private void UpdateMessageAxisDataHandler(double[] dblAxisAngles)
         {
-            this._mainDataModel.IsSampleDataRunning = true;                 // 更新是否正在运行数据采样
+            
             this._myRoboDKExtension.AddRobotMoveMessage(dblAxisAngles);
+            this._myRobotFile.AddAngleMessageHandler(dblAxisAngles);
         }
 
         /// <summary>
@@ -636,7 +668,7 @@ namespace SprayTeaching.ViewModel
         {
             // 将当前的绝对角度值赋值给待设定的绝对角度值
             string strCommand = (string)obj;
-            switch(strCommand)
+            switch (strCommand)
             {
                 case "Calibration1AxisOriginAngle":
                     this._mainDataModel.SetAbsoluteAngle1 = this._mainDataModel.CurrentAbsoluteAngle1;
@@ -667,7 +699,7 @@ namespace SprayTeaching.ViewModel
         {
             // 修改各轴的标定方向，true为正向，false为反向
             string strCommand = (string)obj;
-            switch(strCommand)
+            switch (strCommand)
             {
                 case "Calibration1AxisDirectoinP":
                     this._mainDataModel.SetCalibrateAxis1Direction = true;
@@ -711,7 +743,7 @@ namespace SprayTeaching.ViewModel
         /// <summary>
         /// 标定机器人角度
         /// </summary>
-        public void CalibrateRobotAngleHandler()
+        public void CalibrateRobotAngleHandler( )
         {
             // 更新数据中的标定角度值
             this._mainDataModel.RobotCalibrateAngle1 = this._mainDataModel.SetAbsoluteAngle1;
@@ -739,7 +771,7 @@ namespace SprayTeaching.ViewModel
         /// <summary>
         /// 标定机器人方向
         /// </summary>
-        public void CalibrateRobotDirectionHandler()
+        public void CalibrateRobotDirectionHandler( )
         {
             // 更新数据中的标定方向值
             this._mainDataModel.RobotCalibrateDirection1 = this._mainDataModel.SetCalibrateAxis1Direction == true ? 1.0 : -1.0;

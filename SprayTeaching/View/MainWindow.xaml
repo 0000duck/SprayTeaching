@@ -171,7 +171,7 @@
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal"  MaxWidth="280">
                                     <TextBlock Text="{Binding LogTime,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Margin="1" Padding="1" VerticalAlignment="Top"/>
-                                    <TextBlock Text="{Binding LogMessage,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" MaxWidth="220" Margin="1" Padding="1" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding LogMessage,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" Width="220" Margin="1" Padding="1" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>
