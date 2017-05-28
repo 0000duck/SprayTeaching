@@ -63,10 +63,11 @@
                 <Separator HorizontalAlignment="Right"/>                
             </StatusBar>
             <StatusBar Grid.Column="1">
-                <ProgressBar Width="100" Height="15" Value="67"  DockPanel.Dock="Left"/>
-                <StatusBarItem HorizontalAlignment="Right">
-                    <TextBlock>Ready</TextBlock>
-                </StatusBarItem>                
+                <StatusBarItem DockPanel.Dock="Left">
+                    <TextBlock Text="向RoboDK添加程序：" Margin="5,0,5,0" Visibility="Hidden"/>
+                </StatusBarItem>
+                <ProgressBar Width="80" Height="15" Visibility="Hidden" DockPanel.Dock="Left"
+                             Value="{Binding ModelViewModel.MainDataModel.RunningAddTargetState,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>            
             </StatusBar>
         </Grid>        
         <Grid Grid.Row="1" x:Name="gridBottom">

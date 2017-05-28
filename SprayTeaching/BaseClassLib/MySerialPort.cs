@@ -202,11 +202,11 @@ namespace SprayTeaching.BaseClassLib
         //                readString += this._queueReceiveDataMessage.Dequeue();
         //            }
         //            // 将日志写到文本中
-        //            using (StreamWriter w = new StreamWriter("./sample.txt", true, System.Text.Encoding.UTF8))
+        //            using (StreamWriter r = new StreamWriter("./sample.txt", true, System.Text.Encoding.UTF8))
         //            {
-        //                w.Write(readString);
-        //                w.Flush();
-        //                w.Close();
+        //                r.Write(readString);
+        //                r.Flush();
+        //                r.Close();
         //            }
         //        }
         //        else

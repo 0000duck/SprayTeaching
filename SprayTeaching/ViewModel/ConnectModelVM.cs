@@ -11,6 +11,8 @@ using SprayTeaching.Model;
 using SprayTeaching.BaseClassLib;
 using SprayTeaching.MyAllClass;
 using System.Threading;
+using Microsoft.Win32;
+using System.Windows;
 
 namespace SprayTeaching.ViewModel
 {
@@ -81,6 +83,7 @@ namespace SprayTeaching.ViewModel
             this._myRoboDKExtension = new MyRoboDKExtension();                                                                          // RoboDK的对象
             this._myRoboDKExtension.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                      // RoboDK写日志
             this._myRoboDKExtension.UpdateRobotParameter += new UpdateRobotParameterEventHandler(UpdateRobotParameterHandler);          // 更新机器人参数
+            this._myRoboDKExtension.UpdateAddTargetPointState += new Action<object>(UpdateAddTargetPointStateHandler);                  // 向RoboDK中添加程序的运行状态
 
             this._myRobotFile = new MyRobotFile();                                                                                      // 机器人文件的对象
             this._myRobotFile.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                            // 机器人文件写日志
@@ -183,7 +186,7 @@ namespace SprayTeaching.ViewModel
 
             // 发送实际的命令            
             byte[] byteData = this._myDataMessage.SendDataMessage(strCommand, this._mainDataModel);
-            bool bolIsSuccess= this._myCommunicate.SendDataHandler(byteData);       // 返回是否发送成功
+            bool bolIsSuccess = this._myCommunicate.SendDataHandler(byteData);       // 返回是否发送成功
 
             if (bolIsSuccess)
                 this.UpdateSampleState(strCommand);     // 更新采样的状态，只对开始采样和结束采样起作用
@@ -199,7 +202,7 @@ namespace SprayTeaching.ViewModel
             {
                 this._mainDataModel.IsSampleDataRunning = true;                 // 更新是否正在运行数据采样
                 // 开启添加角度信息，用于将运动轨迹写入文件
-                this._myRobotFile.StartAddAngleMessageHandler(this._mainDataModel.LocationRobotMoveFileName, this._mainDataModel.CurrentSampleFrequent);          
+                this._myRobotFile.StartAddAngleMessageHandler(this._mainDataModel.LocationRobotMoveFileName, this._mainDataModel.CurrentSampleFrequent);
                 return;
             }
             if (strCommand == "StopSampleData")
@@ -208,7 +211,7 @@ namespace SprayTeaching.ViewModel
                 this._mainDataModel.DeviceSampleIsReady = false;            // 每次结束采集的时候都将状态信息回复到初始状态，下次采集的时候重新检查
                 this._mainDataModel.IsSampleDataRunning = false;            // 更新是否正在运行数据采样
                 // 结束添加角度信息，用于将运动轨迹写入文件
-                this._myRobotFile.StopAddAngleMessageHandler(this._mainDataModel.LocationRobotMoveFileName, this._mainDataModel.CurrentSampleFrequent);  
+                this._myRobotFile.StopAddAngleMessageHandler(this._mainDataModel.LocationRobotMoveFileName, this._mainDataModel.CurrentSampleFrequent);
                 return;
             }
         }
@@ -336,7 +339,7 @@ namespace SprayTeaching.ViewModel
             // 在开始采样之前先获取下采样频率
             this.SendDataHandler("QuerySampleFrequent");
             Thread.Sleep(100);
-            this.SendDataHandler("StartSampleData");           
+            this.SendDataHandler("StartSampleData");
         }
 
         /// <summary>
@@ -344,7 +347,7 @@ namespace SprayTeaching.ViewModel
         /// </summary>
         public void StopSampleDataHandler( )
         {
-            this.SendDataHandler("StopSampleData");        
+            this.SendDataHandler("StopSampleData");
         }
 
         #endregion
@@ -449,12 +452,58 @@ namespace SprayTeaching.ViewModel
         }
         #endregion
 
+        /// <summary>
+        /// 选择机器人模型
+        /// </summary>
+        /// <param name="objParameter"></param>
         public void SelectRobotModelHandler(object objParameter)
         {
             if (objParameter == null)
                 return;
             this._myRoboDKExtension.SelectRobotModelHandler(objParameter);
         }
+
+        #region 向添加RoboDK添加程序
+        /// <summary>
+        /// 生成机器人程序
+        /// </summary>
+        /// <param name="obj"></param>
+        public void CreateRoboDKProgramHandler(object obj = null)
+        {
+            OpenFileDialog ofdDlg = new OpenFileDialog();
+            ofdDlg.Title = "请选择指定文件";
+            ofdDlg.Filter = "所有文件(*.st)|*.st";
+            ofdDlg.InitialDirectory = System.IO.Directory.GetCurrentDirectory() + ".\\RobotProgram";
+            if (ofdDlg.ShowDialog() == true)
+            {
+                string strFileAddress = ofdDlg.FileName;
+                this._myRoboDKExtension.CreateRoboDKProgram(strFileAddress);
+            }
+        }
+
+        private void UpdateAddTargetPointStateHandler(object obj)
+        {
+            int intState = (int)obj;
+            this._mainDataModel.RunningAddTargetState = intState;
+            if (this._mainDataModel.RunningAddTargetState == 0)
+            {
+                this._mainDataModel.IsRunningAddTarget = false;
+            }
+            else if (this._mainDataModel.RunningAddTargetState == 100)
+            {
+                this._mainDataModel.IsRunningAddTarget = false;
+                this._mainDataModel.RunningAddTargetState = 0;
+            }
+            else
+                this._mainDataModel.IsRunningAddTarget = true;
+        }
+
+        public void RunRoboDKProgramHandler(object obj = null)
+        {
+            this._myRoboDKExtension.RunRoboDKProgramHandler();
+        }
+
+        #endregion
 
         #endregion
 
@@ -623,7 +672,7 @@ namespace SprayTeaching.ViewModel
         /// <param name="dblAxisAngles"></param>
         private void UpdateMessageAxisDataHandler(double[] dblAxisAngles)
         {
-            
+
             this._myRoboDKExtension.AddRobotMoveMessage(dblAxisAngles);
             this._myRobotFile.AddAngleMessageHandler(dblAxisAngles);
         }

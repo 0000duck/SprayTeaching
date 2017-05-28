@@ -14,8 +14,28 @@ namespace SprayTeaching.MyAllClass
         private string _strFileAddress = string.Empty;                              // 有文件名的文件地址
         private const string RelativeLocation = "./RobotProgram";                   // 没有文件名的文件路径
         private int _intSampleFrequent = 0;                                         // 采样频率
-
+        private bool _bolIsWriteFile = false;                                       // 是否执行过写入文件
+        
         public event UpdateLogContentEventHandler UpdateLogContent;                                 // 更新日志文件 
+
+        /// <summary>
+        /// 文件地址
+        /// </summary>
+        public string RobotFileAddress
+        {
+            get { return _strFileAddress; }
+            set { _strFileAddress = value; }
+        }
+
+        /// <summary>
+        /// 是否执行写入文件
+        /// </summary>
+        public bool IsWriteFile
+        {
+            get { return _bolIsWriteFile; }
+            set { _bolIsWriteFile = value; }
+        }
+        
 
         public MyRobotFile( )
         {
@@ -117,6 +137,7 @@ namespace SprayTeaching.MyAllClass
                 w.Flush();
                 w.Close();
                 this.WriteLogHandler("已完成角度信息写入文件.");
+                this._bolIsWriteFile = true;
             }
         }
 

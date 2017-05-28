@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -28,8 +29,10 @@ namespace SprayTeaching.MyAllClass
         private AutoResetEvent _autoEvent;                                      // 控制数据消息处理的线程，控制它的睡眠和唤醒
         private Object _objLockRobotMove = new object();                        // 用于锁定修改部分的数据
 
-        private double[] _dblRobotUpperLimits = new double[6];
-        private double[] _dblRobotLowerLimits = new double[6];
+        private double[] _dblRobotUpperLimits = new double[6];                  // 机器人上限位
+        private double[] _dblRobotLowerLimits = new double[6];                  // 机器人下限位
+
+        private string _strProgramName = "Program";                             // RoboDK中的程序名
 
         #endregion
 
@@ -37,6 +40,7 @@ namespace SprayTeaching.MyAllClass
 
         public event UpdateLogContentEventHandler UpdateLogContent;             // 更新日志文件        
         public event UpdateRobotParameterEventHandler UpdateRobotParameter;     // 更新机器人参数  
+        public event Action<object> UpdateAddTargetPointState;
 
         #endregion
 
@@ -175,12 +179,9 @@ namespace SprayTeaching.MyAllClass
                 // 检查是否连接，是否选中机器人
                 if (this.CheckRobot())
                 {
-                    lock (this._objLockRobotMove)
-                    {
-                        // 打开了RoboDK和选中了机器人
-                        this.GetRobotParameters();
-                        this.DriveRobotMove();
-                    }
+                    // 打开了RoboDK和选中了机器人
+                    this.GetRobotParameters();
+                    this.DriveRobotMove();
                     Thread.Sleep(10);
                 }
                 else
@@ -226,24 +227,28 @@ namespace SprayTeaching.MyAllClass
             if (!this.CheckRobot()) { return; }
             try
             {
-                // 获取机器人关节坐标系的角度
-                double[] dblJoints = this._rdkItemRobot.Joints();
+                lock (this._thisLock)
+                {
+                    // 获取机器人关节坐标系的角度
+                    double[] dblJoints = this._rdkItemRobot.Joints();
 
-                // 获取机器人直角坐标系的角度
-                Mat locMatPose = this._rdkItemRobot.SolveFK(dblJoints);
-                double[] dblPoses = locMatPose.ToXYZRPW();
+                    // 获取机器人直角坐标系的角度
+                    Mat locMatPose = this._rdkItemRobot.SolveFK(dblJoints);
+                    double[] dblPoses = locMatPose.ToXYZRPW();
 
-                // RoboDK中机器人的运动速度
-                double dblRobotMoveSpeed = this._rdkPlatform.SimulationSpeed();
+                    // RoboDK中机器人的运动速度
+                    double dblRobotMoveSpeed = this._rdkPlatform.SimulationSpeed();
 
-                this._rdkItemRobot.JointLimits(ref this._dblRobotLowerLimits, ref this._dblRobotUpperLimits);
+                    this._rdkItemRobot.JointLimits(ref this._dblRobotLowerLimits, ref this._dblRobotUpperLimits);
 
-                // 机器人参数整合在字典中，一起传出去
-                Dictionary<string, object> dicData = RobotParametersIntegrity(dblJoints, dblPoses, dblRobotMoveSpeed);
 
-                // 更新机器人参数
-                if (this.UpdateRobotParameter != null)
-                    this.UpdateRobotParameter(dicData);
+                    // 机器人参数整合在字典中，一起传出去
+                    Dictionary<string, object> dicData = RobotParametersIntegrity(dblJoints, dblPoses, dblRobotMoveSpeed);
+
+                    // 更新机器人参数
+                    if (this.UpdateRobotParameter != null)
+                        this.UpdateRobotParameter(dicData);
+                }
             }
             catch
             {
@@ -294,18 +299,21 @@ namespace SprayTeaching.MyAllClass
         /// <returns>连接状态</returns>
         private bool CheckRoboDK( )
         {
-            bool ok = this._rdkPlatform.Connected();
-            if (!ok)
+            lock (this._thisLock)
             {
-                ok = this._rdkPlatform.Connect();
-                this._rdkItemRobot = null;          // 每次重连或者重启软件之后，都将机器人对象置null，需重新选取机器人
-                this.WriteLogHandler("已重启或重连RoboDK.");
+                bool ok = this._rdkPlatform.Connected();
+                if (!ok)
+                {
+                    ok = this._rdkPlatform.Connect();
+                    this._rdkItemRobot = null;          // 每次重连或者重启软件之后，都将机器人对象置null，需重新选取机器人
+                    this.WriteLogHandler("已重启或重连RoboDK.");
+                }
+                if (!ok)
+                {
+                    this.WriteLogHandler("未找到 RoboDK. 请先启动RoboDK.", 1);
+                }
+                return ok;
             }
-            if (!ok)
-            {
-                this.WriteLogHandler("未找到 RoboDK. 请先启动RoboDK.", 1);
-            }
-            return ok;
         }
 
         /// <summary>
@@ -314,13 +322,16 @@ namespace SprayTeaching.MyAllClass
         /// <returns></returns>
         private bool CheckRobot( )
         {
-            if (!this.CheckRoboDK()) { return false; }
-            if (this._rdkItemRobot == null || !this._rdkItemRobot.Valid())
+            lock (this._thisLock)
             {
-                this.WriteLogHandler("未选中机器人对象，请添加机器人模型.", 1);
-                return false;
+                if (!this.CheckRoboDK()) { return false; }
+                if (this._rdkItemRobot == null || !this._rdkItemRobot.Valid())
+                {
+                    this.WriteLogHandler("未选中机器人对象，请添加机器人模型.", 1);
+                    return false;
+                }
+                return true;
             }
-            return true;
         }
 
         /// <summary>
@@ -329,17 +340,20 @@ namespace SprayTeaching.MyAllClass
         /// <returns>是否选中机器人</returns>
         private bool SelectRobotItem( )
         {
-            if (!this.CheckRoboDK()) { return false; }
-            this._rdkItemRobot = this._rdkPlatform.ItemUserPick("Select a robot", RoboDK.ITEM_TYPE_ROBOT); // select robot among available robots
-            if (this._rdkItemRobot.Valid())
+            lock (this._thisLock)
             {
-                this.WriteLogHandler("已选中机器人: " + this._rdkItemRobot.Name() + ".");
-                return true;
-            }
-            else
-            {
-                //this.WriteLogHandler("没有机器人可以选取.");
-                return false;
+                if (!this.CheckRoboDK()) { return false; }
+                this._rdkItemRobot = this._rdkPlatform.ItemUserPick("Select a robot", RoboDK.ITEM_TYPE_ROBOT); // select robot among available robots
+                if (this._rdkItemRobot.Valid())
+                {
+                    this.WriteLogHandler("已选中机器人: " + this._rdkItemRobot.Name() + ".");
+                    return true;
+                }
+                else
+                {
+                    //this.WriteLogHandler("没有机器人可以选取.");
+                    return false;
+                }
             }
         }
 
@@ -417,20 +431,23 @@ namespace SprayTeaching.MyAllClass
                 return false;
             }
 
-            if ((this._rdkItemRobot == null) || (!this._rdkItemRobot.Valid()))
+            lock (this._thisLock)
             {
-                this.WriteLogHandler("未选中机器人对象.", 1);
-                return true;
+                if ((this._rdkItemRobot == null) || (!this._rdkItemRobot.Valid()))
+                {
+                    this.WriteLogHandler("未选中机器人对象.", 1);
+                    return true;
+                }
+
+
+                // 避免重复载入相同的机器人模型
+                // 判断当前的机器人名字和选中的名字是否一致，一致则不需要重选，不一致则重选
+                string strName = this.GetRobotModelName(objParameter);
+                if (strName == this._rdkItemRobot.Name())
+                    return false;       // 机器人名字一样              
+                else
+                    return true;        // 机器人名字不一样
             }
-
-
-            // 避免重复载入相同的机器人模型
-            // 判断当前的机器人名字和选中的名字是否一致，一致则不需要重选，不一致则重选
-            string strName = this.GetRobotModelName(objParameter);
-            if (strName == this._rdkItemRobot.Name())
-                return false;       // 机器人名字一样              
-            else
-                return true;        // 机器人名字不一样
         }
 
         /// <summary>
@@ -441,15 +458,18 @@ namespace SprayTeaching.MyAllClass
             if (this._rdkItemRobot == null)
                 return;
             //this._rdkItemRobot.Delete();
-            RoboDK.Item station = this._rdkPlatform.getItem("", RoboDK.ITEM_TYPE_STATION);
-            RoboDK.Item[] station_childs = station.Childs();
-            while (station_childs.Length > 0)
+            lock (this._thisLock)
             {
-                int sum = station_childs.Length;
-                for (int i = 0; i < sum; i++)
-                    station_childs[i].Delete();
-                station = this._rdkPlatform.getItem("", RoboDK.ITEM_TYPE_STATION);
-                station_childs = station.Childs();
+                RoboDK.Item station = this._rdkPlatform.getItem("", RoboDK.ITEM_TYPE_STATION);
+                RoboDK.Item[] station_childs = station.Childs();
+                while (station_childs.Length > 0)
+                {
+                    int sum = station_childs.Length;
+                    for (int i = 0; i < sum; i++)
+                        station_childs[i].Delete();
+                    station = this._rdkPlatform.getItem("", RoboDK.ITEM_TYPE_STATION);
+                    station_childs = station.Childs();
+                }
             }
         }
 
@@ -460,15 +480,18 @@ namespace SprayTeaching.MyAllClass
         {
             if (this._rdkPlatform == null)
                 return;
-            // get the first station available:
-            RoboDK.Item station = this._rdkPlatform.getItem("", RoboDK.ITEM_TYPE_STATION);
-            // check if the station has any items (object, robots, reference frames, ...)
-            RoboDK.Item[] station_childs = station.Childs();
-            while (station_childs.Length > 0)
+            lock (this._thisLock)
             {
-                this._rdkPlatform.CloseStation();
-                station = this._rdkPlatform.getItem("", RoboDK.ITEM_TYPE_STATION);
-                station_childs = station.Childs();
+                // get the first station available:
+                RoboDK.Item station = this._rdkPlatform.getItem("", RoboDK.ITEM_TYPE_STATION);
+                // check if the station has any items (object, robots, reference frames, ...)
+                RoboDK.Item[] station_childs = station.Childs();
+                while (station_childs.Length > 0)
+                {
+                    this._rdkPlatform.CloseStation();
+                    station = this._rdkPlatform.getItem("", RoboDK.ITEM_TYPE_STATION);
+                    station_childs = station.Childs();
+                }
             }
         }
 
@@ -485,7 +508,10 @@ namespace SprayTeaching.MyAllClass
             {
                 try
                 {
-                    this._rdkPlatform.AddFile(strFileName);
+                    lock (this._thisLock)
+                    {
+                        this._rdkPlatform.AddFile(strFileName);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -616,7 +642,7 @@ namespace SprayTeaching.MyAllClass
                     if (dblJoints[i] < this._dblRobotLowerLimits[i])
                         dblJoints[i] = this._dblRobotLowerLimits[i];
                 }
-                lock (this._objLockRobotMove)
+                lock (this._thisLock)
                 {
                     try
                     {
@@ -628,11 +654,169 @@ namespace SprayTeaching.MyAllClass
                         this._rdkItemRobot = null; // 一旦在传输的过程中出现问题，都需要重新选择机器人模型，都将机器人对象置为null
                         this.WriteLogHandler("选中的机器人模型无效或者不存在，请重新选择.", 1);
                     }
-
                 }
             }
         }
 
+
+        #endregion
+
+        #region 添加和执行RoboDK的程序
+
+        public void CreateRoboDKProgram(string strFileAddress)
+        {
+            Thread thrd = new Thread(ThrdCreateRoboDKProgram);
+            thrd.IsBackground = true;
+            thrd.Name = "CreateRoboDKProgram";
+            thrd.Start(strFileAddress);
+        }
+
+        private void ThrdCreateRoboDKProgram(object obj)
+        {
+            string strFileAddress = (string)obj;
+
+            // 如果没有执行写文件，或者文件不存在
+            if (!File.Exists(strFileAddress))
+                return;
+            try
+            {
+                if (!this.CheckRoboDK()) { return; }
+                if (!this.CheckRobot()) { return; }
+            }
+            catch
+            {
+                this.WriteLogHandler("未选中机器人对象.");
+                return;
+            }
+
+            List<string> lstStr = new List<string>();
+            if (!this.ReadRobotFile(strFileAddress, ref lstStr))
+            {
+                this.WriteLogHandler("读取的文件为空.");
+                return;
+            }
+
+            List<double[]> lstJoints = new List<double[]>();
+            if (!this.TransferData2Joints(lstStr, ref lstJoints))
+            {
+                this.WriteLogHandler("文件数据转换到角度值有误.");
+                return;
+            }
+
+            if (!this.AddJointTarget(lstJoints))
+            {
+                this.WriteLogHandler("无法添加目标点.");
+                return;
+            }
+        }
+
+        private bool ReadRobotFile(string strFileAddress, ref List<string> lstStr)
+        {
+            bool bolIsSuccess = false;
+            using (StreamReader r = new StreamReader(strFileAddress, System.Text.Encoding.UTF8))
+            {
+                while (r.Peek() >= 0)
+                {
+                    string strOneLine = r.ReadLine();
+                    lstStr.Add(strOneLine);
+                }
+                r.Close();
+            }
+            if (lstStr.Count != 0)
+                bolIsSuccess = true;
+            return bolIsSuccess;
+        }
+
+        private bool TransferData2Joints(List<string> lstStr, ref List<double[]> lstJoints)
+        {
+            bool bolIsSuccess = false;
+            int intLength = lstStr.Count;
+            for (int i = 0; i < intLength; i++)
+            {
+                string strTmp = lstStr[i];
+                string[] strJoints = strTmp.Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                if (strJoints.Length == 6)
+                {
+                    double[] dblJoints = new double[6];
+                    dblJoints[0] = double.Parse(strJoints[0]);
+                    dblJoints[1] = double.Parse(strJoints[1]);
+                    dblJoints[2] = double.Parse(strJoints[2]);
+                    dblJoints[3] = double.Parse(strJoints[3]);
+                    dblJoints[4] = double.Parse(strJoints[4]);
+                    dblJoints[5] = double.Parse(strJoints[5]);
+                    lstJoints.Add(dblJoints);
+                }
+            }
+            if (lstJoints.Count != 0)
+                bolIsSuccess = true;
+            return bolIsSuccess;
+        }
+
+        private bool AddJointTarget(List<double[]> lstJoints)
+        {
+            bool bolIsSuccess = false;
+            RoboDK.Item itemProgram = null;
+            lock (this._thisLock)
+            {
+                this._rdkPlatform.setSimulationSpeed(5);      //控制机器人的运动速度
+                itemProgram = this._rdkPlatform.AddProgram(this._strProgramName, this._rdkItemRobot);
+                this.WriteLogHandler("开始向RoboDK中添加目标点.");
+                this.WriteLogHandler("正在向RoboDK中添加目标点...");
+            }
+            int intLength = lstJoints.Count;
+            for (int i = 0; i < intLength; i++)
+            {
+                lock (this._thisLock)
+                {
+                    RoboDK.Item jointTarget = this._rdkPlatform.AddTarget("Target " + i.ToString(), null, this._rdkItemRobot);
+                    jointTarget.setAsJointTarget();
+                    jointTarget.setJoints(lstJoints[i]);
+                    itemProgram.addMoveJ(jointTarget);
+                }
+
+                // 更新添加目标点的状态
+                int intState = (int)(100 * (i + 1) / intLength);
+                this.UpdateAddTargetPointStateHandler(intState);
+            }
+            this.WriteLogHandler("结束向RoboDK中添加目标点.");
+            bolIsSuccess = true;
+            return bolIsSuccess;
+        }
+
+        /// <summary>
+        /// 更新添加目标点的执行情况，用progressbar来表示
+        /// </summary>
+        /// <param name="obj"></param>
+        private void UpdateAddTargetPointStateHandler(object obj)
+        {
+            if (this.UpdateAddTargetPointState != null)
+            {
+                this.UpdateAddTargetPointState(obj);
+            }
+        }
+
+        /// <summary>
+        /// 运行RoboDK中的程序
+        /// </summary>
+        public void RunRoboDKProgramHandler( )
+        {
+            if (!this.CheckRoboDK()) { return; }
+            if (!this.CheckRobot()) { return; }
+            lock (this._thisLock)
+            {
+                RoboDK.Item itemProgram = this._rdkPlatform.getItem(this._strProgramName, RoboDK.ITEM_TYPE_PROGRAM);
+                if (itemProgram.Valid())
+                {
+                    this.WriteLogHandler("运行RoboDK机器人程序.");
+                    itemProgram.setRunType(RoboDK.PROGRAM_RUN_ON_SIMULATOR);      // force to run on robot
+                    itemProgram.RunProgram();
+                }
+                else
+                {
+                    this.WriteLogHandler("不存在" + this._strProgramName + "这个程序.", 1);
+                }
+            }
+        }
 
         #endregion
 

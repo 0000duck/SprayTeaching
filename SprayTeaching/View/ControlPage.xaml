@@ -18,7 +18,8 @@
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                 </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0">
+                <StackPanel Grid.Row="0" IsEnabled="{Binding ModelViewModel.MainDataModel.IsRunningAddTarget,Converter={StaticResource NegativeConverter},
+                                Mode=OneWay,UpdateSourceTrigger=PropertyChanged}">
                     <TextBlock Text="采样操作：" Margin="5" FontSize="15" FontWeight="Bold"/>
                     <StackPanel Orientation="Horizontal">
                         <Button Content="开始采样" Margin="5" Padding="5,4,5,4" Command="{Binding StartSampleDataCommand}"
@@ -29,7 +30,8 @@
                     </StackPanel>
                 </StackPanel>
                 <Rectangle Grid.Row="1" Stroke="Black" Height="0.8" Margin="5"/>
-                <Grid Grid.Row="2">
+                <Grid Grid.Row="2" IsEnabled="{Binding ModelViewModel.MainDataModel.IsRunningAddTarget,Converter={StaticResource NegativeConverter},
+                                Mode=OneWay,UpdateSourceTrigger=PropertyChanged}">
                     <StackPanel >
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="机器人运动轨迹文件名：" Margin="5" FontSize="15" FontWeight="Bold"/>                            
@@ -47,8 +49,21 @@
                     </StackPanel>
                 </Grid>
                 <Rectangle Grid.Row="3" Stroke="Black" Height="0.8" Margin="5"/>
-
-
+                <Grid Grid.Row="4" IsEnabled="{Binding ModelViewModel.MainDataModel.IsSampleDataRunning,Converter={StaticResource NegativeConverter},Mode=OneWay,
+                    UpdateSourceTrigger=PropertyChanged}">
+                    <StackPanel>
+                        <TextBlock Text="生成RoboDK程序：" Margin="5" FontSize="15" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="生成程序" Margin="5" Padding="5,4,5,4" HorizontalAlignment="Left" Command="{Binding CreateRoboDKProgramCommand}"/>
+                            <ProgressBar Margin="5" Width="100" Height="30" DockPanel.Dock="Left"
+                                         Visibility="{Binding ModelViewModel.MainDataModel.IsRunningAddTarget,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource BooleanToVisibilityConverter}}"
+                                         Value="{Binding ModelViewModel.MainDataModel.RunningAddTargetState,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <Button Content="执行程序" Margin="5" Padding="5,4,5,4" HorizontalAlignment="Left" Command="{Binding RunRoboDKProgramCommand}"
+                                IsEnabled="{Binding ModelViewModel.MainDataModel.IsRunningAddTarget,Converter={StaticResource NegativeConverter},
+                                Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                </Grid>
             </Grid>
             
         </Border>

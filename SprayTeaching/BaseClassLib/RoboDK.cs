@@ -68,10 +68,10 @@ public class Mat // simple matrix class for homogeneous operations
         rows = 4;
         cols = 4;
         mat = new double[rows, cols];
-        mat[0, 0] = nx;  mat[1, 0] = ny;  mat[2, 0] = nz;
-        mat[0, 1] = ox;  mat[1, 1] = oy;  mat[2, 1] = oz;
-        mat[0, 2] = ax;  mat[1, 2] = ay;  mat[2, 2] = az;
-        mat[0, 3] = tx;  mat[1, 3] = ty;  mat[2, 3] = tz;
+        mat[0, 0] = nx; mat[1, 0] = ny; mat[2, 0] = nz;
+        mat[0, 1] = ox; mat[1, 1] = oy; mat[2, 1] = oz;
+        mat[0, 2] = ax; mat[1, 2] = ay; mat[2, 2] = az;
+        mat[0, 3] = tx; mat[1, 3] = ty; mat[2, 3] = tz;
         mat[3, 0] = 0.0; mat[3, 1] = 0.0; mat[3, 2] = 0.0; mat[3, 3] = 1.0;
     }
 
@@ -91,9 +91,9 @@ public class Mat // simple matrix class for homogeneous operations
         mat[2, 0] = z;
         mat[3, 0] = 1.0;
     }
-    
-//----------------------------------------------------
-//--------     Generic matrix usage    ---------------
+
+    //----------------------------------------------------
+    //--------     Generic matrix usage    ---------------
     /// <summary>
     /// Return a translation matrix
     ///                 |  1   0   0   X |
@@ -164,27 +164,32 @@ public class Mat // simple matrix class for homogeneous operations
     //----------------------------------------------------
     //------ Pose to xyzrpw and xyzrpw to pose------------
     /// <summary>
-    /// Calculates the equivalent position and euler angles ([x,y,z,r,p,w] vector) of the given pose 
-    /// Note: transl(x,y,z)*rotz(w*pi/180)*roty(p*pi/180)*rotx(r*pi/180)
+    /// Calculates the equivalent position and euler angles ([x,y,z,r,p,r] vector) of the given pose 
+    /// Note: transl(x,y,z)*rotz(r*pi/180)*roty(p*pi/180)*rotx(r*pi/180)
     /// See also: FromXYZRPW()
     /// </summary>
     /// <returns>XYZWPR translation and rotation in mm and degrees</returns>
-    public double[] ToXYZRPW()
+    public double[] ToXYZRPW( )
     {
-        double [] xyzwpr = new double[6];
-        double x = mat[0,3];
-        double y = mat[1,3];
-        double z = mat[2,3];
+        double[] xyzwpr = new double[6];
+        double x = mat[0, 3];
+        double y = mat[1, 3];
+        double z = mat[2, 3];
         double w, p, r;
-        if (mat[2,0] > (1.0 - 1e-6)){
-            p = -Math.PI*0.5;
+        if (mat[2, 0] > (1.0 - 1e-6))
+        {
+            p = -Math.PI * 0.5;
             r = 0;
-            w = Math.Atan2(-mat[1,2], mat[1,1]);
-        } else if (mat[2,0] < -1.0 + 1e-6){
-            p = 0.5*Math.PI;
+            w = Math.Atan2(-mat[1, 2], mat[1, 1]);
+        }
+        else if (mat[2, 0] < -1.0 + 1e-6)
+        {
+            p = 0.5 * Math.PI;
             r = 0;
-            w = Math.Atan2(mat[1,2],mat[1,1]);
-        } else {
+            w = Math.Atan2(mat[1, 2], mat[1, 1]);
+        }
+        else
+        {
             p = Math.Atan2(-mat[2, 0], Math.Sqrt(mat[0, 0] * mat[0, 0] + mat[1, 0] * mat[1, 0]));
             w = Math.Atan2(mat[1, 0], mat[0, 0]);
             r = Math.Atan2(mat[2, 1], mat[2, 2]);
@@ -192,28 +197,28 @@ public class Mat // simple matrix class for homogeneous operations
         xyzwpr[0] = x;
         xyzwpr[1] = y;
         xyzwpr[2] = z;
-        xyzwpr[3] = r*180.0/Math.PI;
-        xyzwpr[4] = p*180.0/Math.PI;
-        xyzwpr[5] = w*180.0/Math.PI;
+        xyzwpr[3] = r * 180.0 / Math.PI;
+        xyzwpr[4] = p * 180.0 / Math.PI;
+        xyzwpr[5] = w * 180.0 / Math.PI;
         return xyzwpr;
     }
 
     /// <summary>
-    /// Calculates the pose from the position and euler angles ([x,y,z,r,p,w] vector)
-    /// The result is the same as calling: H = transl(x,y,z)*rotz(w*pi/180)*roty(p*pi/180)*rotx(r*pi/180)
+    /// Calculates the pose from the position and euler angles ([x,y,z,r,p,r] vector)
+    /// The result is the same as calling: H = transl(x,y,z)*rotz(r*pi/180)*roty(p*pi/180)*rotx(r*pi/180)
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <param name="z"></param>
-    /// <param name="w"></param>
+    /// <param name="r"></param>
     /// <param name="p"></param>
     /// <param name="r"></param>
     /// <returns>Homogeneous matrix (4x4)</returns>
     static public Mat FromXYZRPW(double x, double y, double z, double w, double p, double r)
     {
-        double a = r*Math.PI/180.0;
-        double b = p*Math.PI/180.0;
-        double c = w*Math.PI/180.0;
+        double a = r * Math.PI / 180.0;
+        double b = p * Math.PI / 180.0;
+        double c = w * Math.PI / 180.0;
         double ca = Math.Cos(a);
         double sa = Math.Sin(a);
         double cb = Math.Cos(b);
@@ -228,27 +233,31 @@ public class Mat // simple matrix class for homogeneous operations
     /// </summary>
     /// <param name="Ti"></param>
     /// <returns></returns>
-    static double[] ToQuaternion(Mat Ti){
+    static double[] ToQuaternion(Mat Ti)
+    {
         double[] q = new double[4];
-        double a=(Ti[0,0]);
-        double b=(Ti[1,1]);
-        double c=(Ti[2,2]);
-        double sign2=1.0;
-        double sign3=1.0;
-        double sign4=1.0;
-        if ((Ti[2,1]-Ti[1,2])<0){
-            sign2=-1;
+        double a = (Ti[0, 0]);
+        double b = (Ti[1, 1]);
+        double c = (Ti[2, 2]);
+        double sign2 = 1.0;
+        double sign3 = 1.0;
+        double sign4 = 1.0;
+        if ((Ti[2, 1] - Ti[1, 2]) < 0)
+        {
+            sign2 = -1;
         }
-        if ((Ti[0,2]-Ti[2,0])<0){
-            sign3=-1;
+        if ((Ti[0, 2] - Ti[2, 0]) < 0)
+        {
+            sign3 = -1;
         }
-        if ((Ti[1,0]-Ti[0,1])<0){
-            sign4=-1;
+        if ((Ti[1, 0] - Ti[0, 1]) < 0)
+        {
+            sign4 = -1;
         }
-        q[0]=0.5*Math.Sqrt(Math.Max(a+b+c+1,0));
-        q[1]=0.5*sign2*Math.Sqrt(Math.Max(a-b-c+1,0));
-        q[2]=0.5*sign3*Math.Sqrt(Math.Max(-a+b-c+1,0));
-        q[3]=0.5*sign4*Math.Sqrt(Math.Max(-a-b+c+1,0));
+        q[0] = 0.5 * Math.Sqrt(Math.Max(a + b + c + 1, 0));
+        q[1] = 0.5 * sign2 * Math.Sqrt(Math.Max(a - b - c + 1, 0));
+        q[2] = 0.5 * sign3 * Math.Sqrt(Math.Max(-a + b - c + 1, 0));
+        q[3] = 0.5 * sign4 * Math.Sqrt(Math.Max(-a - b + c + 1, 0));
         return q;
     }
 
@@ -257,14 +266,15 @@ public class Mat // simple matrix class for homogeneous operations
     /// </summary>
     /// <param name="q"></param>
     /// <returns></returns>
-    static Mat FromQuaternion(double[] qin){
-        double qnorm = Math.Sqrt(qin[0]*qin[0]+qin[1]*qin[1]+qin[2]*qin[2]+qin[3]*qin[3]);
+    static Mat FromQuaternion(double[] qin)
+    {
+        double qnorm = Math.Sqrt(qin[0] * qin[0] + qin[1] * qin[1] + qin[2] * qin[2] + qin[3] * qin[3]);
         double[] q = new double[4];
-        q[0] = qin[0]/qnorm;
-        q[1] = qin[1]/qnorm;
-        q[2] = qin[2]/qnorm;
-        q[3] = qin[3]/qnorm;
-        Mat pose = new Mat( 1 - 2*q[2]*q[2] - 2*q[3]*q[3]  ,  2*q[1]*q[2] - 2*q[3]*q[0]  ,  2*q[1]*q[3] + 2*q[2]*q[0]   ,  0, 2*q[1]*q[2] + 2*q[3]*q[0]  ,  1 - 2*q[1]*q[1] - 2*q[3]*q[3] , 2*q[2]*q[3] - 2*q[1]*q[0] ,  0, 2*q[1]*q[3] - 2*q[2]*q[0]       ,  2*q[2]*q[3] + 2*q[1]*q[0]   ,   1 - 2*q[1]*q[1] - 2*q[2]*q[2], 0);
+        q[0] = qin[0] / qnorm;
+        q[1] = qin[1] / qnorm;
+        q[2] = qin[2] / qnorm;
+        q[3] = qin[3] / qnorm;
+        Mat pose = new Mat(1 - 2 * q[2] * q[2] - 2 * q[3] * q[3], 2 * q[1] * q[2] - 2 * q[3] * q[0], 2 * q[1] * q[3] + 2 * q[2] * q[0], 0, 2 * q[1] * q[2] + 2 * q[3] * q[0], 1 - 2 * q[1] * q[1] - 2 * q[3] * q[3], 2 * q[2] * q[3] - 2 * q[1] * q[0], 0, 2 * q[1] * q[3] - 2 * q[2] * q[0], 2 * q[2] * q[3] + 2 * q[1] * q[0], 1 - 2 * q[1] * q[1] - 2 * q[2] * q[2], 0);
         return pose;
     }
 
@@ -273,53 +283,58 @@ public class Mat // simple matrix class for homogeneous operations
     /// </summary>
     /// <param name="H"></param>
     /// <returns></returns>
-    static double[] ToABB(Mat H){
+    static double[] ToABB(Mat H)
+    {
         double[] q = ToQuaternion(H);
-        double[] xyzq1234 = {H[0,3],H[1,3],H[2,3],q[0],q[1],q[2],q[3]};
+        double[] xyzq1234 = { H[0, 3], H[1, 3], H[2, 3], q[0], q[1], q[2], q[3] };
         return xyzq1234;
     }
 
-    
+
     /// <summary>
-    /// Calculates the pose from the position and euler angles ([x,y,z,r,p,w] vector)
-    //  The result is the same as calling: H = transl(x,y,z)*rotz(w*pi/180)*roty(p*pi/180)*rotx(r*pi/180)
+    /// Calculates the pose from the position and euler angles ([x,y,z,r,p,r] vector)
+    //  The result is the same as calling: H = transl(x,y,z)*rotz(r*pi/180)*roty(p*pi/180)*rotx(r*pi/180)
     /// </summary>
     /// <param name="xyzwpr"></param>
     /// <returns>Homogeneous matrix (4x4)</returns>
     static public Mat FromXYZRPW(double[] xyzwpr)
     {
-        if (xyzwpr.Length < 6){
+        if (xyzwpr.Length < 6)
+        {
             return null;
         }
         return FromXYZRPW(xyzwpr[0], xyzwpr[1], xyzwpr[2], xyzwpr[3], xyzwpr[4], xyzwpr[5]);
     }
 
     /// <summary>
-    /// Calculates the equivalent position and euler angles ([x,y,z,r,p,w] vector) of the given pose in Universal Robots format
+    /// Calculates the equivalent position and euler angles ([x,y,z,r,p,r] vector) of the given pose in Universal Robots format
     /// Note: The difference between ToUR and ToXYZWPR is that the first one uses radians for the orientation and the second one uses degres
     /// Note: transl(x,y,z)*rotx(rx*pi/180)*roty(ry*pi/180)*rotz(rz*pi/180)
     /// See also: FromXYZRPW()
     /// </summary>
     /// <returns>XYZWPR translation and rotation in mm and radians</returns>
-    public double[] ToUR()
+    public double[] ToUR( )
     {
         double[] xyzwpr = new double[6];
         double x = mat[0, 3];
         double y = mat[1, 3];
-        double z = mat[2, 3];        
-        double angle = Math.Acos(  Math.Min(Math.Max(  (mat[0,0]+mat[1,1]+mat[2,2]-1)/2   ,-1),1));
-        double rx = mat[2,1] - mat[1,2];
-        double ry = mat[0,2] - mat[2,0];
-        double rz = mat[1,0] - mat[0,1];
-        if (angle == 0){
+        double z = mat[2, 3];
+        double angle = Math.Acos(Math.Min(Math.Max((mat[0, 0] + mat[1, 1] + mat[2, 2] - 1) / 2, -1), 1));
+        double rx = mat[2, 1] - mat[1, 2];
+        double ry = mat[0, 2] - mat[2, 0];
+        double rz = mat[1, 0] - mat[0, 1];
+        if (angle == 0)
+        {
             rx = 0;
             ry = 0;
             rz = 0;
-        } else {
+        }
+        else
+        {
             rx = rx * angle / (2 * Math.Sin(angle));
             ry = ry * angle / (2 * Math.Sin(angle));
             rz = rz * angle / (2 * Math.Sin(angle));
-        }        
+        }
         xyzwpr[0] = x;
         xyzwpr[1] = y;
         xyzwpr[2] = z;
@@ -330,7 +345,7 @@ public class Mat // simple matrix class for homogeneous operations
     }
 
     /// <summary>
-    /// Calculates the pose from the position and euler angles ([x,y,z,r,p,w] vector)
+    /// Calculates the pose from the position and euler angles ([x,y,z,r,p,r] vector)
     /// Note: The difference between FromUR and FromXYZWPR is that the first one uses radians for the orientation and the second one uses degres
     /// The result is the same as calling: H = transl(x,y,z)*rotx(rx)*roty(ry)*rotz(rz)
     /// </summary>
@@ -361,7 +376,7 @@ public class Mat // simple matrix class for homogeneous operations
     /// Converts a matrix into a one-dimensional array of doubles
     /// </summary>
     /// <returns>one-dimensional array</returns>
-    public double[] ToDoubles()
+    public double[] ToDoubles( )
     {
         int cnt = 0;
         double[] array = new double[rows * cols];
@@ -379,12 +394,12 @@ public class Mat // simple matrix class for homogeneous operations
     /// <summary>
     /// Check if the matrix is square
     /// </summary>
-    public Boolean IsSquare()
+    public Boolean IsSquare( )
     {
         return (rows == cols);
     }
 
-    public Boolean Is4x4()
+    public Boolean Is4x4( )
     {
         if (cols != 4 || rows != 4)
         {
@@ -396,7 +411,7 @@ public class Mat // simple matrix class for homogeneous operations
     /// <summary>
     /// Check if the matrix is homogeneous (4x4)
     /// </summary>
-    public Boolean IsHomogeneous()
+    public Boolean IsHomogeneous( )
     {
         if (!Is4x4())
         {
@@ -423,7 +438,7 @@ public class Mat // simple matrix class for homogeneous operations
     /// Returns the inverse of a homogeneous matrix (4x4 matrix)
     /// </summary>
     /// <returns>Homogeneous matrix (4x4)</returns>
-    public Mat inv()
+    public Mat inv( )
     {
         if (!IsHomogeneous())
         {
@@ -465,7 +480,7 @@ public class Mat // simple matrix class for homogeneous operations
     /// Returns the XYZ position of the Homogeneous matrix
     /// </summary>
     /// <returns>XYZ position</returns>
-    public double[] Pos()
+    public double[] Pos( )
     {
         if (!Is4x4())
         {
@@ -523,7 +538,7 @@ public class Mat // simple matrix class for homogeneous operations
         for (int i = 0; i < rows; i++) mat[i, k] = v[i, 0];
     }
 
-    public Mat Duplicate()                   // Function returns the copy of this matrix
+    public Mat Duplicate( )                   // Function returns the copy of this matrix
     {
         Mat matrix = new Mat(rows, cols);
         for (int i = 0; i < rows; i++)
@@ -553,7 +568,7 @@ public class Mat // simple matrix class for homogeneous operations
     /// Returns an identity 4x4 matrix (homogeneous matrix)
     /// </summary>
     /// <returns></returns>
-    public static Mat Identity4x4()
+    public static Mat Identity4x4( )
     {
         return Mat.IdentityMatrix(4, 4);
     }
@@ -577,7 +592,7 @@ public class Mat // simple matrix class for homogeneous operations
         return matrix;
     }*/
 
-    public override string ToString()                           // Function returns matrix as a string
+    public override string ToString( )                           // Function returns matrix as a string
     {
         string s = "";
         for (int i = 0; i < rows; i++)
@@ -592,7 +607,7 @@ public class Mat // simple matrix class for homogeneous operations
     /// Transpose a matrix
     /// </summary>
     /// <returns></returns>
-    public Mat Transpose()
+    public Mat Transpose( )
     {
         return Transpose(this);
     }
@@ -863,8 +878,8 @@ public class Mat // simple matrix class for homogeneous operations
         matStr = matStr.Replace("|", "\r\n");
         return matStr.Trim();
     }
-    
-    
+
+
     // Operators
     public static Mat operator -(Mat m)
     { return Mat.Multiply(-1, m); }
@@ -972,19 +987,19 @@ public class RoboDK
     public const int EULER_QUEATERNION = 6; // ABB Rapid
 
     // State of the RoboDK window
-    public const int WINDOWSTATE_HIDDEN      = -1;
-    public const int WINDOWSTATE_SHOW        = 0;
-    public const int WINDOWSTATE_MINIMIZED   = 1;
-    public const int WINDOWSTATE_NORMAL      = 2;
-    public const int WINDOWSTATE_MAXIMIZED   = 3;
-    public const int WINDOWSTATE_FULLSCREEN  = 4;
-    public const int WINDOWSTATE_CINEMA      = 5;
+    public const int WINDOWSTATE_HIDDEN = -1;
+    public const int WINDOWSTATE_SHOW = 0;
+    public const int WINDOWSTATE_MINIMIZED = 1;
+    public const int WINDOWSTATE_NORMAL = 2;
+    public const int WINDOWSTATE_MAXIMIZED = 3;
+    public const int WINDOWSTATE_FULLSCREEN = 4;
+    public const int WINDOWSTATE_CINEMA = 5;
     public const int WINDOWSTATE_FULLSCREEN_CINEMA = 6;
 
 
 
     //string APPLICATION_DIR = "C:/RoboDK/bin/RoboDK.exe"; // file path to the robodk program (executable)
-    string APPLICATION_DIR ="E:/install/RoboDK/bin/RoboDK.exe"; //邢双的RoboDK的exe路径
+    string APPLICATION_DIR = "E:/install/RoboDK/bin/RoboDK.exe"; //邢双的RoboDK的exe路径
     int SAFE_MODE = 1;                      // checks that provided items exist in memory
     int AUTO_UPDATE = 0;                    // if AUTO_UPDATE is zero, the scene is rendered after every function call  
     int TIMEOUT = 10 * 1000;                    // timeout for communication, in seconds
@@ -997,7 +1012,7 @@ public class RoboDK
     int PORT_FORCED = -1;                   // port to force RoboDK to start listening
 
     //Returns 1 if connection is valid, returns 0 if connection is invalid
-    bool is_connected()
+    bool is_connected( )
     {
         return COM.Connected;
     }
@@ -1006,7 +1021,7 @@ public class RoboDK
     /// <summary>
     /// 关闭RoboDK通信
     /// </summary>
-    public void Close()
+    public void Close( )
     {
         if (COM.Connected)
             COM.Close();
@@ -1016,7 +1031,7 @@ public class RoboDK
     /// Checks if the object is currently linked to RoboDK
     /// </summary>
     /// <returns></returns>
-    public bool Connected()
+    public bool Connected( )
     {
         //return COM.Connected;//does not work well
         bool part1 = COM.Poll(1000, SelectMode.SelectRead);
@@ -1028,7 +1043,7 @@ public class RoboDK
     }
 
     //If we are not connected it will attempt a connection, if it fails, it will throw an error
-    void check_connection()
+    void check_connection( )
     {
         if (!is_connected() && !Connect())
         {
@@ -1037,7 +1052,7 @@ public class RoboDK
     }
 
     // checks the status of the connection
-    int check_status()
+    int check_status( )
     {
         int status = rec_int();
         if (status > 0 && status < 10)
@@ -1098,7 +1113,7 @@ public class RoboDK
         COM.Send(data);
     }
 
-    string rec_line()
+    string rec_line( )
     {
         //Receives a string. It reads until if finds LF (\\n)
         byte[] buffer = new byte[1];
@@ -1133,7 +1148,7 @@ public class RoboDK
     }
 
     //Receives an item pointer
-    Item rec_item()
+    Item rec_item( )
     {
         byte[] buffer1 = new byte[8];
         byte[] buffer2 = new byte[4];
@@ -1174,7 +1189,7 @@ public class RoboDK
         COM.Send(bytesarray, 8 * nvalues, SocketFlags.None);
     }
 
-    Mat rec_pose()
+    Mat rec_pose( )
     {
         Mat pose = new Mat(4, 4);
         byte[] bytes = new byte[16 * 8];
@@ -1231,7 +1246,7 @@ public class RoboDK
         COM.Send(bytes);
     }
 
-    Int32 rec_int()
+    Int32 rec_int( )
     {
         byte[] bytes = new byte[4];
         int read = COM.Receive(bytes, 4, SocketFlags.None);
@@ -1264,7 +1279,7 @@ public class RoboDK
     }
 
     // Receives an array of doubles
-    double[] rec_array()
+    double[] rec_array( )
     {
         int nvalues = rec_int();
         if (nvalues > 0)
@@ -1302,7 +1317,7 @@ public class RoboDK
     }
 
     // receives a 2 dimensional matrix (nxm)
-    Mat rec_matrix()
+    Mat rec_matrix( )
     {
         int size1 = rec_int();
         int size2 = rec_int();
@@ -1311,9 +1326,11 @@ public class RoboDK
         Mat mat = new Mat(size1, size2);
         int BUFFER_SIZE = 256;
         int received = 0;
-        if (recvsize > 0){
+        if (recvsize > 0)
+        {
             int to_receive = Math.Min(recvsize, BUFFER_SIZE);
-            while (to_receive > 0){
+            while (to_receive > 0)
+            {
                 int nbytesok = COM.Receive(bytes, received, to_receive, SocketFlags.None);
                 if (nbytesok <= 0)
                 {
@@ -1480,7 +1497,7 @@ public class RoboDK
     /// Starts the link with RoboDK (automatic upon creation of the object)
     /// </summary>
     /// <returns></returns>
-    public bool Connect()
+    public bool Connect( )
     {
         //Establishes a connection with robodk. robodk must be running, otherwise, the variable APPLICATION_DIR must be set properly.
         bool connected = false;
@@ -1597,7 +1614,7 @@ public class RoboDK
     /// <summary>
     /// Shows or raises the RoboDK window
     /// </summary>
-    public void ShowRoboDK()
+    public void ShowRoboDK( )
     {
         check_connection();
         string command = "RAISE";
@@ -1608,7 +1625,7 @@ public class RoboDK
     /// <summary>
     /// Hides the RoboDK window
     /// </summary>
-    public void HideRoboDK()
+    public void HideRoboDK( )
     {
         check_connection();
         string command = "HIDE";
@@ -1620,7 +1637,8 @@ public class RoboDK
     /// Set the state of the RoboDK window
     /// </summary>
     /// <param name="windowstate"></param>
-    public void setWindowState(int windowstate=WINDOWSTATE_NORMAL){
+    public void setWindowState(int windowstate = WINDOWSTATE_NORMAL)
+    {
         check_connection();
         string command = "S_WindowState";
         send_line(command);
@@ -1684,17 +1702,18 @@ public class RoboDK
     /// <param name="add_to_ref">If True, the curve will be added as part of the object in the RoboDK item tree (a reference object must be provided)</param>
     /// <param name="projection_type">Type of projection. For example: PROJECTION_ALONG_NORMAL_RECALC will project along the point normal and recalculate the normal vector on the surface projected.</param>
     /// <returns>added object/curve (null if failed)</returns>
-    public Item AddCurve(Mat curve_points, Item reference_object=null, bool add_to_ref=false, int projection_type=PROJECTION_ALONG_NORMAL_RECALC){
+    public Item AddCurve(Mat curve_points, Item reference_object = null, bool add_to_ref = false, int projection_type = PROJECTION_ALONG_NORMAL_RECALC)
+    {
         check_connection();
         string command = "AddWire";
         send_line(command);
         send_matrix(curve_points);
         send_item(reference_object);
         send_int(add_to_ref ? 1 : 0);
-        send_int(projection_type);  
+        send_int(projection_type);
         Item newitem = rec_item();
         check_status();
-        return newitem ; 
+        return newitem;
     }
 
     /// <summary>
@@ -1704,13 +1723,14 @@ public class RoboDK
     /// <param name="object_project">object to project</param>
     /// <param name="projection_type">Type of projection. For example: PROJECTION_ALONG_NORMAL_RECALC will project along the point normal and recalculate the normal vector on the surface projected.</param>
     /// <returns></returns>
-    public Mat ProjectPoints(Mat points, Item object_project, int projection_type=PROJECTION_ALONG_NORMAL_RECALC){
+    public Mat ProjectPoints(Mat points, Item object_project, int projection_type = PROJECTION_ALONG_NORMAL_RECALC)
+    {
         check_connection();
         string command = "ProjectPoints";
         send_line(command);
         send_matrix(points);
         send_item(object_project);
-        send_int(projection_type); 
+        send_int(projection_type);
         Mat projected_points = rec_matrix();
         check_status();
         return projected_points;
@@ -1719,7 +1739,7 @@ public class RoboDK
     /// <summary>
     /// Closes the current station without suggesting to save
     /// </summary>
-    public void CloseStation()
+    public void CloseStation( )
     {
         check_connection();
         string command = "Remove";
@@ -1727,7 +1747,7 @@ public class RoboDK
         send_item(new Item(this));
         check_status();
     }
-    
+
     /// <summary>
     /// Adds a new target that can be reached with a robot.
     /// </summary>
@@ -1735,7 +1755,8 @@ public class RoboDK
     /// <param name="itemparent">parent to attach to (such as a frame)</param>
     /// <param name="itemrobot">main robot that will be used to go to self target</param>
     /// <returns>the new target created</returns>
-    public Item AddTarget(string name, Item itemparent=null, Item itemrobot=null){
+    public Item AddTarget(string name, Item itemparent = null, Item itemrobot = null)
+    {
         check_connection();
         string command = "Add_TARGET";
         send_line(command);
@@ -1746,14 +1767,15 @@ public class RoboDK
         check_status();
         return newitem;
     }
-    
+
     /// <summary>
     /// Adds a new Frame that can be referenced by a robot.
     /// </summary>
     /// <param name="name">name of the reference frame</param>
     /// <param name="itemparent">parent to attach to (such as the robot base frame)</param>
     /// <returns>the new reference frame created</returns>
-    public Item AddFrame(string name, Item itemparent=null){
+    public Item AddFrame(string name, Item itemparent = null)
+    {
         check_connection();
         string command = "Add_FRAME";
         send_line(command);
@@ -1770,7 +1792,8 @@ public class RoboDK
     /// <param name="name">name of the program</param>
     /// <param name="itemparent">robot that will be used</param>
     /// <returns>the new program created</returns>
-    public Item AddProgram(string name, Item itemrobot=null){
+    public Item AddProgram(string name, Item itemrobot = null)
+    {
         check_connection();
         string command = "Add_PROG";
         send_line(command);
@@ -1844,7 +1867,7 @@ public class RoboDK
     /// Returns the number of pairs of objects that are currently in a collision state.
     /// </summary>
     /// <returns></returns>
-    public int Collisions()
+    public int Collisions( )
     {
         check_connection();
         string command = "Collisions";
@@ -1889,7 +1912,7 @@ public class RoboDK
     /// Gets the current simulation speed. Set the speed to 1 for a real-time simulation.
     /// </summary>
     /// <returns></returns>
-    public double SimulationSpeed()
+    public double SimulationSpeed( )
     {
         check_connection();
         string command = "GetSimulateSpeed";
@@ -1925,7 +1948,7 @@ public class RoboDK
     /// RUNMODE_QUICKVALIDATE=2   performs a quick check to validate the robot movements
     /// RUNMODE_MAKE_ROBOTPROG=3  makes the robot program
     /// RUNMODE_RUN_REAL=4        moves the real robot is it is connected</returns>
-    public int RunMode()
+    public int RunMode( )
     {
         check_connection();
         string command = "G_RunMode";
@@ -1940,14 +1963,16 @@ public class RoboDK
     /// </summary>
     /// <param name="robot_item_list">list of robot items</param>
     /// <returns>list of robot joints (double x nDOF)</returns>
-    public double[][] Joints(Item[] robot_item_list){
+    public double[][] Joints(Item[] robot_item_list)
+    {
         check_connection();
         string command = "G_ThetasList";
         send_line(command);
         int nrobs = robot_item_list.Length;
         send_int(nrobs);
         double[][] joints_list = new double[nrobs][];
-        for (int i=0; i<nrobs; i++){
+        for (int i = 0; i < nrobs; i++)
+        {
             send_item(robot_item_list[i]);
             joints_list[i] = rec_array();
         }
@@ -1960,13 +1985,15 @@ public class RoboDK
     /// </summary>
     /// <param name="robot_item_list">list of robot items</param>
     /// <param name="joints_list">list of robot joints (double x nDOF)</param>
-    public void setJoints(Item[] robot_item_list, double[][] joints_list){
+    public void setJoints(Item[] robot_item_list, double[][] joints_list)
+    {
         int nrobs = Math.Min(robot_item_list.Length, joints_list.Length);
         check_connection();
         string command = "S_ThetasList";
         send_line(command);
         send_int(nrobs);
-        for (int i=0; i<nrobs; i++){
+        for (int i = 0; i < nrobs; i++)
+        {
             send_item(robot_item_list[i]);
             send_array(joints_list[i]);
         }
@@ -1993,12 +2020,12 @@ public class RoboDK
             type = itemtype;
         }
 
-        public UInt64 get_item()
+        public UInt64 get_item( )
         {
             return item;
         }
 
-        public string ToString2()
+        public string ToString2( )
         {
             if (Valid())
             {
@@ -2025,7 +2052,7 @@ public class RoboDK
         /// Returns the RoboDK link Robolink().
         /// </summary>
         /// <returns></returns>
-        public RoboDK RL()
+        public RoboDK RL( )
         {
             return link;
         }
@@ -2035,7 +2062,7 @@ public class RoboDK
         /// Returns the type of an item (robot, object, target, reference frame, ...)
         /// </summary>
         /// <returns></returns>
-        public int Type()
+        public int Type( )
         {
             link.check_connection();
             string command = "G_Item_Type";
@@ -2060,7 +2087,7 @@ public class RoboDK
         /// <summary>
         /// Deletes an item and its childs from the station.
         /// </summary>
-        public void Delete()
+        public void Delete( )
         {
             link.check_connection();
             string command = "Remove";
@@ -2074,7 +2101,7 @@ public class RoboDK
         /// Checks if the item is valid. An invalid item will be returned by an unsuccessful function call.
         /// </summary>
         /// <returns>true if valid, false if invalid</returns>
-        public bool Valid()
+        public bool Valid( )
         {
             if (item == 0)
             {
@@ -2088,7 +2115,7 @@ public class RoboDK
         /// Returns a list of the item childs that are attached to the provided item.
         /// </summary>
         /// <returns>item x n -> list of child items</returns>
-        public Item[] Childs()
+        public Item[] Childs( )
         {
             link.check_connection();
             string command = "G_Childs";
@@ -2108,7 +2135,7 @@ public class RoboDK
         /// Returns 1 if the item is visible, otherwise, returns 0.
         /// </summary>
         /// <returns>true if visible, false if not visible</returns>
-        public bool Visible()
+        public bool Visible( )
         {
             link.check_connection();
             string command = "G_Visible";
@@ -2142,7 +2169,7 @@ public class RoboDK
         /// Returns the name of an item. The name of the item is always displayed in the RoboDK station tree
         /// </summary>
         /// <returns>name of the item</returns>
-        public string Name()
+        public string Name( )
         {
             link.check_connection();
             string command = "G_Name";
@@ -2189,7 +2216,7 @@ public class RoboDK
         /// If a robot is provided, it will get the pose of the end efector
         /// </summary>
         /// <returns>4x4 homogeneous matrix (pose)</returns>
-        public Mat Pose()
+        public Mat Pose( )
         {
             link.check_connection();
             string command = "G_Hlocal";
@@ -2218,7 +2245,7 @@ public class RoboDK
         /// Returns the position (pose) the object geometry with respect to its own reference frame. This procedure works for tools and objects.
         /// </summary>
         /// <returns>4x4 homogeneous matrix (pose)</returns>
-        public Mat GeometryPose()
+        public Mat GeometryPose( )
         {
             link.check_connection();
             string command = "G_Hgeom";
@@ -2247,7 +2274,7 @@ public class RoboDK
         /// Returns the tool pose of an item. If a robot is provided it will get the tool pose of the active tool held by the robot.
         /// </summary>
         /// <returns>4x4 homogeneous matrix (pose)</returns>
-        public Mat Htool()
+        public Mat Htool( )
         {
             link.check_connection();
             string command = "G_Htool";
@@ -2277,7 +2304,7 @@ public class RoboDK
         /// Returns the global position (pose) of an item. For example, the position of an object/frame/target with respect to the station origin.
         /// </summary>
         /// <returns>4x4 homogeneous matrix (pose)</returns>
-        public Mat PoseAbs()
+        public Mat PoseAbs( )
         {
             link.check_connection();
             string command = "G_Hlocal_Abs";
@@ -2342,7 +2369,8 @@ public class RoboDK
         /// <param name="add_to_ref">add_to_ref -> If True, the curve will be added as part of the object in the RoboDK item tree</param>
         /// <param name="projection_type">Type of projection. For example: PROJECTION_ALONG_NORMAL_RECALC will project along the point normal and recalculate the normal vector on the surface projected.</param>
         /// <returns>returns the object where the curve was added or null if failed</returns>
-        public Item AddCurve(Mat curve_points, bool add_to_ref=false, int projection_type=PROJECTION_ALONG_NORMAL_RECALC){
+        public Item AddCurve(Mat curve_points, bool add_to_ref = false, int projection_type = PROJECTION_ALONG_NORMAL_RECALC)
+        {
             return link.AddCurve(curve_points, this, add_to_ref, projection_type);
         }
 
@@ -2352,7 +2380,8 @@ public class RoboDK
         /// <param name="points">matrix 3xN or 6xN -> list of points to project</param>
         /// <param name="projection_type">projection_type -> Type of projection. For example: PROJECTION_ALONG_NORMAL_RECALC will project along the point normal and recalculate the normal vector on the surface projected.</param>
         /// <returns>projected points (empty matrix if failed)</returns>
-        public Mat ProjectPoints(Mat points, int projection_type=PROJECTION_ALONG_NORMAL_RECALC){
+        public Mat ProjectPoints(Mat points, int projection_type = PROJECTION_ALONG_NORMAL_RECALC)
+        {
             return link.ProjectPoints(points, this, projection_type);
         }
 
@@ -2361,7 +2390,7 @@ public class RoboDK
         /// <summary>
         /// Sets a target as a cartesian target. A cartesian target moves to cartesian coordinates.
         /// </summary>
-        public void setAsCartesianTarget()
+        public void setAsCartesianTarget( )
         {
             link.check_connection();
             string command = "S_Target_As_RT";
@@ -2373,7 +2402,7 @@ public class RoboDK
         /// <summary>
         /// Sets a target as a joint target. A joint target moves to a joints position without regarding the cartesian coordinates.
         /// </summary>
-        public void setAsJointTarget()
+        public void setAsJointTarget( )
         {
             link.check_connection();
             string command = "S_Target_As_JT";
@@ -2388,7 +2417,7 @@ public class RoboDK
         /// Returns the current joints of a robot or the joints of a target. If the item is a cartesian target, it returns the preferred joints (configuration) to go to that cartesian position.
         /// </summary>
         /// <returns>double x n -> joints matrix</returns>
-        public double[] Joints()
+        public double[] Joints( )
         {
             link.check_connection();
             string command = "G_Thetas";
@@ -2405,7 +2434,7 @@ public class RoboDK
         /// Returns the home joints of a robot. These joints can be manually set in the robot "Parameters" menu, then select "Set home position"
         /// </summary>
         /// <returns>double x n -> joints array</returns>
-        public double[] JointsHome()
+        public double[] JointsHome( )
         {
             link.check_connection();
             string command = "G_Home";
@@ -2630,7 +2659,7 @@ public class RoboDK
         /// Disconnect from a real robot (when the robot driver is used)
         /// </summary>
         /// <returns>status -> true if disconnected successfully, false if it failed. It can fail if it was previously disconnected manually for example.</returns>
-        public bool Disconnect()
+        public bool Disconnect( )
         {
             link.check_connection();
             string command = "Disconnect";
@@ -2700,7 +2729,7 @@ public class RoboDK
         {
             link.moveX(null, null, target, this, 2, blocking);
         }
-        
+
         /// <summary>
         /// Moves a robot to a specific target ("Move Circular" mode). By default, this function blocks until the robot finishes its movements.
         /// </summary>
@@ -2826,7 +2855,7 @@ public class RoboDK
         /// Checks if a robot or program is currently running (busy or moving)
         /// </summary>
         /// <returns>busy status (1=moving, 0=stopped)</returns>
-        public int Busy()
+        public int Busy( )
         {
             link.check_connection();
             string command = "IsBusy";
@@ -2841,7 +2870,7 @@ public class RoboDK
         /// Stops a program or a robot
         /// </summary>
         /// <returns></returns>
-        public void Stop()
+        public void Stop( )
         {
             link.check_connection();
             string command = "Stop";
@@ -2923,7 +2952,7 @@ public class RoboDK
         /// if setRunMode(RUNMODE_RUN_ROBOT) is used together with program.setRunType(PROGRAM_RUN_ON_ROBOT) -> the program will run sequentially on the robot the same way as if we right clicked the program and selected "Run on robot" in the RoboDK GUI        
         /// </summary>
         /// <returns>number of instructions that can be executed</returns>
-        public int RunProgram()
+        public int RunProgram( )
         {
             link.check_connection();
             string command = "RunProg";
@@ -2956,7 +2985,7 @@ public class RoboDK
         /// <param name="io_var">io_var -> digital output (string or number)</param>
         /// <param name="io_value">io_value -> value (string or number)</param>
         /// <param name="timeout_ms">int (optional) -> timeout in miliseconds</param>
-        public void waitDI(string io_var, string io_value, double timeout_ms=-1)
+        public void waitDI(string io_var, string io_value, double timeout_ms = -1)
         {
             link.check_connection();
             string command = "waitDI";
@@ -2974,7 +3003,8 @@ public class RoboDK
         /// Adds a new robot move joint instruction to a program.
         /// </summary>
         /// <param name="itemtarget">target to move to</param>
-        public void addMoveJ(Item itemtarget){
+        public void addMoveJ(Item itemtarget)
+        {
             link.check_connection();
             string command = "Add_INSMOVE";
             link.send_line(command);
@@ -2988,7 +3018,8 @@ public class RoboDK
         /// Adds a new robot move linear instruction to a program.
         /// </summary>
         /// <param name="itemtarget">target to move to</param>
-        public void addMoveL(Item itemtarget){
+        public void addMoveL(Item itemtarget)
+        {
             link.check_connection();
             string command = "Add_INSMOVE";
             link.send_line(command);
@@ -3003,7 +3034,7 @@ public class RoboDK
         /// Returns the number of instructions of a program.
         /// </summary>
         /// <returns></returns>
-        public int InstructionCount()
+        public int InstructionCount( )
         {
             link.check_connection();
             string command = "Prog_Nins";
@@ -3093,7 +3124,7 @@ public class RoboDK
             link.check_status();
             return errors;
         }
-        
+
         /// <summary>
         /// Returns a list of joints an MxN matrix, where M is the number of robot axes plus 4 columns. Linear moves are rounded according to the smoothing parameter set inside the program.
         /// </summary>

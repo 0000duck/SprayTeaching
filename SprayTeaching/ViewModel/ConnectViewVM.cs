@@ -160,11 +160,11 @@ namespace SprayTeaching.ViewModel
 
         public MyCommand StartSampleDataCommand
         {
-            get 
+            get
             {
                 if (this._startSampleDataCommand == null)
                     this._startSampleDataCommand = new MyCommand(this.ExecuteStartSampleData);
-                return _startSampleDataCommand; 
+                return _startSampleDataCommand;
             }
         }
 
@@ -175,11 +175,11 @@ namespace SprayTeaching.ViewModel
 
         public MyCommand StopSampleDataCommand
         {
-            get 
+            get
             {
                 if (this._stopSampleDataCommand == null)
                     this._stopSampleDataCommand = new MyCommand(this.ExecuteStopSampleData);
-                return _stopSampleDataCommand; 
+                return _stopSampleDataCommand;
             }
         }
 
@@ -190,11 +190,11 @@ namespace SprayTeaching.ViewModel
 
         public MyCommand PreCalibrateOriginAngleCommand
         {
-            get 
+            get
             {
                 if (this._preCalibrateOriginAngleCommand == null)
                     this._preCalibrateOriginAngleCommand = new MyCommand(this.ExecutePreCalibrateOriginAngle);
-                return _preCalibrateOriginAngleCommand; 
+                return _preCalibrateOriginAngleCommand;
             }
         }
 
@@ -205,16 +205,16 @@ namespace SprayTeaching.ViewModel
 
         public MyCommand PreCalibrateOriginDirectionCommand
         {
-            get 
+            get
             {
                 if (this._preCalibrateOriginDirectionCommand == null)
                     this._preCalibrateOriginDirectionCommand = new MyCommand(this.ExecutePreCalibrateOriginDirection);
-                return _preCalibrateOriginDirectionCommand; 
+                return _preCalibrateOriginDirectionCommand;
             }
         }
 
         /// <summary>
-        /// 标定机器人的角度
+        /// 标定机器人的角度命令
         /// </summary>
         private MyCommand _calibrateRobotAngleCommand;
 
@@ -224,22 +224,52 @@ namespace SprayTeaching.ViewModel
             {
                 if (this._calibrateRobotAngleCommand == null)
                     this._calibrateRobotAngleCommand = new MyCommand(this.ExecuteCalibrateRobotAngle);
-                return _calibrateRobotAngleCommand; 
+                return _calibrateRobotAngleCommand;
             }
         }
 
         /// <summary>
-        /// 标定机器人的方向
+        /// 标定机器人的方向命令
         /// </summary>
         private MyCommand _calibrateRobotDirectionCommand;
 
         public MyCommand CalibrateRobotDirectionCommand
         {
-            get 
+            get
             {
                 if (this._calibrateRobotDirectionCommand == null)
                     this._calibrateRobotDirectionCommand = new MyCommand(this.ExecuteCalibrateRobotDirection);
-                return _calibrateRobotDirectionCommand; 
+                return _calibrateRobotDirectionCommand;
+            }
+        }
+
+        /// <summary>
+        /// 生成RoboDK程序命令
+        /// </summary>
+        private MyCommand _createRoboDKProgramCommand;
+
+        public MyCommand CreateRoboDKProgramCommand
+        {
+            get 
+            {
+                if (this._createRoboDKProgramCommand == null)
+                    this._createRoboDKProgramCommand = new MyCommand(this.ExecuteCreateRoboDKProgram);
+                return _createRoboDKProgramCommand; 
+            }
+        }
+
+        /// <summary>
+        /// 运行RoboDK中的机器人程序
+        /// </summary>
+        private MyCommand _runRoboDKProgramCommand;
+
+        public MyCommand RunRoboDKProgramCommand
+        {
+            get 
+            {
+                if (this._runRoboDKProgramCommand == null)
+                    this._runRoboDKProgramCommand = new MyCommand(this.ExecuteRunRoboDKProgram);
+                return _runRoboDKProgramCommand; 
             }
         }
 
@@ -340,7 +370,7 @@ namespace SprayTeaching.ViewModel
         /// 执行标定原点角度预处理
         /// </summary>
         /// <param name="obj"></param>
-        private void ExecutePreCalibrateOriginAngle(object obj =null)
+        private void ExecutePreCalibrateOriginAngle(object obj = null)
         {
             this._modelViewModel.PreCalibrateOriginAngleHandler(obj);
         }
@@ -349,7 +379,7 @@ namespace SprayTeaching.ViewModel
         /// 执行标定原点方向预处理
         /// </summary>
         /// <param name="obj"></param>
-        private void ExecutePreCalibrateOriginDirection(object obj =null)
+        private void ExecutePreCalibrateOriginDirection(object obj = null)
         {
             this._modelViewModel.PreCalibrateOriginDirectionHandler(obj);
         }
@@ -358,7 +388,7 @@ namespace SprayTeaching.ViewModel
         /// 执行标定机器人角度
         /// </summary>
         /// <param name="obj"></param>
-        private void ExecuteCalibrateRobotAngle(object obj=null)
+        private void ExecuteCalibrateRobotAngle(object obj = null)
         {
             this._modelViewModel.CalibrateRobotAngleHandler();
         }
@@ -367,9 +397,27 @@ namespace SprayTeaching.ViewModel
         /// 执行标定机器人方向
         /// </summary>
         /// <param name="obj"></param>
-        private void ExecuteCalibrateRobotDirection(object obj=null)
+        private void ExecuteCalibrateRobotDirection(object obj = null)
         {
             this._modelViewModel.CalibrateRobotDirectionHandler();
+        }
+
+        /// <summary>
+        /// 创建机器人程序
+        /// </summary>
+        /// <param name="obj"></param>
+        private void ExecuteCreateRoboDKProgram(object obj = null)
+        {
+            this._modelViewModel.CreateRoboDKProgramHandler();
+        }
+
+        /// <summary>
+        /// 运行RoboDK中的机器人程序
+        /// </summary>
+        /// <param name="obj"></param>
+        private void ExecuteRunRoboDKProgram(object obj=null)
+        {
+            this._modelViewModel.RunRoboDKProgramHandler();
         }
 
         #endregion

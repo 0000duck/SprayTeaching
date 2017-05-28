@@ -952,7 +952,7 @@ namespace SprayTeaching.Model
 
         #endregion
 
-        #region 界面状态显示
+        #region 界面底栏状态显示
 
         /// <summary>
         /// 错误操作信息提示
@@ -963,6 +963,28 @@ namespace SprayTeaching.Model
         {
             get { return _strErrorOperateMessage; }
             set { _strErrorOperateMessage = value; RaisePropertyChanged("ErrorOperateMessage"); }
+        }
+
+        /// <summary>
+        /// 是否正在运行添加目标点
+        /// </summary>
+        private bool _bolIsRunningAddTarget = false;
+
+        public bool IsRunningAddTarget
+        {
+            get { return _bolIsRunningAddTarget; }
+            set { _bolIsRunningAddTarget = value; RaisePropertyChanged("IsRunningAddTarget"); }
+        }
+
+        /// <summary>
+        /// 运行添加目标点的执行情况
+        /// </summary>
+        private int _intRunningAddTargetState = 0;
+
+        public int RunningAddTargetState
+        {
+            get { return _intRunningAddTargetState; }
+            set { _intRunningAddTargetState = value; RaisePropertyChanged("RunningAddTargetState"); }
         }
 
 
