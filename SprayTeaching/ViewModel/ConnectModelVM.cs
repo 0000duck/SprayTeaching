@@ -13,6 +13,7 @@ using SprayTeaching.MyAllClass;
 using System.Threading;
 using Microsoft.Win32;
 using System.Windows;
+using System.IO;
 
 namespace SprayTeaching.ViewModel
 {
@@ -84,6 +85,7 @@ namespace SprayTeaching.ViewModel
             this._myRoboDKExtension.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                      // RoboDK写日志
             this._myRoboDKExtension.UpdateRobotParameter += new UpdateRobotParameterEventHandler(UpdateRobotParameterHandler);          // 更新机器人参数
             this._myRoboDKExtension.UpdateAddTargetPointState += new Action<object>(UpdateAddTargetPointStateHandler);                  // 向RoboDK中添加程序的运行状态
+            this._myRoboDKExtension.UpdateRobotRunningState += new Action<object>(UpdateRobotRunningStateHandler);                      // 更新机器人的运动状态
 
             this._myRobotFile = new MyRobotFile();                                                                                      // 机器人文件的对象
             this._myRobotFile.UpdateLogContent += new UpdateLogContentEventHandler(UpdateLogContentHandler);                            // 机器人文件写日志
@@ -452,6 +454,7 @@ namespace SprayTeaching.ViewModel
         }
         #endregion
 
+        #region 机器人模型切换
         /// <summary>
         /// 选择机器人模型
         /// </summary>
@@ -462,8 +465,9 @@ namespace SprayTeaching.ViewModel
                 return;
             this._myRoboDKExtension.SelectRobotModelHandler(objParameter);
         }
+        #endregion
 
-        #region 向添加RoboDK添加程序
+        #region 向添加RoboDK添加程序，运行程序，停止程序，生成机器人程序
         /// <summary>
         /// 生成机器人程序
         /// </summary>
@@ -481,10 +485,16 @@ namespace SprayTeaching.ViewModel
             }
         }
 
+        /// <summary>
+        /// 更新向RoboDK中添加目标点的状态
+        /// </summary>
+        /// <param name="obj"></param>
         private void UpdateAddTargetPointStateHandler(object obj)
         {
             int intState = (int)obj;
             this._mainDataModel.RunningAddTargetState = intState;
+
+            // 如果是0和100，则不显示进程条
             if (this._mainDataModel.RunningAddTargetState == 0)
             {
                 this._mainDataModel.IsRunningAddTarget = false;
@@ -498,11 +508,52 @@ namespace SprayTeaching.ViewModel
                 this._mainDataModel.IsRunningAddTarget = true;
         }
 
+        /// <summary>
+        /// 运行RoboDK中的机器人程序
+        /// </summary>
+        /// <param name="obj"></param>
         public void RunRoboDKProgramHandler(object obj = null)
         {
             this._myRoboDKExtension.RunRoboDKProgramHandler();
         }
 
+        /// <summary>
+        /// 停止RoboDK中的机器人程序
+        /// </summary>
+        /// <param name="obj"></param>
+        public void StopRoboDKProgramHandler(object obj=null)
+        {
+            this._myRoboDKExtension.StopRoboDKProgramHandler();
+        }
+
+        /// <summary>
+        /// 生成实际机器人程序
+        /// </summary>
+        public void MakeRobotProgramHandler()
+        {
+            string strFileAddress = this._myRobotFile.RobotFileAddress;
+            strFileAddress = System.IO.Directory.GetCurrentDirectory() + ".\\RobotProgram" + "\\" + Path.GetFileNameWithoutExtension(strFileAddress) + ".tid";
+            this._myRoboDKExtension.MakeRobotProgramHandler(strFileAddress);
+        }
+
+        #endregion
+
+        #region 机器人的运动状态
+
+        /// <summary>
+        /// 更新机器人的运动状态
+        /// </summary>
+        /// <param name="obj">运动状态</param>
+        public void UpdateRobotRunningStateHandler(object obj)
+        {
+            string strState = (string)obj;
+            this._mainDataModel.RobotRunningState = strState;
+            if (strState == "运行")
+                this._mainDataModel.IsRobotRunning = true;
+            else
+                this._mainDataModel.IsRobotRunning = false;
+
+        }
         #endregion
 
         #endregion

@@ -987,6 +987,28 @@ namespace SprayTeaching.Model
             set { _intRunningAddTargetState = value; RaisePropertyChanged("RunningAddTargetState"); }
         }
 
+        /// <summary>
+        /// 机器人的运动状态
+        /// </summary>
+        private string _strRobotRunningState = "停止";
+
+        public string RobotRunningState
+        {
+            get { return _strRobotRunningState; }
+            set { _strRobotRunningState = value; RaisePropertyChanged("RobotRunningState"); }
+        }
+
+        /// <summary>
+        /// 机器人的运动状态标识符
+        /// </summary>
+        private bool _bolIsRobotRunning = false;
+
+        public bool IsRobotRunning
+        {
+            get { return _bolIsRobotRunning; }
+            set { _bolIsRobotRunning = value; RaisePropertyChanged("IsRobotRunning"); }
+        }
+
 
         #endregion
     }

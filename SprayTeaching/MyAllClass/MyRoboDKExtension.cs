@@ -40,7 +40,8 @@ namespace SprayTeaching.MyAllClass
 
         public event UpdateLogContentEventHandler UpdateLogContent;             // 更新日志文件        
         public event UpdateRobotParameterEventHandler UpdateRobotParameter;     // 更新机器人参数  
-        public event Action<object> UpdateAddTargetPointState;
+        public event Action<object> UpdateAddTargetPointState;                  // 更新添加目标点的状态
+        public event Action<object> UpdateRobotRunningState;                    // 更新机器人的运动状态
 
         #endregion
 
@@ -182,6 +183,7 @@ namespace SprayTeaching.MyAllClass
                     // 打开了RoboDK和选中了机器人
                     this.GetRobotParameters();
                     this.DriveRobotMove();
+                    this.UpdateRobotRunningStateHandler();
                     Thread.Sleep(10);
                 }
                 else
@@ -290,6 +292,20 @@ namespace SprayTeaching.MyAllClass
             return dic;
         }
 
+        /// <summary>
+        /// 更新机器人的运动状态
+        /// </summary>
+        private void UpdateRobotRunningStateHandler( )
+        {
+            string strState = string.Empty;
+            if (this.CheckIsRobotBusy())
+                strState = "运行";
+            else
+                strState = "停止";
+            if (this.UpdateRobotRunningState != null)
+                this.UpdateRobotRunningState(strState);
+        }
+
         #endregion
 
         #region 对RoboDK的检查
@@ -332,6 +348,27 @@ namespace SprayTeaching.MyAllClass
                 }
                 return true;
             }
+        }
+
+        /// <summary>
+        /// 检查机器人是否正在运动，true为运动，false为停止
+        /// </summary>
+        /// <returns></returns>
+        private bool CheckIsRobotBusy( )
+        {
+            bool bolIsBusy = false;
+            int intBusy = 0;
+            lock (this._thisLock)
+            {
+                intBusy = this._rdkItemRobot.Busy();
+            }
+            if (intBusy == 1)
+            {
+                bolIsBusy = true;
+            }
+            else
+                bolIsBusy = false;
+            return bolIsBusy;
         }
 
         /// <summary>
@@ -380,38 +417,38 @@ namespace SprayTeaching.MyAllClass
         /// <param name="objParameter">机器人对应的编号</param>
         public void SelectRobotModelHandler(object objParameter)
         {
-            //Thread thrd = new Thread(ThreadSelectRobotModel);
-            //thrd.IsBackground = true;
-            //thrd.Name = "SelectRobotModel";
-            //thrd.Start(objParameter);
+            Thread thrd = new Thread(ThreadSelectRobotModel);
+            thrd.IsBackground = true;
+            thrd.Name = "SelectRobotModel";
+            thrd.Start(objParameter);
+            // 判断是否可以执行选择机器人模型的操作
+            //if (!this.IsEnableReselectRobotModel(objParameter))
+            //    return;
+
+            //string strFileName = this.GetRobotModelFileName(objParameter);  // 获取对应机器人的文件名
+            //this.SuspendThreadUpdateRobotParameter();                       // 线程暂停                                          
+            //this.DeleteAllRobotModel();                                     // 删除工作站中的所有机器人模型 
+            //this.LoadRobotModel(strFileName);                               // 载入机器人模型   
+            //this.SelectRobotItem();                                         // 选中机器人对象           
+            //this.ResumeThreadUpdateRobotParameter();                        // 线程继续执行
+        }
+
+        private void ThreadSelectRobotModel(object objParameter)
+        {
             // 判断是否可以执行选择机器人模型的操作
             if (!this.IsEnableReselectRobotModel(objParameter))
                 return;
-
-            string strFileName = this.GetRobotModelFileName(objParameter);  // 获取对应机器人的文件名
-            this.SuspendThreadUpdateRobotParameter();                       // 线程暂停                                          
-            this.DeleteAllRobotModel();                                     // 删除工作站中的所有机器人模型 
-            this.LoadRobotModel(strFileName);                               // 载入机器人模型   
-            this.SelectRobotItem();                                         // 选中机器人对象           
-            this.ResumeThreadUpdateRobotParameter();                        // 线程继续执行
+            lock (this._thisLock)
+            {
+                string strFileName = this.GetRobotModelFileName(objParameter);  // 获取对应机器人的文件名
+                this.SuspendThreadUpdateRobotParameter();                       // 线程暂停                                          
+                this.DeleteAllRobotModel();                                     // 删除工作站中的所有机器人模型 
+                Thread.Sleep(100);
+                this.LoadRobotModel(strFileName);                               // 载入机器人模型   
+                this.SelectRobotItem();                                         // 选中机器人对象           
+                this.ResumeThreadUpdateRobotParameter();                        // 线程继续执行
+            }
         }
-
-        //private void ThreadSelectRobotModel(object objParameter)
-        //{
-        //    // 判断是否可以执行选择机器人模型的操作
-        //    if (!this.IsEnableReselectRobotModel(objParameter))
-        //        return;
-        //    lock (this._thisLock)
-        //    {
-        //        string strFileName = this.GetRobotModelFileName(objParameter);  // 获取对应机器人的文件名
-        //        this.SuspendThreadUpdateRobotParameter();                       // 线程暂停                                          
-        //        this.DeleteAllRobotModel();                                     // 删除工作站中的所有机器人模型 
-        //        Thread.Sleep(100);
-        //        this.LoadRobotModel(strFileName);                               // 载入机器人模型   
-        //        this.SelectRobotItem();                                         // 选中机器人对象           
-        //        this.ResumeThreadUpdateRobotParameter();                        // 线程继续执行
-        //    }
-        //}
 
         /// <summary>
         /// 是否可以重新选择机器人对象，true为可以，false为不可以
@@ -661,8 +698,12 @@ namespace SprayTeaching.MyAllClass
 
         #endregion
 
-        #region 添加和执行RoboDK的程序
+        #region 添加,执行RoboDK的程序，生成机器人程序
 
+        /// <summary>
+        /// 创建RoboDK程序
+        /// </summary>
+        /// <param name="strFileAddress">文件地址</param>
         public void CreateRoboDKProgram(string strFileAddress)
         {
             Thread thrd = new Thread(ThrdCreateRoboDKProgram);
@@ -671,6 +712,10 @@ namespace SprayTeaching.MyAllClass
             thrd.Start(strFileAddress);
         }
 
+        /// <summary>
+        /// 创建RoboDK程序的线程
+        /// </summary>
+        /// <param name="obj">文件地址</param>
         private void ThrdCreateRoboDKProgram(object obj)
         {
             string strFileAddress = (string)obj;
@@ -689,6 +734,7 @@ namespace SprayTeaching.MyAllClass
                 return;
             }
 
+            // 读取机器人程序文件，转换成每行的内容
             List<string> lstStr = new List<string>();
             if (!this.ReadRobotFile(strFileAddress, ref lstStr))
             {
@@ -696,6 +742,7 @@ namespace SprayTeaching.MyAllClass
                 return;
             }
 
+            // 将每行的内容转换为具体的角度值
             List<double[]> lstJoints = new List<double[]>();
             if (!this.TransferData2Joints(lstStr, ref lstJoints))
             {
@@ -703,13 +750,28 @@ namespace SprayTeaching.MyAllClass
                 return;
             }
 
-            if (!this.AddJointTarget(lstJoints))
+            // 若工作站中存在目标点和程序，则进行删除操作
+            int intDeleteNum = 0;
+            if (!this.DeleteTargetPointAndProgram(ref intDeleteNum))
+            {
+                this.WriteLogHandler("RoboDK目标点和程序删除失败.");
+                return;
+            }
+
+            // 向RoboDK中添加关节目标节点
+            if (!this.AddJointTarget(lstJoints, intDeleteNum))
             {
                 this.WriteLogHandler("无法添加目标点.");
                 return;
             }
         }
 
+        /// <summary>
+        /// 读取机器人程序文件
+        /// </summary>
+        /// <param name="strFileAddress">文件地址</param>
+        /// <param name="lstStr">每行的内容</param>
+        /// <returns>是否读取成功</returns>
         private bool ReadRobotFile(string strFileAddress, ref List<string> lstStr)
         {
             bool bolIsSuccess = false;
@@ -727,6 +789,12 @@ namespace SprayTeaching.MyAllClass
             return bolIsSuccess;
         }
 
+        /// <summary>
+        /// 将每行的内容转换为具体的角度值
+        /// </summary>
+        /// <param name="lstStr">每行内容</param>
+        /// <param name="lstJoints">关节角度值</param>
+        /// <returns>转换是否成功</returns>
         private bool TransferData2Joints(List<string> lstStr, ref List<double[]> lstJoints)
         {
             bool bolIsSuccess = false;
@@ -752,7 +820,59 @@ namespace SprayTeaching.MyAllClass
             return bolIsSuccess;
         }
 
-        private bool AddJointTarget(List<double[]> lstJoints)
+        /// <summary>
+        /// 删除目标点和程序
+        /// </summary>
+        /// <param name="intDeleteNum">目标点的个数</param>
+        /// <returns>是否删除成功</returns>
+        private bool DeleteTargetPointAndProgram(ref int intDeleteNum)
+        {
+            bool bolIsSuccess = false;
+            if (this._rdkItemRobot == null)
+                return bolIsSuccess;
+            //this._rdkItemRobot.Delete();
+            lock (this._thisLock)
+            {
+                RoboDK.Item station = this._rdkPlatform.getItem("", RoboDK.ITEM_TYPE_STATION);
+                RoboDK.Item[] station_childs = station.Childs();
+                this.WriteLogHandler("开始删除RoboDK中的目标点.");
+                int sum = station_childs.Length;
+                for (int i = 0; i < sum; i++)
+                {
+                    // 删除所有PROGRAM
+                    if (station_childs[i].Type() == RoboDK.ITEM_TYPE_PROGRAM)
+                        station_childs[i].Delete();
+                    // 删除FRAME下面所有TARGET
+                    else if (station_childs[i].Type() == RoboDK.ITEM_TYPE_FRAME)
+                    {
+                        RoboDK.Item[] frame_childs = station_childs[i].Childs();
+                        int intLength = frame_childs.Length;
+                        intDeleteNum = intLength;
+                        for (int j = 0; j < intLength; j++)
+                        {
+                            if (frame_childs[j].Type() == RoboDK.ITEM_TYPE_TARGET)
+                            {
+                                frame_childs[j].Delete();
+
+                                // 更新添加目标点的状态
+                                int intState = (int)(50 * (j + 1) / intLength);
+                                this.UpdateAddTargetPointStateHandler(intState);
+                            }                                
+                        }
+                    }
+                }
+            }
+            this.WriteLogHandler("结束删除RoboDK中的目标点.");
+            bolIsSuccess = true;
+            return bolIsSuccess;
+        }
+
+        /// <summary>
+        /// 向RoboDK中添加关节目标节点
+        /// </summary>
+        /// <param name="lstJoints">关节角度</param>
+        /// <returns>是否添加成功</returns>
+        private bool AddJointTarget(List<double[]> lstJoints, int intDeleteNum)
         {
             bool bolIsSuccess = false;
             RoboDK.Item itemProgram = null;
@@ -775,7 +895,11 @@ namespace SprayTeaching.MyAllClass
                 }
 
                 // 更新添加目标点的状态
-                int intState = (int)(100 * (i + 1) / intLength);
+                int intState = 0;
+                if (intDeleteNum > 2)
+                    intState = (int)(50 * (i + 1) / intLength + 50);
+                else
+                    intState = (int)(100 * (i + 1) / intLength);
                 this.UpdateAddTargetPointStateHandler(intState);
             }
             this.WriteLogHandler("结束向RoboDK中添加目标点.");
@@ -802,6 +926,7 @@ namespace SprayTeaching.MyAllClass
         {
             if (!this.CheckRoboDK()) { return; }
             if (!this.CheckRobot()) { return; }
+            if (this.CheckIsRobotBusy()) { this.WriteLogHandler("机器人正在运动,无法进行其他操作.", 1); return; }
             lock (this._thisLock)
             {
                 RoboDK.Item itemProgram = this._rdkPlatform.getItem(this._strProgramName, RoboDK.ITEM_TYPE_PROGRAM);
@@ -814,6 +939,48 @@ namespace SprayTeaching.MyAllClass
                 else
                 {
                     this.WriteLogHandler("不存在" + this._strProgramName + "这个程序.", 1);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 停止RoboDK中的程序
+        /// </summary>
+        public void StopRoboDKProgramHandler( )
+        {
+            if (!this.CheckRoboDK()) { return; }
+            if (!this.CheckRobot()) { return; }
+            if (!this.CheckIsRobotBusy()) { return; }       // 若机器人停止中，则不执行停止操作
+
+            lock (this._thisLock)
+            {
+                RoboDK.Item itemProgram = this._rdkPlatform.getItem(this._strProgramName, RoboDK.ITEM_TYPE_PROGRAM);
+                if (itemProgram.Valid())
+                {
+                    itemProgram.Stop();
+                    this.WriteLogHandler("停止RoboDK机器人程序.");
+                }
+                //this._rdkItemRobot.Stop();
+            }
+        }
+
+        /// <summary>
+        /// 生成机器人程序
+        /// </summary>
+        /// <param name="strFileAddress"></param>
+        public void MakeRobotProgramHandler( string strFileAddress)
+        {
+            if (!this.CheckRoboDK()) { return; }
+            if (!this.CheckRobot()) { return; }
+            if (this.CheckIsRobotBusy()) { return; }
+
+            lock(this._thisLock)
+            {
+                RoboDK.Item itemProgram = this._rdkPlatform.getItem(this._strProgramName, RoboDK.ITEM_TYPE_PROGRAM);
+                if (itemProgram.Valid())
+                {
+                    itemProgram.MakeProgram(strFileAddress);
+                    this.WriteLogHandler("生成实际机器人程序.");
                 }
             }
         }

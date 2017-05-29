@@ -60,14 +60,15 @@
                     <TextBlock Text="{Binding ModelViewModel.MainDataModel.ErrorOperateMessage,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"
                                Foreground="Red" FontWeight="Bold" Margin="5,0,5,0"/>
                 </StatusBarItem>
-                <Separator HorizontalAlignment="Right"/>                
+                <Separator HorizontalAlignment="Right" Visibility="Hidden"/>                
             </StatusBar>
             <StatusBar Grid.Column="1">
-                <StatusBarItem DockPanel.Dock="Left">
-                    <TextBlock Text="向RoboDK添加程序：" Margin="5,0,5,0" Visibility="Hidden"/>
+                <StatusBarItem DockPanel.Dock="Right" HorizontalAlignment="Right">
+                    <TextBlock Margin="5,0,5,0" Text="{Binding ModelViewModel.MainDataModel.RobotRunningState,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" />
                 </StatusBarItem>
-                <ProgressBar Width="80" Height="15" Visibility="Hidden" DockPanel.Dock="Left"
-                             Value="{Binding ModelViewModel.MainDataModel.RunningAddTargetState,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>            
+                <StatusBarItem DockPanel.Dock="Right" HorizontalAlignment="Right">
+                    <TextBlock Margin="5,0,5,0" Text="机器人状态:" />
+                </StatusBarItem>
             </StatusBar>
         </Grid>        
         <Grid Grid.Row="1" x:Name="gridBottom">

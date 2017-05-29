@@ -108,14 +108,14 @@ namespace SprayTeaching.MyAllClass
                 string strTmp = string.Empty;
 
                 // 为了实现错误消息的闪烁效果，闪烁4次，共花费8s
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < 3; i++)
                 {
                     strTmp = strMessage;
                     this.UpdateErrorOperateMessageHandler(strTmp);          // 赋值错误消息，相当于显示消息
                     Thread.Sleep(1000);
                     strTmp = string.Empty;
                     this.UpdateErrorOperateMessageHandler(strTmp);          // 赋值空字符串，相当于隐藏消息
-                    Thread.Sleep(1000);
+                    Thread.Sleep(500);
                 }
             }
         }

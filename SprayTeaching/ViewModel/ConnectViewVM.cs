@@ -259,7 +259,7 @@ namespace SprayTeaching.ViewModel
         }
 
         /// <summary>
-        /// 运行RoboDK中的机器人程序
+        /// 运行RoboDK中的机器人程序命令
         /// </summary>
         private MyCommand _runRoboDKProgramCommand;
 
@@ -270,6 +270,36 @@ namespace SprayTeaching.ViewModel
                 if (this._runRoboDKProgramCommand == null)
                     this._runRoboDKProgramCommand = new MyCommand(this.ExecuteRunRoboDKProgram);
                 return _runRoboDKProgramCommand; 
+            }
+        }
+
+        /// <summary>
+        /// 停止RoboDK中的机器人程序命令
+        /// </summary>
+        private MyCommand _stopRoboDKProgramCommand;
+
+        public MyCommand StopRoboDKProgramCommand
+        {
+            get 
+            {
+                if (this._stopRoboDKProgramCommand == null)
+                    this._stopRoboDKProgramCommand = new MyCommand(this.ExecuteStopRoboDKProgram);
+                return _stopRoboDKProgramCommand; 
+            }
+        }
+
+        /// <summary>
+        /// 生成实际机器人程序命令
+        /// </summary>
+        private MyCommand _makeRobotProgramCommand;
+
+        public MyCommand MakeRobotProgramCommand
+        {
+            get
+            {
+                if (this._makeRobotProgramCommand == null)
+                    this._makeRobotProgramCommand = new MyCommand(this.ExecuteMakeRobotProgram);
+                return _makeRobotProgramCommand;
             }
         }
 
@@ -403,7 +433,7 @@ namespace SprayTeaching.ViewModel
         }
 
         /// <summary>
-        /// 创建机器人程序
+        /// 执行创建机器人程序
         /// </summary>
         /// <param name="obj"></param>
         private void ExecuteCreateRoboDKProgram(object obj = null)
@@ -412,12 +442,29 @@ namespace SprayTeaching.ViewModel
         }
 
         /// <summary>
-        /// 运行RoboDK中的机器人程序
+        /// 执行运行RoboDK中的机器人程序
         /// </summary>
         /// <param name="obj"></param>
         private void ExecuteRunRoboDKProgram(object obj=null)
         {
             this._modelViewModel.RunRoboDKProgramHandler();
+        }
+
+        /// <summary>
+        /// 执行停止RoboDK中的机器人程序
+        /// </summary>
+        /// <param name="obj"></param>
+        private void ExecuteStopRoboDKProgram(object obj=null)
+        {
+            this._modelViewModel.StopRoboDKProgramHandler();
+        }
+
+        /// <summary>
+        /// 执行生成实际机器人程序
+        /// </summary>
+        private void ExecuteMakeRobotProgram(object obj=null)
+        {
+            this._modelViewModel.MakeRobotProgramHandler();
         }
 
         #endregion

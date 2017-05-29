@@ -11,7 +11,7 @@ namespace SprayTeaching.MyAllClass
     public class MyRobotFile
     {
         private StringBuilder _sbReceiveAngleMessage = new StringBuilder();         // 存放角度信息的缓存 
-        private string _strFileAddress = string.Empty;                              // 有文件名的文件地址
+        private string _strFileAddress = "./RobotProgram/RobotAngle.st";               // 有文件名的文件地址
         private const string RelativeLocation = "./RobotProgram";                   // 没有文件名的文件路径
         private int _intSampleFrequent = 0;                                         // 采样频率
         private bool _bolIsWriteFile = false;                                       // 是否执行过写入文件
