@@ -395,11 +395,7 @@ namespace SprayTeaching.BaseClassLib
         #region 发送数据并处理的相关方法
         public bool SendDataHandler(byte[] btData = null)
         {
-            if (this._sktCommunicate == null)
-            {
-                this.WriteLogHandler("数据发送失败，Wifi连接已断开.", 1);
-                return false;
-            }
+
             if (!this.IsSocketConnected())
             {
                 this.WriteLogHandler("Wifi连接断开.", 1);
@@ -411,9 +407,32 @@ namespace SprayTeaching.BaseClassLib
                 return false;
             }
 
-            this._sktCommunicate.BeginSendTo(btData, 0, btData.Length, SocketFlags.None,
+            //try
+            //{
+            //    Socket skt = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);               
+            //    skt.SendTo(btData, 0, btData.Length, SocketFlags.None, this._epServer);
+            //    skt.Close();
+            //    skt.Dispose();
+            //    return true;
+            //}
+            //catch
+            //{
+            //    return false;
+            //}
+
+
+            try
+            {
+                this._sktCommunicate.BeginSendTo(btData, 0, btData.Length, SocketFlags.None,
                 this._epServer, new AsyncCallback(SendDataCallbackHandler), this._sktCommunicate);
-            return true;
+                return true;
+            }
+            catch
+            {
+                this.Connect();
+                this.WriteLogHandler("Wifi数据发送失败.", 1);
+                return false;
+            }                      
         }
 
         /// <summary>
@@ -430,7 +449,8 @@ namespace SprayTeaching.BaseClassLib
             }
             catch
             {
-                //this.WriteLogHandler("发送失败.", 1);
+                this.Connect();
+                //this.WriteLogHandler("Wifi发送失败,对方没有接收.", 1);
             }
         }
 

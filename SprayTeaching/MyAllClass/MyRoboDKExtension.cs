@@ -358,6 +358,10 @@ namespace SprayTeaching.MyAllClass
         {
             bool bolIsBusy = false;
             int intBusy = 0;
+
+            if (this._rdkItemRobot == null)
+                return false;
+
             lock (this._thisLock)
             {
                 intBusy = this._rdkItemRobot.Busy();

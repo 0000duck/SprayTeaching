@@ -191,7 +191,11 @@ namespace SprayTeaching.ViewModel
             bool bolIsSuccess = this._myCommunicate.SendDataHandler(byteData);       // 返回是否发送成功
 
             if (bolIsSuccess)
+            {
+                this._myDataMessage.TipMessageOperate(strCommand);          // 对完成的操作进行提示
                 this.UpdateSampleState(strCommand);     // 更新采样的状态，只对开始采样和结束采样起作用
+            }
+                
         }
 
         /// <summary>
@@ -603,8 +607,9 @@ namespace SprayTeaching.ViewModel
             this._myCommunicate.Close();            // 关闭通信的资源
             this._myRoboDKExtension.Close();        // 关闭与RoboDK相关的资源
             this._myDataMessage.Close();            // 关闭与数据消息相关的资源
-            this._myConfigFileINI.Close();          // 关闭配置文件的资源
+            this._myConfigFileINI.Close(this._mainDataModel);          // 关闭配置文件的资源
             this._myErrorOperate.Close();           // 关闭错误操作的资源
+            this._myRobotFile.Close();              // 关闭机器人文件操作的所有资源
         }
 
         /// <summary>
@@ -632,6 +637,7 @@ namespace SprayTeaching.ViewModel
             object[] objPar = (object[])obj;
             double[] dblCalibrateAngles = (double[])objPar[0];
             double[] dblCalibrateDirectioins = (double[])objPar[1];
+            string[] strCommunicates = (string[])objPar[2];
 
             // 更新DataMessage对象中的标定角度
             this._myDataMessage.CalibrateAngles = dblCalibrateAngles;
@@ -668,6 +674,10 @@ namespace SprayTeaching.ViewModel
             this._mainDataModel.SetCalibrateAxis4Direction = dblCalibrateDirectioins[3] > 0 ? true : false;
             this._mainDataModel.SetCalibrateAxis5Direction = dblCalibrateDirectioins[4] > 0 ? true : false;
             this._mainDataModel.SetCalibrateAxis6Direction = dblCalibrateDirectioins[5] > 0 ? true : false;
+
+            // 初始化通信相关的IP地址和端口号
+            this._mainDataModel.SocketIPAddress = strCommunicates[0];
+            this._mainDataModel.SocketPortNum = int.Parse(strCommunicates[1]);
         }
 
         #endregion

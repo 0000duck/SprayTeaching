@@ -495,6 +495,57 @@ namespace SprayTeaching.MyAllClass
         #region  发送消息的处理部分
 
         /// <summary>
+        /// 提示当前执行的指令
+        /// </summary>
+        /// <param name="strCommand"></param>
+        /// <returns></returns>
+        public void TipMessageOperate(string strCommand)
+        {
+            switch (strCommand)
+            {
+                case "QuerySampleFrequent":     // 查询采样频率
+                    this.WriteLogHandler("执行查询采样频率操作.");
+                    break;
+                case "SetSampleFrequent":       // 设定采样频率
+                    this.WriteLogHandler("执行设定采样频率操作.");
+                    break;
+                case "ReadAllAxisAddress":      // 读取所有轴地址
+                    this.WriteLogHandler("执行读取所有地址操作.");
+                    break;
+                case "ModifyAxis1Address":      // 修改1轴地址
+                    this.WriteLogHandler("执行修改1轴地址操作.");
+                    break;
+                case "ModifyAxis2Address":      // 修改2轴地址
+                    this.WriteLogHandler("执行修改2轴地址操作.");
+                    break;
+                case "ModifyAxis3Address":      // 修改3轴地址
+                    this.WriteLogHandler("执行修改3轴地址操作.");
+                    break;
+                case "ModifyAxis4Address":      // 修改4轴地址
+                    this.WriteLogHandler("执行修改4轴地址操作.");
+                    break;
+                case "ModifyAxis5Address":      // 修改5轴地址
+                    this.WriteLogHandler("执行修改5轴地址操作.");
+                    break;
+                case "ModifyAxis6Address":      // 修改6轴地址
+                    this.WriteLogHandler("执行修改6轴地址操作.");
+                    break;
+                case "QueryDeviceConnect":      // 查询设备连接状态
+                    this.WriteLogHandler("执行查询设备连接操作.");
+                    break;
+                case "QueryDeviceSampleReady":  // 查询设备采样是否准备就绪
+                    this.WriteLogHandler("执行查询设备数据采样装备就绪操作.");
+                    break;
+                case "StartSampleData":         // 开始采样数据
+                    this.WriteLogHandler("执行开始采样数据操作.");
+                    break;
+                case "StopSampleData":          // 停止采样数据
+                    this.WriteLogHandler("执行停止采样数据操作.");
+                    break;
+            }
+        }
+
+        /// <summary>
         /// 识别指令
         /// </summary>
         /// <param name="strCommand"></param>
@@ -506,55 +557,55 @@ namespace SprayTeaching.MyAllClass
             {
                 case "QuerySampleFrequent":     // 查询采样频率
                     byteSendBuffer = this.SendMessageQuerySampleFrequentHandler();
-                    this.WriteLogHandler("执行查询采样频率操作.");
+                    //this.WriteLogHandler("执行查询采样频率操作.");
                     break;
                 case "SetSampleFrequent":       // 设定采样频率
                     byteSendBuffer = this.SendMessageSetSampleRateHandler(dm.SetSampleFrequent);
-                    this.WriteLogHandler("执行设定采样频率操作.");
+                    //this.WriteLogHandler("执行设定采样频率操作.");
                     break;
                 case "ReadAllAxisAddress":      // 读取所有轴地址
                     byteSendBuffer = this.SendMessageReturnAxisAddressHandler();
-                    this.WriteLogHandler("执行读取所有地址操作.");
+                    //this.WriteLogHandler("执行读取所有地址操作.");
                     break;
                 case "ModifyAxis1Address":      // 修改1轴地址
                     byteSendBuffer = this.SendMessageModifyEncoderAddressHandler(0x01, dm.SetAxis1Address);
-                    this.WriteLogHandler("执行修改1轴地址操作.");
+                    //this.WriteLogHandler("执行修改1轴地址操作.");
                     break;
                 case "ModifyAxis2Address":      // 修改2轴地址
                     byteSendBuffer = this.SendMessageModifyEncoderAddressHandler(0x02, dm.SetAxis2Address);
-                    this.WriteLogHandler("执行修改2轴地址操作.");
+                    //this.WriteLogHandler("执行修改2轴地址操作.");
                     break;
                 case "ModifyAxis3Address":      // 修改3轴地址
                     byteSendBuffer = this.SendMessageModifyEncoderAddressHandler(0x03, dm.SetAxis3Address);
-                    this.WriteLogHandler("执行修改3轴地址操作.");
+                    //this.WriteLogHandler("执行修改3轴地址操作.");
                     break;
                 case "ModifyAxis4Address":      // 修改4轴地址
                     byteSendBuffer = this.SendMessageModifyEncoderAddressHandler(0x04, dm.SetAxis4Address);
-                    this.WriteLogHandler("执行修改4轴地址操作.");
+                    //this.WriteLogHandler("执行修改4轴地址操作.");
                     break;
                 case "ModifyAxis5Address":      // 修改5轴地址
                     byteSendBuffer = this.SendMessageModifyEncoderAddressHandler(0x05, dm.SetAxis5Address);
-                    this.WriteLogHandler("执行修改5轴地址操作.");
+                    //this.WriteLogHandler("执行修改5轴地址操作.");
                     break;
                 case "ModifyAxis6Address":      // 修改6轴地址
                     byteSendBuffer = this.SendMessageModifyEncoderAddressHandler(0x06, dm.SetAxis6Address);
-                    this.WriteLogHandler("执行修改6轴地址操作.");
+                    //this.WriteLogHandler("执行修改6轴地址操作.");
                     break;
                 case "QueryDeviceConnect":      // 查询设备连接状态
                     byteSendBuffer = this.SendMessageQueryDeviceConnectHandler();
-                    this.WriteLogHandler("执行查询设备连接操作.");
+                    //this.WriteLogHandler("执行查询设备连接操作.");
                     break;
                 case "QueryDeviceSampleReady":  // 查询设备采样是否准备就绪
                     byteSendBuffer = this.SendMessageReadDataFromSDHandler();
-                    this.WriteLogHandler("执行查询设备数据采样装备就绪操作.");
+                    //this.WriteLogHandler("执行查询设备数据采样装备就绪操作.");
                     break;
                 case "StartSampleData":         // 开始采样数据
                     byteSendBuffer = this.SendMessageStartSampleHandler();
-                    this.WriteLogHandler("执行开始采样数据操作.");
+                    //this.WriteLogHandler("执行开始采样数据操作.");
                     break;
                 case "StopSampleData":          // 停止采样数据
                     byteSendBuffer = this.SendMessageStopSampleHandler();
-                    this.WriteLogHandler("执行停止采样数据操作.");
+                    //this.WriteLogHandler("执行停止采样数据操作.");
                     break;
             }
             return byteSendBuffer;

@@ -73,9 +73,10 @@ namespace SprayTeaching.MyAllClass
         /// <summary>
         /// 关闭资源
         /// </summary>
-        public void Close( DataModel dm=null)
+        public void Close(DataModel dm = null)
         {
             //this.WirteFileParameter(dm);
+            this.WriteFileCommunicateInformation(dm);
             this.CloseAllVariable();
         }
 
@@ -148,6 +149,9 @@ namespace SprayTeaching.MyAllClass
                 this.INIWrite("CalibrateDirection", "Direction4", "1", this._strConfigFileAddress);
                 this.INIWrite("CalibrateDirection", "Direction5", "1", this._strConfigFileAddress);
                 this.INIWrite("CalibrateDirection", "Direction6", "1", this._strConfigFileAddress);
+
+                this.INIWrite("CommunicateInformation", "IPAddress", "10.8.193.177", this._strConfigFileAddress);
+                this.INIWrite("CommunicateInformation", "PortNum", "12000", this._strConfigFileAddress);
             }
         }
 
@@ -159,11 +163,12 @@ namespace SprayTeaching.MyAllClass
         {
             double[] dblAngles = this.GetCalibrateAngleParameter();
             double[] dblDirections = this.GetCalibrateDirectionParameter();
+            string[] strCommunicates = this.GetCommunicateInformParameter();
 
             this.CalibrateAxisAngles = dblAngles;
             this.CalibrateAxisDirections = dblDirections;
 
-            object[] objParameter = new object[] { dblAngles, dblDirections };
+            object[] objParameter = new object[] { dblAngles, dblDirections, strCommunicates };
             this.GetConfigParameterHandler(objParameter);
         }
 
@@ -217,8 +222,19 @@ namespace SprayTeaching.MyAllClass
             return dblDirections;
         }
 
-        #endregion
+        /// <summary>
+        /// 获取通信相关的IP地址和端口号
+        /// </summary>
+        /// <returns></returns>
+        private string[] GetCommunicateInformParameter( )
+        {
+            string[] strCommunicates = new string[2];
+            strCommunicates[0] = this.INIRead("CommunicateInformation", "IPAddress", this._strConfigFileAddress);
+            strCommunicates[1] = this.INIRead("CommunicateInformation", "PortNum", this._strConfigFileAddress);
+            return strCommunicates;
+        }
 
+        #endregion
 
         #region  写配置文件的数据
 
@@ -298,10 +314,18 @@ namespace SprayTeaching.MyAllClass
             this.INIWrite("CalibrateDirection", "Direction6", dblCalibrateDirections[5].ToString(), strFileAddress);
         }
 
+        private void WriteFileCommunicateInformation(object obj)
+        {
+            if (obj == null) { return; }
+
+            DataModel dm = (DataModel)obj;
+            string strIPAddress = dm.SocketIPAddress;
+            string strPortNum = dm.SocketPortNum.ToString();
+            this.INIWrite("CommunicateInformation", "IPAddress", strIPAddress, this._strConfigFileAddress);
+            this.INIWrite("CommunicateInformation", "PortNum", strPortNum, this._strConfigFileAddress);
+        }
+
         #endregion
-
-
-
 
         #region  更新配置文件的参数
         private void GetConfigParameterHandler(object obj)

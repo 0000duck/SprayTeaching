@@ -167,6 +167,12 @@ namespace SprayTeaching.MyAllClass
         /// <param name="btData">具体数据</param>
         public bool SendDataHandler(byte[] btData)
         {
+            if (!this.IsCommunicateConnected())
+            {
+                this.WriteLogHandler("通信未连接，请检查.", 1);
+                return false;
+            }                
+
             bool bolIsSuccess = false;
 
             // ture为Wifi方式发送数据，false为串口方式发送数据
