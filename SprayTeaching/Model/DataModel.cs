@@ -703,7 +703,7 @@ namespace SprayTeaching.Model
         /// 设备是否连接
         /// </summary>
         private bool _bolDeviceIsConnected = false;
-        
+
         public bool DeviceIsConnected
         {
             get { return _bolDeviceIsConnected; }
@@ -1009,6 +1009,43 @@ namespace SprayTeaching.Model
             set { _bolIsRobotRunning = value; RaisePropertyChanged("IsRobotRunning"); }
         }
 
+
+        #endregion
+
+        #region  FTP相关
+
+        /// <summary>
+        /// FTP服务器的IP地址
+        /// </summary>
+        private string _strFTPServerIP = "10.8.193.177";
+
+        public string FTPServerIP
+        {
+            get { return _strFTPServerIP; }
+            set { _strFTPServerIP = value; RaisePropertyChanged("FTPServerIP"); }
+        }
+
+        /// <summary>
+        /// FTP的用户名
+        /// </summary>
+        private string _strFTPUserID = "xing";
+
+        public string FTPUserID
+        {
+            get { return _strFTPUserID; }
+            set { _strFTPUserID = value; RaisePropertyChanged("FTPUserID"); }
+        }
+
+        /// <summary>
+        /// FTP的密码
+        /// </summary>
+        private string _strFTPPassword = "123456";
+
+        public string FTPPassword
+        {
+            get { return _strFTPPassword; }
+            set { _strFTPPassword = value; RaisePropertyChanged("FTPPassword"); }
+        }
 
         #endregion
     }

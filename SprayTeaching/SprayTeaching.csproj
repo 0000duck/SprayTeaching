@@ -63,9 +63,11 @@
     <Compile Include="BaseClassLib\MyLogMessage.cs" />
     <Compile Include="BaseClassLib\MyConverter.cs" />
     <Compile Include="BaseClassLib\MyUDPCom.cs" />
+    <Compile Include="BaseClassLib\MyFTPHelper.cs" />
     <Compile Include="MyAllClass\MyCommunicate.cs" />
     <Compile Include="MyAllClass\MyDataMessage.cs" />
     <Compile Include="MyAllClass\MyErrorOperate.cs" />
+    <Compile Include="MyAllClass\MyFTPClient.cs" />
     <Compile Include="MyAllClass\MyLog.cs" />
     <Compile Include="MyAllClass\MyRoboDKExtension.cs" />
     <Compile Include="BaseClassLib\RoboDK.cs" />
